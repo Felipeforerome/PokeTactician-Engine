@@ -18,11 +18,15 @@ class Pokemon:
         moves = self.moves
         expectedAttacks = []
         for move in moves:
+            moveName = move.Name
             moveType = move.type
             movePower = move.power
             moveDamageClass = move.damageClass
             moveAccuracy = move.accuracy
             stab = 1.5 if (moveType == self.type1 or moveType == self.type2) else 1
+            split = self.att if (moveDamageClass == "physical") else self.spatt
+            expectedPower = (stab * movePower) * split * moveAccuracy
+            expectedAttacks += (moveName, expectedPower)
         return expectedAttacks
 
 
