@@ -14,30 +14,32 @@ class Pokemon:
         self.knowableMoves = []
 
     def addKnowableMove(self, move):
-        sameType = False
+        sameTypeClass = False
         if(move.power == 0):
             return
 
         for knownMove in self.knowableMoves:
-            if(knownMove.type != move.type):
+            diffType = knownMove.type != move.type
+            diffClass = knownMove.damageClass != move.damageClass
+            if(diffType or diffClass):
                 continue
             else:
-                sameType = True
-                increasedPower = knownMove.power >= move.power
-                increasedAccuracy = knownMove.accuracy >= move.accuracy
-                increasedPP = knownMove.pp >= move.pp
+                sameTypeClass = True
+                increasedPowerAccuracy = knownMove.power * knownMove.accuracy <= move.power * move.accuracy
+                increasedPP = knownMove.pp*0.75 <= move.pp
 
-                if(increasedPower and increasedAccuracy and increasedPP):
-                    self.knowableMoves.remove(knownMove)
-                    self.knowableMoves += move
-                    return
+                if(increasedPowerAccuracy):
+                    if(increasedPP or knownMove.power+30<=move.power):
+                        self.knowableMoves.remove(knownMove)
+                        self.knowableMoves.append(move)
+                        return
 
-        if(not sameType):
-            self.knowableMoves += move
+        if(not sameTypeClass):
+            self.knowableMoves.append(move)
 
 
     def addMove(self, move):
-        self.moves += move
+        self.moves.append(move)
 
     def expectedMoves(self):
         moves = self.moves
@@ -51,7 +53,7 @@ class Pokemon:
             stab = 1.5 if (moveType == self.type1 or moveType == self.type2) else 1
             split = self.att if (moveDamageClass == "physical") else self.spatt
             expectedPower = (stab * movePower) * split * moveAccuracy
-            expectedAttacks += (moveName, expectedPower)
+            expectedAttacks.append((moveName, expectedPower))
         return expectedAttacks
 
     def learnMove(self, move, place=None):
@@ -77,3 +79,6 @@ class Pokemon:
                 expectedPower = (stab * movePower) * split * moveAccuracy
                 currentPower += expectedPower
             return currentPower
+
+    def overallStats(self):
+        return (self.hp + self.att + self.deff + self.spatt + self.spdeff + self.spe)
