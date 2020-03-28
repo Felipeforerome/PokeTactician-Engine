@@ -15,6 +15,8 @@ class Pokemon:
 
     def addKnowableMove(self, move):
         sameTypeClass = False
+        sameTypeClassMoves = []
+        numTypeClass = 0
         if(move.power == 0):
             return
 
@@ -24,15 +26,24 @@ class Pokemon:
             if(diffType or diffClass):
                 continue
             else:
-                sameTypeClass = True
-                increasedPowerAccuracy = knownMove.power * knownMove.accuracy <= move.power * move.accuracy
-                increasedPP = knownMove.pp*0.75 <= move.pp
+                numTypeClass = numTypeClass + 1
+                sameTypeClassMoves.append(knownMove)
+                lenTypeClassMoves = sameTypeClassMoves.__len__()
 
-                if(increasedPowerAccuracy):
-                    if(increasedPP or knownMove.power+30<=move.power):
-                        self.knowableMoves.remove(knownMove)
-                        self.knowableMoves.append(move)
-                        return
+                if(lenTypeClassMoves == 3 ):
+                    sameTypeClass = True
+                    sameTypeClassMoves.sort(key= lambda x: x.power*x.accuracy)
+                    for knownTypeClass in sameTypeClassMoves:
+                        increasedPowerAccuracy = knownTypeClass.power * knownTypeClass.accuracy <= move.power * move.accuracy
+                        increasedPP = knownMove.pp*0.75 <= move.pp
+
+                        if(increasedPowerAccuracy):
+                            if(increasedPP or knownTypeClass.power+30<=move.power):
+                                self.knowableMoves.remove(knownTypeClass)
+                                self.knowableMoves.append(move)
+                                return
+                        else:
+                            return
 
         if(not sameTypeClass):
             self.knowableMoves.append(move)
