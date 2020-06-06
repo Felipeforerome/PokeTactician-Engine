@@ -74,6 +74,3 @@ while (lastExisted):
         lastExisted = False
 
 toc = time.time()
-
-
-print(toc-tic)
