@@ -41,3 +41,23 @@ def moveTotalCounter(PokemonsList):
         tempmove = quantPok
     print(i_s)
     return numberofmoves
+
+def currentPower(self):
+    """
+    Calculates the current power of the pokemon based on Stats, Attacks, and Type
+    :return: Returns total power of the learned moves
+    """
+    currentPower = 0
+    if self.learnedMoves.__len__() <1:
+        raise Exception("This Pokemon Needs To Learn A Move")
+    else:
+        for learnedMove in self.learnedMoves:
+            moveType = learnedMove.type
+            movePower = learnedMove.power
+            moveDamageClass = learnedMove.damageClass
+            moveAccuracy = learnedMove.accuracy
+            stab = 1.5 if (moveType == self.type1 or moveType == self.type2) else 1
+            split = self.att if (moveDamageClass == "physical") else self.spatt
+            expectedPower = (stab * movePower) * split * moveAccuracy
+            currentPower += expectedPower
+        return currentPower

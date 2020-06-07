@@ -7,13 +7,15 @@ class Pokemon:
         self.spatt = spatt
         self.spdeff = spdeff
         self.spe = spe
-        self.learnedMoves = []
-        self.moves = []
+        self.knowableMoves = []
         self.type1 = type1
         self.type2 = type2
-        self.knowableMoves = []
 
     def addKnowableMove(self, move):
+        """
+        Adds move to list of knowable move if it has power greater to 0, its between the best 3 moves wtht that type and class
+        :param move: Move to add
+        """
         sameTypeClass = False
         sameTypeClassMoves = []
         numTypeClass = 0
@@ -49,47 +51,9 @@ class Pokemon:
             self.knowableMoves.append(move)
 
 
-    def addMove(self, move):
-        self.moves.append(move)
-
-    def expectedMoves(self):
-        moves = self.moves
-        expectedAttacks = []
-        for move in moves:
-            moveName = move.Name
-            moveType = move.type
-            movePower = move.power
-            moveDamageClass = move.damageClass
-            moveAccuracy = move.accuracy
-            stab = 1.5 if (moveType == self.type1 or moveType == self.type2) else 1
-            split = self.att if (moveDamageClass == "physical") else self.spatt
-            expectedPower = (stab * movePower) * split * moveAccuracy
-            expectedAttacks.append((moveName, expectedPower))
-        return expectedAttacks
-
-    def learnMove(self, move, place=None):
-        if(place==None):
-            numberMoves = self.learnedMoves.__len__()
-            if(numberMoves<4):
-                self.learnedMoves[place] = move
-            else:
-                raise Exception("Missing Place Argument, This Pokemon Already Knows 4 Moves")
-
-    def currentPower(self):
-        currentPower = 0
-        if self.learnedMoves.__len__() <1:
-            raise Exception("This Pokemon Needs To Learn A Move")
-        else:
-            for learnedMove in self.learnedMoves:
-                moveType = learnedMove.type
-                movePower = learnedMove.power
-                moveDamageClass = learnedMove.damageClass
-                moveAccuracy = learnedMove.accuracy
-                stab = 1.5 if (moveType == self.type1 or moveType == self.type2) else 1
-                split = self.att if (moveDamageClass == "physical") else self.spatt
-                expectedPower = (stab * movePower) * split * moveAccuracy
-                currentPower += expectedPower
-            return currentPower
-
     def overallStats(self):
+        """
+        Calculates the sum of stats
+        :return: Sum of Stats
+        """
         return (self.hp + self.att + self.deff + self.spatt + self.spdeff + self.spe)
