@@ -1,5 +1,6 @@
 class Move:
-    def __init__(self, name: str, type: str, damageClass: str, power: int, accuracy: int, pp: int, priority: int):
+    def __init__(self, id: str,name: str, type: str, damageClass: str, power: int, accuracy: int, pp: int, priority: int):
+        self.id = id
         self.name = name
         self.type = type
         self.damageClass = damageClass
