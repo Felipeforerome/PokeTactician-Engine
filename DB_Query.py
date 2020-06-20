@@ -73,4 +73,6 @@ while (lastExisted):
     else:
         lastExisted = False
 
+with open("Pok.pkl", "wb") as f:
+    pickle.dump(Pokemons, f)
 toc = time.time()
