@@ -19,5 +19,5 @@ Dark = np.array((1,1,1,1,1,1,0.5,1,1,1,2,1,1,2,1,0.5,1,0.5))
 Steel = np.array((1,0.5,0.5,0.5,1,2,1,1,1,1,1,1,2,1,1,1,0.5,2))
 Fairy = np.array((1,0.5,1,1,1,1,2,0.5,1,1,1,1,1,1,2,2,0.5,1))
 
-typeChart = np.stack(Normal, Fire, Water, Electric, Grass, Ice, Fighting, Poison, Ground, Flying, Psychic,
-                     Bug, Rock, Ghost, Dragon, Dark, Steel, Fairy)
+typeChart = np.stack([Normal, Fire, Water, Electric, Grass, Ice, Fighting, Poison, Ground, Flying, Psychic,
+                     Bug, Rock, Ghost, Dragon, Dark, Steel, Fairy])
