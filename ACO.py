@@ -33,6 +33,21 @@ def ACO(filter=None):
         size = pok.knowableMoves.__len__()
         DS_Att.append(np.arange(size))
 
+    #Create Probability Vector for Pokemon
+    Prob_Poks = np.ones(poks.__len__())*(1/poks.__len__())
+
+    #Create Probability of Attacks
+    Prob_Att = []
+    for pok in poks:
+        size = pok.knowableMoves.__len__()
+        if(size == 0):
+            size = 1
+        Prob_Att.append(np.ones(size)*(1/size))
+
+    #Create Pheromone Vector for Pokemon
+    Ph_Pok = np.zeros(poks.__len__())
+
+
     #Create Pheromone of Attacks
     Ph_Att = []
     for pok in poks:
@@ -56,8 +71,8 @@ def ACO(filter=None):
         H_Att.append(np.zeros(size))
 
     #Create Population
-    pop_size = 100
-    Pop = np.empty([pop_size,6,5])
+    pop_size = 5000
+    Pop = np.empty([pop_size,6,5], dtype=int)
 
     #Assign Population
     for ant in Pop:
@@ -68,31 +83,31 @@ def ACO(filter=None):
             randPok = random.randrange(0,100001,1)/100001
             #Get Pokemon such that ph_(n)< rand <ph(n+1)
             while(not selectedPok):
-                tempPh = Ph_Pok[id]
-                if(randPok>tempSum+tempPh):
+                tempProb = Prob_Poks[id]
+                if(randPok>tempSum+tempProb):
                     id = id + 1
-                    tempSum = tempSum + tempPh
-                elif(randPok<tempSum+tempPh):
+                    tempSum = tempSum + tempProb
+                elif(randPok<tempSum+tempProb):
                     selectedPok = True
 
             pokemon[0] = id
 
             #Get Knowable Moves
-            PhAtt_Temp = Ph_Att[id]
+            ProbAtt_Temp = deepcopy(Prob_Att[id])
             for i in range(1,5):
-                if((PhAtt_Temp.size - (i))>0):
-                    randAtt = PhAtt_Temp.sum()*random.randrange(0,100001,1)/100001
+                if((ProbAtt_Temp.size - (i))>0):
+                    randAtt = ProbAtt_Temp.sum()*random.randrange(0,100001,1)/100001
                     attId = 0
                     tempSum = 0
                     selectedAttack = False
                     while(not selectedAttack):
-                        tempPh = PhAtt_Temp[attId]
+                        tempPh = ProbAtt_Temp[attId]
                         if(randAtt>tempSum+tempPh):
                             attId = attId + 1
                             tempSum = tempSum + tempPh
                         elif(randAtt<=tempSum+tempPh):
-                            pokemon[i] = poks[id].knowableMoves[attId].id
-                            PhAtt_Temp[attId] = 0
+                            pokemon[i] = attId
+                            ProbAtt_Temp[attId] = 0
                             selectedAttack = True
                 else:
                     pokemon[i] = -1
