@@ -2,7 +2,17 @@ import numpy as np
 import pickle
 import random
 import time
-#Ant Colony Optimization Algorithm
+from copy import deepcopy
+###Ant Colony Optimization Algorithm
+
+#User Defined Variables
+Q = 10
+rho = 0.2
+alpha = 1
+beta = 1
+
+#General functions
+numeratorFun = lambda c, n: (c ** alpha) + (n ** beta)
 
 def ACO(filter=None):
     tic = time.time()
@@ -16,9 +26,6 @@ def ACO(filter=None):
 
     #Create Decision Space of Pokemon
     DS_Pok = np.arange(poks.__len__())
-
-    #Create Pheromone Vector for Pokemon
-    Ph_Pok = np.ones(poks.__len__())*(1/poks.__len__())
 
     #Create Decision Space of Attacks
     DS_Att = []
