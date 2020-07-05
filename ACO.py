@@ -112,6 +112,42 @@ def ACO(filter=None):
                 else:
                     pokemon[i] = -1
 
+    #Update Pheromone Concentration
+    for ant in Pop:
+        fitnessValue = fitness(ant)
+        deltaConcentr = Q*fitnessValue
+        for pokemon in ant:
+            Ph_Pok[pokemon[0]] = (1-rho)*Ph_Pok[pokemon[0]]+deltaConcentr
+            if pokemon[1]>=0:
+                Ph_Att[pokemon[0]][pokemon[1]] = (1-rho)*Ph_Att[pokemon[0]][pokemon[1]]+deltaConcentr
+
+            if pokemon[2]>=0:
+                Ph_Att[pokemon[0]][pokemon[2]] = (1-rho)*Ph_Att[pokemon[0]][pokemon[2]]+deltaConcentr
+
+            if pokemon[3]>=0:
+                Ph_Att[pokemon[0]][pokemon[3]] = (1-rho)*Ph_Att[pokemon[0]][pokemon[3]]+deltaConcentr
+
+            if pokemon[4]>=0:
+                Ph_Att[pokemon[0]][pokemon[4]] = (1-rho)*Ph_Att[pokemon[0]][pokemon[4]]+deltaConcentr
+
+    #Update Pokemon Probabilities
+    numeratorsPok = numeratorFun(Ph_Pok, H_Poks)
+    denomPok = numeratorFun(Ph_Pok,H_Poks).sum()
+    for i in range(0,Prob_Poks.__len__()):
+        Prob_Poks[i] = numeratorsPok[i]/denomPok
+
+    #Update Attack Probabilities
+    numeratorsAtt=[]
+    denomAtt=[]
+    for PhAtt, HAtt in zip(Ph_Att, H_Att):
+        temp = numeratorFun(PhAtt, HAtt)
+        numeratorsAtt.append(temp)
+        denomAtt.append(temp.sum())
+
+    for i in range(0, numeratorsAtt.__len__()):
+        for j in range(0, numeratorsAtt[i].__len__()):
+            Prob_Att[i][j] = numeratorsAtt[i][j]/denomAtt[i]
+
     toc = time.time()
     print(toc-tic)
     print("Stop")
