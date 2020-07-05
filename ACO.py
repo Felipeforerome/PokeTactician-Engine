@@ -39,7 +39,21 @@ def ACO(filter=None):
         size = pok.knowableMoves.__len__()
         if(size == 0):
             size = 1
-        Ph_Att.append(np.ones(size)*(1/size))
+        Ph_Att.append(np.zeros(size))
+
+    #Create Heuristic Value of Pokemon
+    H_Poks = np.zeros(poks.__len__())
+    i = 0
+    for i in range(0, H_Poks.__len__()):
+        H_Poks[i] = heuristicPokFun(poks, i)
+
+    #Create Heuristic Value of Attack
+    H_Att = []
+    for pok in poks:
+        size = pok.knowableMoves.__len__()
+        if(size == 0):
+            size = 1
+        H_Att.append(np.zeros(size))
 
     #Create Population
     pop_size = 100
@@ -88,19 +102,18 @@ def ACO(filter=None):
     print("Stop")
 
 
-
-
-
-
-
-def fitness():
-    fitnessValue = 0
+def fitness(ant):
+    fitnessValue = 1
 
     return fitnessValue
 
 def calculatePheromone(ph_vect):
     pass
 
+def heuristicPokFun(poks, pokIndex):
+    #TODO Scale the heuristic value after getting Pheromone Values
+    heuristicValue = poks[pokIndex].overallStats()/500
+    return heuristicValue
 
 if __name__ == "__main__":
     ACO()
