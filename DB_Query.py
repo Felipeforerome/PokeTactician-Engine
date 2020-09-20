@@ -15,8 +15,8 @@ movesTotal = 0
 Pokemons = []
 Moves = {}
 lastMove = True
-recalculateMoves = False
-
+recalculateMoves = True
+print('Started: '+ str(tic))
 if(recalculateMoves):
     while(lastMove):
         movepreJSON = requests.get('http://127.0.0.1:8000/api/v2/move/'+str(j))
@@ -24,6 +24,7 @@ if(recalculateMoves):
         if(not is404):
             moveJSON = movepreJSON.json()
             tempMove = Move(
+                str(j),
                 moveJSON['name'],
                 moveJSON['type']['name'],
                 moveJSON['damage_class']['name'],
@@ -36,7 +37,7 @@ if(recalculateMoves):
             j += 1
         else:
             lastMove = False
-
+    print('Finished Moves')
     with open("Moves.pkl", "wb") as f:
         pickle.dump(Moves, f)
 else:
@@ -70,6 +71,8 @@ while (lastExisted):
         Pokemons.append(tempPoke)
         movesTotal += pokemonJSON['moves'].__len__()
         i+=1
+        if(i%100==0):
+            print(str(i)+": "+pokemonJSON['name'])
     else:
         lastExisted = False
 

@@ -49,12 +49,12 @@ def ACO(filter=None):
 
 
     #Create Pheromone of Attacks
-    Ph_Att = []
+    Ph_Atts = []
     for pok in poks:
         size = pok.knowableMoves.__len__()
         if(size == 0):
             size = 1
-        Ph_Att.append(np.zeros(size))
+        Ph_Atts.append(np.zeros(size))
 
     #Create Heuristic Value of Pokemon
     H_Poks = np.zeros(poks.__len__())
@@ -63,12 +63,12 @@ def ACO(filter=None):
         H_Poks[i] = heuristicPokFun(poks, i)
 
     #Create Heuristic Value of Attack
-    H_Att = []
+    H_Atts = []
     for pok in poks:
         size = pok.knowableMoves.__len__()
         if(size == 0):
             size = 1
-        H_Att.append(np.zeros(size))
+        H_Atts.append(np.zeros(size))
 
     #Create Population
     pop_size = 5000
@@ -113,22 +113,28 @@ def ACO(filter=None):
                     pokemon[i] = -1
 
     #Update Pheromone Concentration
+    #Evaporate Pheromones
+    Ph_Pok = (1-rho)*Ph_Pok
+
+    for idx, Ph_Att in enumerate(Ph_Atts):
+        Ph_Atts[idx] = (1-rho)*Ph_Att
+
     for ant in Pop:
         fitnessValue = fitness(ant)
         deltaConcentr = Q*fitnessValue
         for pokemon in ant:
-            Ph_Pok[pokemon[0]] = (1-rho)*Ph_Pok[pokemon[0]]+deltaConcentr
+            Ph_Pok[pokemon[0]] = Ph_Pok[pokemon[0]]+deltaConcentr
             if pokemon[1]>=0:
-                Ph_Att[pokemon[0]][pokemon[1]] = (1-rho)*Ph_Att[pokemon[0]][pokemon[1]]+deltaConcentr
+                Ph_Atts[pokemon[0]][pokemon[1]] = Ph_Atts[pokemon[0]][pokemon[1]]+deltaConcentr
 
             if pokemon[2]>=0:
-                Ph_Att[pokemon[0]][pokemon[2]] = (1-rho)*Ph_Att[pokemon[0]][pokemon[2]]+deltaConcentr
+                Ph_Atts[pokemon[0]][pokemon[2]] = Ph_Atts[pokemon[0]][pokemon[2]]+deltaConcentr
 
             if pokemon[3]>=0:
-                Ph_Att[pokemon[0]][pokemon[3]] = (1-rho)*Ph_Att[pokemon[0]][pokemon[3]]+deltaConcentr
+                Ph_Atts[pokemon[0]][pokemon[3]] = Ph_Atts[pokemon[0]][pokemon[3]]+deltaConcentr
 
             if pokemon[4]>=0:
-                Ph_Att[pokemon[0]][pokemon[4]] = (1-rho)*Ph_Att[pokemon[0]][pokemon[4]]+deltaConcentr
+                Ph_Atts[pokemon[0]][pokemon[4]] = Ph_Atts[pokemon[0]][pokemon[4]]+deltaConcentr
 
     #Update Pokemon Probabilities
     numeratorsPok = numeratorFun(Ph_Pok, H_Poks)
@@ -139,8 +145,8 @@ def ACO(filter=None):
     #Update Attack Probabilities
     numeratorsAtt=[]
     denomAtt=[]
-    for PhAtt, HAtt in zip(Ph_Att, H_Att):
-        temp = numeratorFun(PhAtt, HAtt)
+    for Ph_Att, H_Att in zip(Ph_Atts, H_Atts):
+        temp = numeratorFun(Ph_Att, H_Att)
         numeratorsAtt.append(temp)
         denomAtt.append(temp.sum())
 
@@ -154,6 +160,7 @@ def ACO(filter=None):
 
 
 def fitness(ant):
+    #TODO Combine all 4 objectives into fitness function or define how to pursue different objectives
     fitnessValue = 1
 
     return fitnessValue
