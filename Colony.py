@@ -3,6 +3,7 @@ import pickle
 import random
 import time
 from copy import deepcopy
+from utils import currentPower, getLearnedMoves
 ###Ant Colony Optimization Algorithm
 
 #User Defined Variables
@@ -16,17 +17,13 @@ numeratorFun = lambda c, n: (c ** alpha) + (n ** beta)
 
 class Colony:
 
-    def __init__(self, pop_sizeParam, objFuncParam, filter = None):
+    def __init__(self, pop_sizeParam, objFuncParam, poks):
         self.pop_size = pop_sizeParam
         #objFunParam should be a lambda function
         self.objFunc = objFuncParam
 
-        #import pokemon DB
-        with open("Pok.pkl", "rb") as f:
-            pokPreFilter = pickle.load(f)
-
         #Filter Pokemon (now not filtering)
-        self.poks = pokPreFilter
+        self.poks = poks
 
 
         #Create Decision Space of Pokemon
@@ -172,18 +169,19 @@ class Colony:
         fitnessValue = self.objFunc(ant)
         return fitnessValue
 
-    def calculatePheromone(self, ph_vect):
-        pass
-
     def heuristicPokFun(self, poks, pokIndex):
-        #TODO Scale the heuristic value after getting Pheromone Values
         heuristicValue = poks[pokIndex].overallStats()/500
         return heuristicValue
 
 if __name__ == "__main__":
-    objFunctionOne = lambda x: 1
+    #import pokemon DB
+    with open("Pok.pkl", "rb") as f:
+        pokPreFilter = pickle.load(f)
+    with open("Moves.pkl", "rb") as f:
+        moves = pickle.load(f)
+    objFunctionOne = lambda team: sum(list(map(lambda x: currentPower(pokPreFilter[x[0]],getLearnedMoves(pokPreFilter, x, x[1],x[2],x[3],x[4])), team)))
     tic = time.time()
-    firstColony = Colony(5000,objFunctionOne)
+    firstColony = Colony(5000,objFunctionOne, pokPreFilter)
     toc = time.time()
     print(toc-tic)
     print(firstColony.Pop)
