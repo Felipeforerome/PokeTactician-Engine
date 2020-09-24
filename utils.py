@@ -42,22 +42,26 @@ def moveTotalCounter(PokemonsList):
     print(i_s)
     return numberofmoves
 
-def currentPower(self):
+def currentPower(pok, learnedMoves):
     """
     Calculates the current power of the pokemon based on Stats, Attacks, and Type
     :return: Returns total power of the learned moves
     """
     currentPower = 0
-    if self.learnedMoves.__len__() <1:
+    if learnedMoves.__len__() <1:
         raise Exception("This Pokemon Needs To Learn A Move")
     else:
-        for learnedMove in self.learnedMoves:
+        for learnedMove in learnedMoves:
             moveType = learnedMove.type
             movePower = learnedMove.power
             moveDamageClass = learnedMove.damageClass
             moveAccuracy = learnedMove.accuracy
-            stab = 1.5 if (moveType == self.type1 or moveType == self.type2) else 1
-            split = self.att if (moveDamageClass == "physical") else self.spatt
+            stab = 1.5 if (moveType == pok.type1 or moveType == pok.type2) else 1
+            split = pok.att if (moveDamageClass == "physical") else pok.spatt
             expectedPower = (stab * movePower) * split * moveAccuracy
             currentPower += expectedPower
         return currentPower
+
+def getLearnedMoves(pokPreFilter, pok, id1, id2, id3, id4):
+    #TODO Handle -1 in ids because it has no attack (Like Ditto)
+    return [pokPreFilter[pok[0]].knowableMoves[id1],pokPreFilter[pok[0]].knowableMoves[id2],pokPreFilter[pok[0]].knowableMoves[id3],pokPreFilter[pok[0]].knowableMoves[id4]]
