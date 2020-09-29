@@ -9,7 +9,7 @@ from utils import currentPower, getLearnedMoves
 ###Ant Colony Optimization Algorithm
 
 #General functions
-numeratorFun = lambda c, n: (c ** alpha) + (n ** beta)
+numeratorFun = lambda c, n: (c ** glob_var.alpha) * (n ** glob_var.beta)
 
 class Colony:
 
@@ -90,7 +90,7 @@ class Colony:
                     if(randPok>tempSum+tempProb):
                         id = id + 1
                         tempSum = tempSum + tempProb
-                    elif(randPok<tempSum+tempProb):
+                    elif(randPok <= tempSum+tempProb):
                         selectedPok = True
 
                 pokemon[0] = id
@@ -161,7 +161,8 @@ class Colony:
 
         for i in range(0, numeratorsAtt.__len__()):
             for j in range(0, numeratorsAtt[i].__len__()):
-                self.Prob_Att[i][j] = numeratorsAtt[i][j]/denomAtt[i]
+                if denomAtt[i] > 0:
+                    self.Prob_Att[i][j] = numeratorsAtt[i][j]/denomAtt[i]
 
     def fitness(self, ant):
         fitnessValue = self.objFunc(ant)
