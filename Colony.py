@@ -2,15 +2,11 @@ import numpy as np
 import pickle
 import random
 import time
+import glob_var
+from math import ceil
 from copy import deepcopy
 from utils import currentPower, getLearnedMoves
 ###Ant Colony Optimization Algorithm
-
-#User Defined Variables
-Q = 10
-rho = 0.2
-alpha = 1
-beta = 1
 
 #General functions
 numeratorFun = lambda c, n: (c ** alpha) + (n ** beta)
@@ -77,8 +73,6 @@ class Colony:
 
         #Initial Run of the Meta-Heuristic
         self.ACO()
-        self.updatePhCon(self.Pop)
-        self.updatePokProb()
 
 
 
@@ -122,6 +116,10 @@ class Colony:
                         pokemon[i] = -1
 
     def updatePhCon(self, candidateSet):
+        # User Defined Variables
+        Q = glob_var.Q
+        rho = glob_var.rho
+
         #Update Pheromone Concentration
         #Evaporate Pheromones
         self.Ph_Pok = (1-rho)*self.Ph_Pok

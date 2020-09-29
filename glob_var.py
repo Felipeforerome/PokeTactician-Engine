@@ -21,3 +21,9 @@ Fairy = np.array((1,0.5,1,1,1,1,2,0.5,1,1,1,1,1,1,2,2,0.5,1))
 
 typeChart = np.stack([Normal, Fire, Water, Electric, Grass, Ice, Fighting, Poison, Ground, Flying, Psychic,
                      Bug, Rock, Ghost, Dragon, Dark, Steel, Fairy])
+
+# User Defined Variables
+Q = 10
+rho = 0.9
+alpha = 1
+beta = 1
