@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import pickle
 import random
 import time
@@ -172,15 +173,37 @@ class Colony:
         heuristicValue = poks[pokIndex].overallStats()/500
         return heuristicValue
 
+    def candidateSet(self):
+        popSorted = sorted(self.Pop, key = self.fitness)
+        return list(popSorted[ceil(self.pop_size*0.95):self.pop_size])
+
+
+
 if __name__ == "__main__":
     #import pokemon DB
     with open("Pok.pkl", "rb") as f:
         pokPreFilter = pickle.load(f)
     with open("Moves.pkl", "rb") as f:
         moves = pickle.load(f)
-    objFunctionOne = lambda team: sum(list(map(lambda x: currentPower(pokPreFilter[x[0]],getLearnedMoves(pokPreFilter, x, x[1],x[2],x[3],x[4])), team)))
+    objFunctionOne = lambda team: sum(list(map(lambda x: currentPower(pokPreFilter[x[0]],getLearnedMoves(pokPreFilter, x, [x[1],x[2],x[3],x[4]])), team)))
     tic = time.time()
-    firstColony = Colony(5000,objFunctionOne, pokPreFilter)
+    firstColony = Colony(500,objFunctionOne, pokPreFilter)
     toc = time.time()
     print(toc-tic)
-    print(firstColony.Pop)
+    prevCandSet = firstColony.candidateSet()
+    iters = 26
+    for i in range(0,iters):
+        if i == iters-1:
+            a = list(map(objFunctionOne, prevCandSet))
+            b = np.array(a)
+            plt.scatter(range(0, b.size), b)
+            plt.title("Iter: "+ str(i) + " - rho: "+str(glob_var.rho)+ " - Q: "+str(glob_var.Q))
+            plt.show()
+        currentCandSet = firstColony.candidateSet()
+        updateSet = deepcopy(prevCandSet)+deepcopy(currentCandSet)
+        candSetTemp = list(sorted(updateSet, key = firstColony.fitness))
+        candSet = candSetTemp[int(candSetTemp.__len__()/2):candSetTemp.__len__()]
+        prevCandSet = candSet
+        firstColony.updatePhCon(candSet)
+        firstColony.updatePokProb()
+        firstColony.ACO()

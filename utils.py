@@ -48,20 +48,21 @@ def currentPower(pok, learnedMoves):
     :return: Returns total power of the learned moves
     """
     currentPower = 0
-    if learnedMoves.__len__() <1:
-        raise Exception("This Pokemon Needs To Learn A Move")
-    else:
-        for learnedMove in learnedMoves:
-            moveType = learnedMove.type
-            movePower = learnedMove.power
-            moveDamageClass = learnedMove.damageClass
-            moveAccuracy = learnedMove.accuracy
-            stab = 1.5 if (moveType == pok.type1 or moveType == pok.type2) else 1
-            split = pok.att if (moveDamageClass == "physical") else pok.spatt
-            expectedPower = (stab * movePower) * split * moveAccuracy
-            currentPower += expectedPower
-        return currentPower
+    for learnedMove in learnedMoves:
+        moveType = learnedMove.type
+        movePower = learnedMove.power
+        moveDamageClass = learnedMove.damageClass
+        moveAccuracy = learnedMove.accuracy
+        stab = 1.5 if (moveType == pok.type1 or moveType == pok.type2) else 1
+        split = pok.att if (moveDamageClass == "physical") else pok.spatt
+        expectedPower = (stab * movePower) * split * moveAccuracy
+        currentPower += expectedPower
+    return currentPower
 
-def getLearnedMoves(pokPreFilter, pok, id1, id2, id3, id4):
+def getLearnedMoves(pokPreFilter, pok, ids):
     #TODO Handle -1 in ids because it has no attack (Like Ditto)
-    return [pokPreFilter[pok[0]].knowableMoves[id1],pokPreFilter[pok[0]].knowableMoves[id2],pokPreFilter[pok[0]].knowableMoves[id3],pokPreFilter[pok[0]].knowableMoves[id4]]
+    temp = []
+    for id in ids:
+        if id != -1:
+            temp.append(pokPreFilter[pok[0]].knowableMoves[id])
+    return temp
