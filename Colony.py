@@ -124,7 +124,6 @@ class Colony:
         #Update Pheromone Concentration
         #Evaporate Pheromones
         self.Ph_Pok = (1-rho)*self.Ph_Pok
-
         for idx, Ph_Att in enumerate(self.Ph_Atts):
             self.Ph_Atts[idx] = (1-rho)*Ph_Att
 
@@ -175,7 +174,7 @@ class Colony:
 
     def candidateSet(self):
         popSorted = sorted(self.Pop, key = self.fitness)
-        return list(popSorted[ceil(self.pop_size*0.95):self.pop_size])
+        return list(popSorted[ceil(self.pop_size*0.90):self.pop_size])
 
 
 
