@@ -6,7 +6,8 @@ import time
 import glob_var
 from math import ceil
 from copy import deepcopy
-from utils import currentPower, getLearnedMoves
+from functools import reduce
+from utils import currentPower, getLearnedMoves, getWeakness, magnitud
 ###Ant Colony Optimization Algorithm
 
 #General functions
@@ -184,16 +185,17 @@ if __name__ == "__main__":
         pokPreFilter = pickle.load(f)
     with open("Moves.pkl", "rb") as f:
         moves = pickle.load(f)
-    objFunctionOne = lambda team: sum(list(map(lambda x: currentPower(pokPreFilter[x[0]],getLearnedMoves(pokPreFilter, x, [x[1],x[2],x[3],x[4]])), team)))
+    attackObjFun = lambda team: sum(list(map(lambda x: currentPower(pokPreFilter[x[0]], getLearnedMoves(pokPreFilter, x, [x[1], x[2], x[3], x[4]])), team)))
+    teamCoverageObjFun = lambda team: magnitud(reduce(np.multiply,map(lambda x: getWeakness(pokPreFilter[x[0]]), team)))
     tic = time.time()
-    firstColony = Colony(500,objFunctionOne, pokPreFilter)
+    firstColony = Colony(500, attackObjFun, pokPreFilter)
     toc = time.time()
     print(toc-tic)
     prevCandSet = firstColony.candidateSet()
     iters = 26
     for i in range(0,iters):
         if i == iters-1:
-            a = list(map(objFunctionOne, prevCandSet))
+            a = list(map(attackObjFun, prevCandSet))
             b = np.array(a)
             plt.scatter(range(0, b.size), b)
             plt.title("Iter: "+ str(i) + " - rho: "+str(glob_var.rho)+ " - Q: "+str(glob_var.Q))

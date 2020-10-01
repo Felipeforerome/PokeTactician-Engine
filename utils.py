@@ -1,3 +1,5 @@
+import glob_var
+import numpy as np
 def moveExactCounter(PokemonsList):
     """
     Count the number of pokemon that have X number of knowable attacks (until 36)
@@ -66,3 +68,18 @@ def getLearnedMoves(pokPreFilter, pok, ids):
         if id != -1:
             temp.append(pokPreFilter[pok[0]].knowableMoves[id])
     return temp
+
+def getWeakness(pok):
+    typeChart = glob_var.typeChart
+    typeOrder = glob_var.typeOrder
+    weakness = typeChart[:,typeOrder.index(pok.type1)]
+    try:
+        weakness2 = typeChart[:,typeOrder.index(pok.type2)]
+        weakness = np.multiply(weakness, weakness2)
+    except:
+        pass
+
+    return weakness
+
+def magnitud(x):
+    return np.sqrt(x.dot(x))
