@@ -7,7 +7,7 @@ import glob_var
 from math import ceil
 from copy import deepcopy
 from functools import reduce
-from utils import currentPower, getLearnedMoves, getWeakness, magnitud
+from utils import currentPower, getLearnedMoves, getWeakness, magnitud, colonyCooperation
 ###Ant Colony Optimization Algorithm
 
 #General functions
@@ -187,11 +187,12 @@ if __name__ == "__main__":
         moves = pickle.load(f)
     attackObjFun = lambda team: sum(list(map(lambda x: currentPower(pokPreFilter[x[0]], getLearnedMoves(pokPreFilter, x, [x[1], x[2], x[3], x[4]])), team)))
     teamCoverageObjFun = lambda team: magnitud(reduce(np.multiply,map(lambda x: getWeakness(pokPreFilter[x[0]]), team)))
-    tic = time.time()
-    firstColony = Colony(500, attackObjFun, pokPreFilter)
-    toc = time.time()
-    print(toc-tic)
-    prevCandSet = firstColony.candidateSet()
+
+    attackObjColony = Colony(500, attackObjFun, pokPreFilter)
+    teamCoverageObjColony = Colony(500, teamCoverageObjFun, pokPreFilter)
+    coopCandSet = colonyCooperation([attackObjColony.candidateSet(), teamCoverageObjColony.candidateSet()], [attackObjFun, teamCoverageObjFun])
+
+    prevCandSet = attackObjColony.candidateSet()
     iters = 26
     for i in range(0,iters):
         if i == iters-1:
@@ -200,11 +201,11 @@ if __name__ == "__main__":
             plt.scatter(range(0, b.size), b)
             plt.title("Iter: "+ str(i) + " - rho: "+str(glob_var.rho)+ " - Q: "+str(glob_var.Q))
             plt.show()
-        currentCandSet = firstColony.candidateSet()
+        currentCandSet = attackObjColony.candidateSet()
         updateSet = deepcopy(prevCandSet)+deepcopy(currentCandSet)
-        candSetTemp = list(sorted(updateSet, key = firstColony.fitness))
+        candSetTemp = list(sorted(updateSet, key = attackObjColony.fitness))
         candSet = candSetTemp[int(candSetTemp.__len__()/2):candSetTemp.__len__()]
         prevCandSet = candSet
-        firstColony.updatePhCon(candSet)
-        firstColony.updatePokProb()
-        firstColony.ACO()
+        attackObjColony.updatePhCon(candSet)
+        attackObjColony.updatePokProb()
+        attackObjColony.ACO()

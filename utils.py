@@ -83,3 +83,24 @@ def getWeakness(pok):
 
 def magnitud(x):
     return np.sqrt(x.dot(x))
+
+def colonyCooperation(candSets, objFuns):
+    if not candSets.__len__() == objFuns.__len__():
+        raise Exception("candSets and ObjFuns must be the same size")
+    else:
+        totalCandSet = []
+        candSetObjs=[]
+        for i in candSets:
+            totalCandSet += i
+
+        for j in objFuns:
+            candSetObjsTemp = np.array(list(map(j, totalCandSet)))
+            candSetObjs += [candSetObjsTemp/(candSetObjsTemp.max())]
+
+        dominanceVector = np.ones(totalCandSet.__len__())
+
+        for x in candSetObjs: dominanceVector = np.multiply(dominanceVector, (x/(x.max())))
+
+        dominatedCandSet = [x for _, x in sorted(zip(dominanceVector, totalCandSet), key=lambda pair: pair[0])]
+
+        return dominatedCandSet

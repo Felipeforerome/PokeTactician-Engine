@@ -25,6 +25,6 @@ Right now it will build a team only following one objective, building the collab
 
 ### To-Do:
 
-* Finish the collaboration mechanism.
+* ~~Finish the collaboration mechanism.~~
 * A user-friendly web interface, so it can be uploaded to a website for everyone to use.
 * A filtering feature for the pokemon from which to build a team.
