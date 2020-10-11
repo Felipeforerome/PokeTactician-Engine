@@ -79,7 +79,7 @@ def getWeakness(pok):
     except:
         pass
 
-    return weakness
+    return np.reciprocal(weakness, out=np.ones_like(weakness)*5, where= weakness!=0)
 
 def magnitud(x):
     return np.sqrt(x.dot(x))
