@@ -1,14 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import pickle
 import random
-import time
 import glob_var
 from math import ceil
 from copy import deepcopy
-from functools import reduce
-from utils import currentPower, getLearnedMoves, getWeakness, magnitud, colonyCooperation
-###Ant Colony Optimization Algorithm
 
 #General functions
 numeratorFun = lambda c, n: (c ** glob_var.alpha) * (n ** glob_var.beta)
@@ -176,36 +170,3 @@ class Colony:
     def candidateSet(self):
         popSorted = sorted(self.Pop, key = self.fitness)
         return list(popSorted[ceil(self.pop_size*0.90):self.pop_size])
-
-
-
-if __name__ == "__main__":
-    #import pokemon DB
-    with open("Pok.pkl", "rb") as f:
-        pokPreFilter = pickle.load(f)
-    with open("Moves.pkl", "rb") as f:
-        moves = pickle.load(f)
-    attackObjFun = lambda team: sum(list(map(lambda x: currentPower(pokPreFilter[x[0]], getLearnedMoves(pokPreFilter, x, [x[1], x[2], x[3], x[4]])), team)))
-    teamCoverageObjFun = lambda team: magnitud(reduce(np.multiply,map(lambda x: getWeakness(pokPreFilter[x[0]]), team)))
-
-    attackObjColony = Colony(500, attackObjFun, pokPreFilter)
-    teamCoverageObjColony = Colony(500, teamCoverageObjFun, pokPreFilter)
-    coopCandSet = colonyCooperation([attackObjColony.candidateSet(), teamCoverageObjColony.candidateSet()], [attackObjFun, teamCoverageObjFun])
-
-    prevCandSet = attackObjColony.candidateSet()
-    iters = 26
-    for i in range(0,iters):
-        if i == iters-1:
-            a = list(map(attackObjFun, prevCandSet))
-            b = np.array(a)
-            plt.scatter(range(0, b.size), b)
-            plt.title("Iter: "+ str(i) + " - rho: "+str(glob_var.rho)+ " - Q: "+str(glob_var.Q))
-            plt.show()
-        currentCandSet = attackObjColony.candidateSet()
-        updateSet = deepcopy(prevCandSet)+deepcopy(currentCandSet)
-        candSetTemp = list(sorted(updateSet, key = attackObjColony.fitness))
-        candSet = candSetTemp[int(candSetTemp.__len__()/2):candSetTemp.__len__()]
-        prevCandSet = candSet
-        attackObjColony.updatePhCon(candSet)
-        attackObjColony.updatePokProb()
-        attackObjColony.ACO()
