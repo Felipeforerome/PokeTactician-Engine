@@ -79,10 +79,16 @@ def getWeakness(pok):
     except:
         pass
 
-    return np.reciprocal(weakness, out=np.ones_like(weakness)*5, where= weakness!=0)
+    return weakness
 
-def magnitud(x):
-    return np.sqrt(x.dot(x))
+def hoyerSparseness(x):
+    k = x.__len__()
+    value = (np.sqrt(k) - ((np.linalg.norm(x,1))/(np.linalg.norm(x,2))))/(np.sqrt(k)-1)
+    return value
+
+def getTeamNames(team):
+    for pok in team:
+        print(pokPreFilter[pok[0]].name)
 
 def colonyCooperation(candSets, objFuns):
     totalCandSet = []

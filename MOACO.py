@@ -4,7 +4,7 @@ import pickle
 import glob_var
 from copy import deepcopy
 from functools import reduce
-from utils import currentPower, getLearnedMoves, getWeakness, magnitud, colonyCooperation
+from utils import currentPower, getLearnedMoves, getWeakness, colonyCooperation
 from Colony import Colony
 
 ###Multi Objective Ant Colony Optimization Algorithm
@@ -42,5 +42,8 @@ def MOACO(totalPopulation, objFuncs):
 if __name__ == "__main__":
     attackObjFun = lambda team: sum(list(map(lambda x: currentPower(pokPreFilter[x[0]], getLearnedMoves(pokPreFilter, x, [x[1], x[2], x[3], x[4]])), team)))
     #TODO Fix magnitud function it's encouraging increasing single type coverage, should aim for spread
-    #selfCoverageFun = lambda team: magnitud(reduce(np.multiply,map(lambda x: getWeakness(pokPreFilter[x[0]]), team)))
-    MOACO(1000, [attackObjFun])
+    #selfCoverageFun = lambda team: 1/reduce(np.multiply,map(hoyerSparseness,map(lambda x: getWeakness(pokPreFilter[x[0]]), team)))
+    selfCoverageFun = lambda team: 1 / np.power(
+        np.ones_like(reduce(np.multiply, map(lambda x: getWeakness(pokPreFilter[x[0]]), team))) * 2,
+        reduce(np.multiply, map(lambda x: getWeakness(pokPreFilter[x[0]]), team))).mean()
+    MOACO(1000, [attackObjFun, selfCoverageFun])
