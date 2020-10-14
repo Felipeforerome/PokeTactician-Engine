@@ -65,7 +65,7 @@ class Colony:
             self.H_Atts.append(np.zeros(size))
 
         #Create Population
-        self.Pop = np.empty([self.pop_size,6,5], dtype=int)
+        self.Pop = np.ones([self.pop_size,6,5], dtype=int)*(-1)
 
         #Initial Run of the Meta-Heuristic
         self.ACO()
@@ -76,18 +76,22 @@ class Colony:
         #Assign Population
         for ant in self.Pop:
             for pokemon in ant:
-                selectedPok = False
-                id = 0
-                tempSum = 0
-                randPok = random.randrange(0,100001,1)/100001
-                #Get Pokemon such that ph_(n)< rand <ph(n+1)
-                while(not selectedPok):
-                    tempProb = self.Prob_Poks[id]
-                    if(randPok>tempSum+tempProb):
-                        id = id + 1
-                        tempSum = tempSum + tempProb
-                    elif(randPok <= tempSum+tempProb):
-                        selectedPok = True
+                notRepeatedPokemon = True
+                while(notRepeatedPokemon):
+                    selectedPok = False
+                    id = 0
+                    tempSum = 0
+                    randPok = random.randrange(0,100001,1)/100001
+                    #Get Pokemon such that ph_(n)< rand <ph(n+1)
+                    while(not selectedPok):
+                        tempProb = self.Prob_Poks[id]
+                        if(randPok>tempSum+tempProb):
+                            id = id + 1
+                            tempSum = tempSum + tempProb
+                        elif(randPok <= tempSum+tempProb):
+                            selectedPok = True
+                            if id not in ant[:,0]:
+                                notRepeatedPokemon = False
 
                 pokemon[0] = id
 
