@@ -93,9 +93,17 @@ class MOACO:
             self.bestSoFar = max([iterationBest, self.bestSoFar], key=self.jointFun)
 
     def getSolnTeamNames(self):
+        team = []
         if self.bestSoFar is not None:
             for pok in self.bestSoFar:
-                print(self.pokemonPop[pok[0]].name)
+                team += [self.pokemonPop[pok[0]].name]
+            return team
+        else:
+            raise Exception("Optimization has not been ran.")
+
+    def getObjTeamValue(self):
+        if self.bestSoFar is not None:
+            return self.jointFun(self.bestSoFar)
         else:
             raise Exception("Optimization has not been ran.")
 
@@ -115,7 +123,7 @@ class MOACO:
                 name=f"Last Cand Set Team Values: Iter: {str(self.iterNum)} - rho: {str(self.rho)} - Q: {str(self.Q)}",
             )
         )
-        fig.show()
+        return fig
 
     def plot_iters(self, sortedIters):
         # Plot iteration points
@@ -151,7 +159,7 @@ class MOACO:
             title=f"Line Plot for Each Iteration. Params alpha:{alpha}, beta: {beta}, Q: {Q}, rho: {rho}",
         )
 
-        fig.show()
+        return fig
 
     def plot_averages(self):
         # Plot averages
@@ -172,7 +180,7 @@ class MOACO:
         fig.update_layout(xaxis_title="Iteration", yaxis_title="Average Y-axis Value")
 
         # Show the plot
-        fig.show()
+        return fig
 
     def plot_maxes(self, fig=None):
         # Plot averages
@@ -193,4 +201,4 @@ class MOACO:
         fig.update_layout(xaxis_title="Iteration", yaxis_title="Average Y-axis Value")
 
         # Show the plot
-        fig.show()
+        return fig
