@@ -7,7 +7,11 @@ layout = html.Div(
         html.Button("Suggest Team", id="suggest-team-btn"),
         dcc.Loading(
             id="loading-output",
-            children=[html.Div(id="team-output")],
+            children=[
+                html.Div(id="team-output"),
+                html.Br(),
+                html.Div(id="time-to-calc"),
+            ],
             type="default",
         ),
     ]
