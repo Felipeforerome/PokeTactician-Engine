@@ -1,5 +1,5 @@
 import numpy as np
-from .glob_var import moves, pokPreFilter
+from .glob_var import moves
 from .models.Types import typeChart, typeOrder
 
 # Vectors of Attack Effectiveness against types
@@ -131,12 +131,12 @@ def currentPower(pok, learnedMoves):
     return currentPower
 
 
-def getLearnedMoves(pokPreFilter, pok, ids):
+def getLearnedMoves(pokemonList, pok, ids):
     # TODO Handle -1 in ids because it has no attack (Like Ditto)
     temp = []
     for id in ids:
         if id != -1:
-            temp.append(pokPreFilter[pok[0]].knowableMoves[id])
+            temp.append(pokemonList[pok[0]].knowableMoves[id])
     return temp
 
 
@@ -151,15 +151,15 @@ def getWeakness(pok):
     return weakness
 
 
-def getMoveWeakness(pok, pokMoves):
+def getMoveWeakness(pok, pokMoves, pokList):
     weakness = np.ones(18)
     for move in pokMoves:
         if move == -1:
             pass
         else:
-            moveType = moves.get(pokPreFilter[pok].knowableMoves[move].id).type
+            moveType = moves.get(pokList[pok].knowableMoves[move].id).type
             weakness = np.multiply(weakness, typeChart[:, typeOrder.index(moveType)])
-            weakness = np.multiply(weakness, getWeakness(pokPreFilter[pok]))
+            weakness = np.multiply(weakness, getWeakness(pokList[pok]))
             weakness = [weak if weak <= 256 else 512 for weak in weakness]
     return weakness
 
@@ -172,9 +172,9 @@ def hoyerSparseness(x):
     return value
 
 
-def getTeamNames(team):
+def getTeamNames(team, pokList):
     for pok in team:
-        print(pokPreFilter[pok[0]].name)
+        print(pokList[pok[0]].name)
 
 
 def debugPower(team):
