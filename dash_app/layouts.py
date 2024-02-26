@@ -80,8 +80,8 @@ layout = html.Div(
                         ),
                         html.Br(),
                         dmc.MultiSelect(
-                            label="Select Types to Exclude",
-                            placeholder="None",
+                            label="Select Types to Include",
+                            placeholder="Leave empty for all",
                             id="type-multi-select",
                             value=[],
                             data=[
@@ -105,6 +105,14 @@ layout = html.Div(
                                 {"value": "fairy", "label": "Fairy"},
                             ],
                             style={"marginBottom": 10, "width": "95%"},
+                        ),
+                        html.Br(),
+                        dmc.Switch(
+                            label="Only Mono-types?",
+                            offLabel="No",
+                            onLabel="Yes",
+                            checked=False,
+                            id="mono-type",
                         ),
                         html.Br(),
                         dmc.Button(

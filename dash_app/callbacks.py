@@ -21,22 +21,38 @@ import time
         Input("suggest-team-btn", "n_clicks"),
         State("objectives-multi-select", "value"),
         State("type-multi-select", "value"),
+        State("mono-type", "checked"),
     ],
 )
-def update_output(n, objFuncsParam, excludedTypes):
+def update_output(n, objFuncsParam, includedTypes, monoType):
     if n is None:
         return "", ""
     else:
         if len(objFuncsParam) > 0:
             try:
-                pokList = [
-                    pok
-                    for pok in pokPreFilter
-                    if (
-                        pok.type1 not in excludedTypes
-                        and pok.type2 not in excludedTypes
+                if len(includedTypes) > 0:
+                    pokList = (
+                        [
+                            pok
+                            for pok in pokPreFilter
+                            if (pok.type1 in includedTypes and pok.type2 is None)
+                        ]
+                        if monoType
+                        else [
+                            pok
+                            for pok in pokPreFilter
+                            if (
+                                pok.type1 in includedTypes or pok.type2 in includedTypes
+                            )
+                        ]
                     )
-                ]
+                else:
+                    pokList = (
+                        [pok for pok in pokPreFilter if (pok.type2 is None)]
+                        if monoType
+                        else pokPreFilter
+                    )
+
                 start = time.time()
                 objectiveFuncs = []
                 attackObjFun = lambda team: attack_obj_fun(team, pokList)
