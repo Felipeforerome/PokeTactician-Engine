@@ -1,5 +1,6 @@
-from dash import Input, Output, callback, State
+from dash import Input, Output, callback, State, no_update
 import sys
+from components import PokemonTeam
 
 sys.path.append(sys.path[0] + "/..")
 from poketactician.MOACO import MOACO
@@ -16,35 +17,60 @@ import time
 @callback(
     Output("team-output", "children"),
     Output("time-to-calc", "children"),
-    [Input("suggest-team-btn", "n_clicks"), State("objective-funcs", "value")],
+    [
+        Input("suggest-team-btn", "n_clicks"),
+        State("objectives-multi-select", "value"),
+        State("type-multi-select", "value"),
+    ],
 )
-def update_output(n, objFuncsParam):
+def update_output(n, objFuncsParam, excludedTypes):
     if n is None:
-        return "Click the button to suggest a team.", ""
+        return "", ""
     else:
-        start = time.time()
-        objectiveFuncs = []
-        attackObjFun = lambda team: attack_obj_fun(team)
-        teamCoverageFun = lambda team: team_coverage_fun(team)
-        selfCoverageFun = lambda team: self_coverage_fun(team)
-        if "1" in objFuncsParam:
-            objectiveFuncs.append((attackObjFun, Q, 0.1))
-        if "2" in objFuncsParam:
-            objectiveFuncs.append((teamCoverageFun, Q, rho))
-        if "3" in objFuncsParam:
-            objectiveFuncs.append((selfCoverageFun, Q, rho))
-        print(objectiveFuncs)
-        mCol = MOACO(
-            ColonyGPT,
-            400,
-            objectiveFuncs,
-            pokPreFilter,
-            alpha,
-            beta,
-        )
-        mCol.optimize(iters=20, time_limit=None)
-        team = mCol.getSolnTeamNames()
-        return (
-            f"Suggested Team: {', '.join(team)}",
-            f"Time to compute: {time.time()-start} - Objective Value: {mCol.getObjTeamValue()}",
-        )
+        if len(objFuncsParam) > 0:
+            try:
+                pokList = [
+                    pok
+                    for pok in pokPreFilter
+                    if (
+                        pok.type1 not in excludedTypes
+                        and pok.type2 not in excludedTypes
+                    )
+                ]
+                start = time.time()
+                objectiveFuncs = []
+                attackObjFun = lambda team: attack_obj_fun(team, pokList)
+                teamCoverageFun = lambda team: team_coverage_fun(team)
+                selfCoverageFun = lambda team: self_coverage_fun(team)
+                if 1 in objFuncsParam:
+                    objectiveFuncs.append((attackObjFun, Q, 0.1))
+                if 2 in objFuncsParam:
+                    objectiveFuncs.append((teamCoverageFun, Q, rho))
+                if 3 in objFuncsParam:
+                    objectiveFuncs.append((selfCoverageFun, Q, rho))
+                mCol = MOACO(
+                    ColonyGPT,
+                    400,
+                    objectiveFuncs,
+                    pokList,
+                    alpha,
+                    beta,
+                )
+                mCol.optimize(iters=20, time_limit=None)
+                team = mCol.getSolnTeamNames()
+                return (
+                    PokemonTeam(team).layout(),
+                    f"Time to compute: {time.time()-start} - Objective Value: {mCol.getObjTeamValue()}",
+                )
+            except Exception as e:
+                return (str(e), "")
+        else:
+            return (no_update, no_update)
+
+
+@callback(
+    Output("objectives-multi-select", "error"),
+    Input("objectives-multi-select", "value"),
+)
+def select_value(value):
+    return "Select at least 1." if len(value) < 1 else ""

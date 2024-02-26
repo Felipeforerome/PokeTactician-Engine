@@ -17,6 +17,7 @@ services:
       - ./dash_app:/usr/src/app/dash_app
       - ./optimizer:/usr/src/app/optimizer
       - ./requirements.txt:/usr/src/app/requirements.txt
+    command: python3 dash_app/app.py
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to

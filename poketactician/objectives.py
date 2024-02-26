@@ -12,13 +12,13 @@ from .glob_var import moves, pokPreFilter
 import numpy as np
 
 
-def attack_obj_fun(team):
+def attack_obj_fun(team, pokList):
     return sum(
         list(
             map(
                 lambda x: currentPower(
-                    pokPreFilter[x[0]],
-                    getLearnedMoves(pokPreFilter, x, [x[1], x[2], x[3], x[4]]),
+                    pokList[x[0]],
+                    getLearnedMoves(pokList, x, [x[1], x[2], x[3], x[4]]),
                 ),
                 team,
             )
@@ -26,10 +26,8 @@ def attack_obj_fun(team):
     )
 
 
-def team_coverage_fun(team):
-    team_vector = reduce(
-        np.multiply, map(lambda x: getWeakness(pokPreFilter[x[0]]), team)
-    )
+def team_coverage_fun(team, pokList):
+    team_vector = reduce(np.multiply, map(lambda x: getWeakness(pokList[x[0]]), team))
     total_score = sum(value**2 for value in team_vector)
     sparsity_penalty = 1 - hoyerSparseness(team_vector)  # Flip the result
     final_score = total_score * sparsity_penalty  # Multiply by the total_score
