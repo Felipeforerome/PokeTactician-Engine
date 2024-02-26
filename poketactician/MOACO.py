@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 from .glob_var import cooperationStatsDict, alpha, beta, Q, rho
+from .models.Team import Team
 
 
 ###Multi Objective Ant Colony Optimization Algorithm
@@ -97,6 +98,18 @@ class MOACO:
         if self.bestSoFar is not None:
             for pok in self.bestSoFar:
                 team += [self.pokemonPop[pok[0]].name]
+            return team
+        else:
+            raise Exception("Optimization has not been ran.")
+
+    def getSoln(self):
+        team = Team()
+        if self.bestSoFar is not None:
+            for pok in self.bestSoFar:
+                tempPokemon = self.pokemonPop[pok[0]]
+                for move_index in pok[1:]:
+                    tempPokemon.teachMove(move_index)
+                team.addPokemon(tempPokemon)
             return team
         else:
             raise Exception("Optimization has not been ran.")

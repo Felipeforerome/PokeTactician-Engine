@@ -1,3 +1,6 @@
+from .Move import Move
+
+
 class Pokemon:
     def __init__(self, name, hp, att, deff, spatt, spdeff, spe, type1, type2):
         self.name = name
@@ -8,6 +11,7 @@ class Pokemon:
         self.spdeff = spdeff
         self.spe = spe
         self.knowableMoves = []
+        self.learntMoves = []
         self.type1 = type1
         self.type2 = type2
 
@@ -19,41 +23,61 @@ class Pokemon:
         sameTypeClass = False
         sameTypeClassMoves = []
         numTypeClass = 0
-        if(move.power == 0):
+        if move.power == 0:
             return
 
         for knownMove in self.knowableMoves:
             diffType = knownMove.type != move.type
             diffClass = knownMove.damageClass != move.damageClass
-            if(diffType or diffClass):
+            if diffType or diffClass:
                 continue
             else:
                 numTypeClass = numTypeClass + 1
                 sameTypeClassMoves.append(knownMove)
                 lenTypeClassMoves = sameTypeClassMoves.__len__()
 
-                if(lenTypeClassMoves == 3 ):
+                if lenTypeClassMoves == 3:
                     sameTypeClass = True
-                    sameTypeClassMoves.sort(key= lambda x: x.power*x.accuracy)
+                    sameTypeClassMoves.sort(key=lambda x: x.power * x.accuracy)
                     for knownTypeClass in sameTypeClassMoves:
-                        increasedPowerAccuracy = knownTypeClass.power * knownTypeClass.accuracy <= move.power * move.accuracy
-                        increasedPP = knownMove.pp*0.75 <= move.pp
+                        increasedPowerAccuracy = (
+                            knownTypeClass.power * knownTypeClass.accuracy
+                            <= move.power * move.accuracy
+                        )
+                        increasedPP = knownMove.pp * 0.75 <= move.pp
 
-                        if(increasedPowerAccuracy):
-                            if(increasedPP or knownTypeClass.power+30<=move.power):
+                        if increasedPowerAccuracy:
+                            if increasedPP or knownTypeClass.power + 30 <= move.power:
                                 self.knowableMoves.remove(knownTypeClass)
                                 self.knowableMoves.append(move)
                                 return
                         else:
                             return
 
-        if(not sameTypeClass):
+        if not sameTypeClass:
             self.knowableMoves.append(move)
 
+    def serialize(self):
+        serialized_moves = [move.serialize() for move in self.learntMoves]
+        return {
+            "name": self.name,
+            "hp": self.hp,
+            "att": self.att,
+            "deff": self.deff,
+            "spatt": self.spatt,
+            "spdeff": self.spdeff,
+            "spe": self.spe,
+            "type1": self.type1,
+            "type2": self.type2,
+            "moves": serialized_moves,
+        }
+
+    def teachMove(self, int):
+        self.learntMoves += [self.knowableMoves[int]]
 
     def overallStats(self):
         """
         Calculates the sum of stats
         :return: Sum of Stats
         """
-        return (self.hp + self.att + self.deff + self.spatt + self.spdeff + self.spe)
+        return self.hp + self.att + self.deff + self.spatt + self.spdeff + self.spe

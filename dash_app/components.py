@@ -21,9 +21,14 @@ class PokemonCard:
 
 class PokemonTeam:
     def __init__(self, pokemonList):
-        self.pokemonList = pokemonList
         self.pokemonCards = [
-            dmc.Col(PokemonCard(pokemon, "").layout(), span=4)
+            dmc.Col(
+                PokemonCard(
+                    pokemon["name"].capitalize(),
+                    f"{pokemon['type1'].capitalize()}{"" if pokemon['type2'] is None else "/"+pokemon['type2'].capitalize()}",
+                ).layout(),
+                span=4,
+            )
             for pokemon in pokemonList
         ]
 

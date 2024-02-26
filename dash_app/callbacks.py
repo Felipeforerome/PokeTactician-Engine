@@ -73,9 +73,9 @@ def update_output(n, objFuncsParam, includedTypes, monoType):
                     beta,
                 )
                 mCol.optimize(iters=20, time_limit=None)
-                team = mCol.getSolnTeamNames()
+                team = mCol.getSoln()
                 return (
-                    PokemonTeam(team).layout(),
+                    PokemonTeam(team.serialize()).layout(),
                     f"Time to compute: {time.time()-start} - Objective Value: {mCol.getObjTeamValue()}",
                 )
             except Exception as e:
