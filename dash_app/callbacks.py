@@ -15,8 +15,8 @@ import time
 
 
 @callback(
-    Output("team-output", "children"),
     Output("time-to-calc", "children"),
+    Output("team-output", "children"),
     [
         Input("suggest-team-btn", "n_clicks"),
         State("objectives-multi-select", "value"),
@@ -75,8 +75,8 @@ def update_output(n, objFuncsParam, includedTypes, monoType):
                 mCol.optimize(iters=20, time_limit=None)
                 team = mCol.getSoln()
                 return (
-                    PokemonTeam(team.serialize()).layout(),
                     f"Time to compute: {time.time()-start} - Objective Value: {mCol.getObjTeamValue()}",
+                    PokemonTeam(team.serialize()).layout(),
                 )
             except Exception as e:
                 return (str(e), "")

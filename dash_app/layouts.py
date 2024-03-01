@@ -125,15 +125,22 @@ layout = html.Div(
                 ),
                 # Container for results
                 dmc.Container(
-                    style={"flexGrow": 1, "marginLeft": 20, "overflow": "auto"},
+                    style={
+                        "flexGrow": 1,
+                        "marginLeft": 20,
+                        "marginRight": 20,
+                        "overflow": "auto",
+                        "maxWidth": "none",  # Removes the max-width restriction
+                        "width": "100%",  # Optionally, ensure it takes the full width available
+                    },
                     children=[
                         dcc.Loading(
                             id="loading-output",
                             children=[
                                 html.Br(),
-                                html.Div(id="team-output"),
-                                html.Br(),
                                 html.Div(id="time-to-calc"),
+                                html.Br(),
+                                html.Div(id="team-output"),
                             ],
                             type="default",
                         ),

@@ -5,17 +5,49 @@ from dash_iconify import DashIconify
 
 
 class PokemonCard:
-    def __init__(self, title, content):
-        self.title = title
-        self.content = content
+    def __init__(
+        self,
+        pokemon: dict,
+    ):
+        self.pokemon = pokemon
 
     def layout(self):
-        return html.Div(
+        pokemon = self.pokemon
+        return dmc.Card(
             children=[
-                html.H4(self.title, className="card-title"),
-                html.P(self.content, className="card-content"),
+                dmc.CardSection(
+                    dmc.Center(  # Use dmc.Center for center alignment
+                        dmc.Text(
+                            pokemon["name"].title(),
+                            weight=500,
+                        ),
+                    ),
+                    withBorder=True,
+                    inheritPadding=True,
+                    py="xs",
+                ),
+                dmc.CardSection(
+                    children=[
+                        dmc.SimpleGrid(
+                            cols=2,
+                            children=[
+                                html.P(
+                                    move["name"].replace("-", " ").title(),
+                                    className="card-content",
+                                )
+                                for move in pokemon["moves"]
+                            ],
+                        ),
+                    ],
+                    inheritPadding=True,
+                    mt="sm",
+                    pb="md",
+                ),
             ],
-            className="card",
+            withBorder=True,
+            shadow="sm",
+            radius="md",
+            style={"width": "20vw"},
         )
 
 
@@ -23,14 +55,13 @@ class PokemonTeam:
     def __init__(self, pokemonList):
         self.pokemonCards = [
             dmc.Col(
-                PokemonCard(
-                    pokemon["name"].capitalize(),
-                    f"{pokemon['type1'].capitalize()}{"" if pokemon['type2'] is None else "/"+pokemon['type2'].capitalize()}",
-                ).layout(),
+                PokemonCard(pokemon).layout(),
                 span=4,
             )
             for pokemon in pokemonList
         ]
 
     def layout(self):
-        return dmc.Grid(children=self.pokemonCards, className="team")
+        return dmc.Grid(
+            children=self.pokemonCards, className="team", justify="space-evenly"
+        )

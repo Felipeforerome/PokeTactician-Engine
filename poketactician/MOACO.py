@@ -27,7 +27,7 @@ class MOACO:
         self.totalPopulation = totalPopulation
         self.objFuncs_Q_rho = objFuncs_Q_rho
         self.cooperationID = cooperationID
-        self.pokemonPop = pokemonPop
+        self.pokemonPop = deepcopy(pokemonPop)
         self.prevCandSet = None
         self.iterNum = 1
         self.plot = None
