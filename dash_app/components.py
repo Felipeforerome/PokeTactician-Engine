@@ -16,12 +16,20 @@ class PokemonCard:
         return dmc.Card(
             children=[
                 dmc.CardSection(
-                    dmc.Center(  # Use dmc.Center for center alignment
-                        dmc.Text(
-                            pokemon["name"].title(),
-                            weight=500,
+                    children=[
+                        dmc.Image(
+                            src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/17.png",
+                            height="75%",
+                            width="75%",
+                            style={"margin": "auto"},
                         ),
-                    ),
+                        dmc.Center(  # Use dmc.Center for center alignment
+                            dmc.Text(
+                                pokemon["name"].title(),
+                                weight=500,
+                            ),
+                        ),
+                    ],
                     withBorder=True,
                     inheritPadding=True,
                     py="xs",
