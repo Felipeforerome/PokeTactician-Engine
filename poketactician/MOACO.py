@@ -106,7 +106,7 @@ class MOACO:
         team = Team()
         if self.bestSoFar is not None:
             for pok in self.bestSoFar:
-                tempPokemon = self.pokemonPop[pok[0]]
+                tempPokemon = deepcopy(self.pokemonPop[pok[0]])
                 for move_index in pok[1:]:
                     tempPokemon.teachMove(move_index)
                 team.addPokemon(tempPokemon)
