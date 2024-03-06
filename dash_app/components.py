@@ -19,7 +19,7 @@ class PokemonCard:
                     children=[
                         dmc.Center(
                             html.Img(
-                                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/17.png",
+                                src=f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{pokemon["id"]}.png",
                                 height="50%",
                                 width="50%",
                                 style={"margin": "auto"},
