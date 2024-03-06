@@ -4,7 +4,7 @@ from components import PokemonTeam
 
 sys.path.append(sys.path[0] + "/..")
 from poketactician.MOACO import MOACO
-from poketactician.Colony import Colony, ColonyGPT
+from poketactician.Colony import Colony, Colony
 from poketactician.glob_var import pokPreFilter, alpha, beta, Q, rho
 from poketactician.objectives import (
     attack_obj_fun,
@@ -65,7 +65,7 @@ def update_output(n, objFuncsParam, includedTypes, monoType):
                 if 3 in objFuncsParam:
                     objectiveFuncs.append((selfCoverageFun, Q, rho))
                 mCol = MOACO(
-                    ColonyGPT,
+                    Colony,
                     400,
                     objectiveFuncs,
                     pokList,
