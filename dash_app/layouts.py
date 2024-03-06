@@ -6,6 +6,25 @@ from dash_iconify import DashIconify
 # Define the layout
 layout = html.Div(
     children=[
+        dmc.Modal(
+            title=dmc.Group(
+                [
+                    DashIconify(icon="arcticons:pokemon-unite"),
+                    dmc.Text("🌟 Hello and Welcome to PokéTactician! 🌟", weight=700),
+                    DashIconify(icon="arcticons:pokemon-unite"),
+                ]
+            ),
+            id="modal-centered",
+            centered=True,
+            size="55%",
+            zIndex=10000,
+            children=[
+                dmc.Text(
+                    "This is a project I've developed in my free time to put some theory to practice and have fun with my passion for Pokemon. This webapp started as a way for me to practice implementing some Multi Objective Metaheuristic Algorithms to solve NP-Hard problems, and practice frontend development. It has been developed with the goal of providing a tool for different people to use and tailor the results they want to get. It is built implementing a Multi Objective Ant Colony Optimization for the composition of the team, and Dash with Dash Mantine for the interface."
+                ),
+            ],
+            opened=True,
+        ),
         # Header
         html.Header(
             children=[
