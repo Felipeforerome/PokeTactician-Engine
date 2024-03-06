@@ -17,11 +17,14 @@ class PokemonCard:
             children=[
                 dmc.CardSection(
                     children=[
-                        dmc.Image(
-                            src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/17.png",
-                            height="75%",
-                            width="75%",
-                            style={"margin": "auto"},
+                        dmc.Center(
+                            html.Img(
+                                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/17.png",
+                                height="50%",
+                                width="50%",
+                                style={"margin": "auto"},
+                                id="hello",
+                            )
                         ),
                         dmc.Center(  # Use dmc.Center for center alignment
                             dmc.Text(
