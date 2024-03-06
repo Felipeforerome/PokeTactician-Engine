@@ -17,6 +17,7 @@ class Pokemon:
 
     def addKnowableMove(self, move):
         """
+        TODO This should be changed once more info about the moves is added, like effects or whatever. Right now it does reduce the decision space
         Adds move to list of knowable move if it has power greater to 0, its between the best 3 moves wtht that type and class
         :param move: Move to add
         """

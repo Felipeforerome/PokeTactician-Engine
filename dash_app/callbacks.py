@@ -56,8 +56,8 @@ def update_output(n, objFuncsParam, includedTypes, monoType):
                 start = time.time()
                 objectiveFuncs = []
                 attackObjFun = lambda team: attack_obj_fun(team, pokList)
-                teamCoverageFun = lambda team: team_coverage_fun(team)
-                selfCoverageFun = lambda team: self_coverage_fun(team)
+                teamCoverageFun = lambda team: team_coverage_fun(team, pokList)
+                selfCoverageFun = lambda team: self_coverage_fun(team, pokList)
                 if 1 in objFuncsParam:
                     objectiveFuncs.append((attackObjFun, Q, 0.1))
                 if 2 in objFuncsParam:
@@ -72,7 +72,8 @@ def update_output(n, objFuncsParam, includedTypes, monoType):
                     alpha,
                     beta,
                 )
-                mCol.optimize(iters=20, time_limit=None)
+                mCol.optimize(iters=25, time_limit=None)
+                # mCol.optimize(iters=30, time_limit=None)
                 team = mCol.getSoln()
                 return (
                     f"Time to compute: {time.time()-start} - Objective Value: {mCol.getObjTeamValue()}",

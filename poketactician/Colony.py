@@ -2,6 +2,7 @@ import numpy as np
 import random
 from math import ceil
 from collections import Counter
+import time
 
 
 class Colony:
@@ -207,8 +208,9 @@ class ColonyGPT:
         for pok in self.poks:
             size = pok.knowableMoves.__len__()
             if size == 0:
-                size = 1
-            self.Prob_Att.append(np.ones(size) * (1 / size))
+                self.Prob_Att.append([])
+            else:
+                self.Prob_Att.append(np.ones(size) * (1 / size))
 
         # Create Pheromone Vector for Pokemon
         self.Ph_Pok = np.zeros(self.poks.__len__())
@@ -235,7 +237,8 @@ class ColonyGPT:
                 size = 1
             self.H_Atts.append(np.zeros(size))
 
-        # Create Population
+        # Create Population$
+        # TODO Change the 6 to min(6, self.poks) in case incomplete teams are allowed
         self.Pop = np.ones([self.pop_size, 6, 5], dtype=int) * (-1)
 
         # Initial Run of the Meta-Heuristic
@@ -244,30 +247,37 @@ class ColonyGPT:
     def ACO(self):
         # Assign Population
         for ant in self.Pop:
-            unique_poks = False
-            while not unique_poks:
-                rand_pokemon = np.random.random(size=self.Pop.shape[1])
-                cumulative_probs = np.cumsum(self.Prob_Poks)
-                selected_pokemon_ids = np.argmax(
-                    rand_pokemon[:, np.newaxis] <= cumulative_probs, axis=1
-                )
-                if (
-                    len(
-                        [
-                            item
-                            for item, count in Counter(selected_pokemon_ids).items()
-                            if count > 1
-                        ]
-                    )
-                    < 1
-                ):
-                    unique_poks = True
+            # TODO Run more tests vectorized and non-vectorized versions they tend to give different results
+            # TODO Allow Repeating even if not all pokemon have been used
+            ######### Non Vectorized
+            # unique_poks = False
+            # while not unique_poks:
+            #     rand_pokemon = np.random.random(size=self.Pop.shape[1])
+            #     cumulative_probs = np.cumsum(self.Prob_Poks)
+            #     selected_pokemon_ids = np.argmax(
+            #         rand_pokemon[:, np.newaxis] <= cumulative_probs, axis=1
+            #     )
+            #     if (
+            #         len(
+            #             [
+            #                 item
+            #                 for item, count in Counter(selected_pokemon_ids).items()
+            #                 if count > 1
+            #             ]
+            #         )
+            #         < 1
+            #     ):
+            #         unique_poks = True
 
-            ant[:, 0] = selected_pokemon_ids
-
+            # ant[:, 0] = selected_pokemon_ids
+            ######### Vectorized
+            team_size = min(len(self.poks), 6)
+            ant[:, 0] = np.random.choice(
+                len(self.Prob_Poks), size=team_size, replace=False, p=self.Prob_Poks
+            )
             for pokemon in ant:
                 selected_pokemon_id = pokemon[0]
-                # Get Knowable Moves
+                ######### NonVectorized
                 prob_att_temp = self.Prob_Att[selected_pokemon_id].copy()
                 for i in range(1, 5):
                     if prob_att_temp.size - i > 0:
@@ -279,6 +289,19 @@ class ColonyGPT:
                         prob_att_temp[selected_attack_id] = 0
                     else:
                         pokemon[i] = -1
+                ######### Vectorized
+                # Get Knowable Moves
+                # prob_att_temp = self.Prob_Att[selected_pokemon_id]
+                # # TODO Ensure no repeated attacks and if the pokemon has less than 4 attacks, fill with -1 the remaining
+                # num_req_atts = min(4, len(prob_att_temp))
+                # selected_attack_ids = -1 * np.ones(4)
+                # selected_attack_ids[0:num_req_atts] = np.random.choice(
+                #     len(prob_att_temp),
+                #     size=num_req_atts,
+                #     replace=False,
+                #     p=prob_att_temp,
+                # )
+                # pokemon[1:5] = selected_attack_ids
 
     def updatePhCon(self, candidateSet):
         # User Defined Variables

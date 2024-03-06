@@ -1,4 +1,14 @@
 {
+    "0": {
+        "id": "0",
+        "name": "no-move",
+        "type": "Normal",
+        "damageClass": "physical",
+        "power": 1,
+        "accuracy": 0,
+        "pp": 0,
+        "priority": 0
+    },
     "1": {
         "id": "1",
         "name": "pound",
