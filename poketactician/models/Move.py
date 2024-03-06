@@ -19,6 +19,19 @@ class Move:
         self.pp = pp
         self.priority = priority
 
+    @staticmethod
+    def from_json(moveJSON):
+        return Move(
+            moveJSON["id"],
+            moveJSON["name"],
+            moveJSON["type"],
+            moveJSON["damageClass"],
+            moveJSON["power"],
+            moveJSON["accuracy"],
+            moveJSON["pp"],
+            moveJSON["priority"],
+        )
+
     def serialize(self):
         return {
             "id": self.id,

@@ -6,4 +6,4 @@ class Team:
         self.pokemons += [pokemon]
 
     def serialize(self):
-        return [pokemon.serialize() for pokemon in self.pokemons]
+        return [pokemon.serialize_instance() for pokemon in self.pokemons]

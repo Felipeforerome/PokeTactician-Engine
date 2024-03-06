@@ -38,6 +38,7 @@ def serialize_move(move):
 def serialize_pokemon(pokemon):
     serialized_moves = [serialize_move(move) for move in pokemon.knowableMoves]
     return {
+        "id": pokemon.id,
         "name": pokemon.name,
         "hp": pokemon.hp,
         "att": pokemon.att,
@@ -77,6 +78,7 @@ def deserialize_move(data):
 def deserialize_pokemon(data):
     moves = [deserialize_move(move_data) for move_data in data["knowableMoves"]]
     pokemon = Pokemon(
+        data["id"],
         data["name"],
         data["hp"],
         data["att"],

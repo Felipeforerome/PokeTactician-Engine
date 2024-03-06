@@ -2,7 +2,8 @@ from .Move import Move
 
 
 class Pokemon:
-    def __init__(self, name, hp, att, deff, spatt, spdeff, spe, type1, type2):
+    def __init__(self, id, name, hp, att, deff, spatt, spdeff, spe, type1, type2):
+        self.id = id
         self.name = name
         self.hp = hp
         self.att = att
@@ -58,9 +59,46 @@ class Pokemon:
         if not sameTypeClass:
             self.knowableMoves.append(move)
 
-    def serialize(self):
+    @staticmethod
+    def from_json(data):
+        pokemon = Pokemon(
+            data["id"],
+            data["name"],
+            data["hp"],
+            data["att"],
+            data["deff"],
+            data["spatt"],
+            data["spdeff"],
+            data["spe"],
+            data["type1"],
+            data["type2"],
+        )
+        moves = [Move.from_json(move_data) for move_data in data["knowableMoves"]]
+
+        for move in moves:
+            pokemon.addKnowableMove(move)
+        return pokemon
+
+    def serialize(pokemon):
+        serialized_moves = [move.serialize() for move in pokemon.knowableMoves]
+        return {
+            "id": pokemon.id,
+            "name": pokemon.name,
+            "hp": pokemon.hp,
+            "att": pokemon.att,
+            "deff": pokemon.deff,
+            "spatt": pokemon.spatt,
+            "spdeff": pokemon.spdeff,
+            "spe": pokemon.spe,
+            "type1": pokemon.type1,
+            "type2": pokemon.type2,
+            "knowableMoves": serialized_moves,
+        }
+
+    def serialize_instance(self):
         serialized_moves = [move.serialize() for move in self.learntMoves]
         return {
+            "id": self.id,
             "name": self.name,
             "hp": self.hp,
             "att": self.att,
