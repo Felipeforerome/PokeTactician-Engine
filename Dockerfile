@@ -5,7 +5,7 @@
 # https://docs.docker.com/engine/reference/builder/
 
 ARG PYTHON_VERSION=3.12.1
-FROM python:${PYTHON_VERSION}-slim as base
+FROM --platform=linux/amd64 python:${PYTHON_VERSION}-alpine as base
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -13,17 +13,6 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    libffi-dev \
-    python3-dev \
-    git \
-    && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 # Copy the current directory contents into the container at /usr/src/app
 COPY . .
@@ -36,4 +25,4 @@ EXPOSE 8050
 
 
 # Run app.py when the container launches
-CMD ["python", "./dash_app/app.py"]
+CMD ["python3", "./dash_app/app.py"]
