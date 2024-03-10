@@ -64,8 +64,8 @@ class Colony:
             self.H_Atts.append(np.zeros(size))
 
         # Create Population$
-        # TODO Change the 6 to min(6, self.poks) in case incomplete teams are allowed
-        self.Pop = np.ones([self.pop_size, 6, 5], dtype=int) * (-1)
+        # TODO Change to min(6, len(self.poks)) to 6 in case incomplete teams are not allowed
+        self.Pop = np.ones([self.pop_size, min(6, len(self.poks)), 5], dtype=int) * (-1)
 
         # Initial Run of the Meta-Heuristic
         self.ACO()
@@ -83,24 +83,24 @@ class Colony:
             #     selected_pokemon_ids = np.argmax(
             #         rand_pokemon[:, np.newaxis] <= cumulative_probs, axis=1
             #     )
-            #     if (
-            #         len(
-            #             [
-            #                 item
-            #                 for item, count in Counter(selected_pokemon_ids).items()
-            #                 if count > 1
-            #             ]
-            #         )
-            #         < 1
-            #     ):
+            #     if len(set(selected_pokemon_ids)) >= min(len(self.poks), 6):
             #         unique_poks = True
 
             # ant[:, 0] = selected_pokemon_ids
             ######### Vectorized
             team_size = min(len(self.poks), 6)
             ant[:, 0] = np.random.choice(
-                len(self.Prob_Poks), size=team_size, replace=False, p=self.Prob_Poks
+                len(self.Prob_Poks),
+                size=team_size,
+                replace=False,
+                p=self.Prob_Poks,
             )
+            # if replacePok:
+            #     ant[len(self.poks) :, 0] = np.random.choice(
+            #         len(self.Prob_Poks),
+            #         size=6 - team_size,
+            #         p=self.Prob_Poks,
+            #     )
             for pokemon in ant:
                 selected_pokemon_id = pokemon[0]
                 ######### NonVectorized
