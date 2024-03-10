@@ -19,7 +19,7 @@ class PokemonCard:
                     children=[
                         dmc.Center(
                             html.Img(
-                                src=f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{pokemon["id"]}.png",
+                                src=f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{pokemon['id']}.png",
                                 height="50%",
                                 width="50%",
                                 style={"margin": "auto"},
@@ -28,9 +28,22 @@ class PokemonCard:
                         ),
                         dmc.Center(  # Use dmc.Center for center alignment
                             dmc.Text(
-                                pokemon["name"].title(),
+                                pokemon["name"].replace("-", " ").title(),
                                 weight=500,
                             ),
+                        ),
+                        dmc.Center(
+                            dmc.Group(
+                                children=[
+                                    dmc.Image(
+                                        src=f"/assets/{pokType}.png",
+                                        width=30,
+                                        alt=pokType.capitalize(),
+                                    )
+                                    for pokType in [pokemon["type1"], pokemon["type2"]]
+                                    if pokType is not None
+                                ]
+                            )
                         ),
                     ],
                     withBorder=True,
