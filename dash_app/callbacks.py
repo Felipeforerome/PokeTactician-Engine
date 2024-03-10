@@ -1,4 +1,4 @@
-from dash import Input, Output, callback, State, no_update
+from dash import Input, Output, callback, State, no_update, clientside_callback
 import sys
 from components import PokemonTeam
 
@@ -17,6 +17,7 @@ import time
 @callback(
     Output("time-to-calc", "children"),
     Output("team-output", "children"),
+    Output("memory-output", "data"),
     [
         Input("suggest-team-btn", "n_clicks"),
         State("objectives-multi-select", "value"),
@@ -26,7 +27,7 @@ import time
 )
 def update_output(n, objFuncsParam, includedTypes, monoType):
     if n is None:
-        return "", ""
+        return "", "", ""
     else:
         if len(objFuncsParam) > 0:
             try:
@@ -76,8 +77,9 @@ def update_output(n, objFuncsParam, includedTypes, monoType):
                 # mCol.optimize(iters=30, time_limit=None)
                 team = mCol.getSoln()
                 return (
-                    f"Time to compute: {time.time()-start} - Objective Value: {mCol.getObjTeamValue()}",
+                    "",
                     PokemonTeam(team.serialize()).layout(),
+                    [time.time() - start, mCol.getObjTeamValue()],
                 )
             except Exception as e:
                 return (str(e), "")
@@ -91,3 +93,15 @@ def update_output(n, objFuncsParam, includedTypes, monoType):
 )
 def select_value(value):
     return "Select at least 1." if len(value) < 1 else ""
+
+
+clientside_callback(
+    """
+    function(data){
+        console.log(`Time to compute: ${data[0]} - Objective Value: ${data[1]}`);
+        return ''
+    }
+    """,
+    Output("placeholder", "children"),
+    Input("memory-output", "data"),
+)

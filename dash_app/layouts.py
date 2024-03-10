@@ -6,6 +6,8 @@ from dash_iconify import DashIconify
 # Define the layout
 layout = html.Div(
     children=[
+        # Variable share
+        dcc.Store(id="memory-output"),
         dmc.Modal(
             title=dmc.Group(
                 [
@@ -49,12 +51,9 @@ layout = html.Div(
                                     style={"marginRight": "15px", "color": "white"},
                                 ),
                                 html.A(
-                                    "About",
-                                    href="/about",
-                                    style={"marginRight": "15px", "color": "white"},
-                                ),
-                                html.A(
-                                    "Contact", href="/contact", style={"color": "white"}
+                                    "Contact",
+                                    href="mailto:felipe.forerome@gmail.com",
+                                    style={"color": "white"},
                                 ),
                             ],
                             style={"flex": 1, "textAlign": "right"},
@@ -160,12 +159,32 @@ layout = html.Div(
                                 html.Div(id="time-to-calc"),
                                 html.Br(),
                                 html.Div(id="team-output"),
+                                html.Br(),
+                                html.Div(style={"display": "none"}, id="placeholder"),
                             ],
                             type="default",
                         ),
                     ],
                 ),
             ],
+        ),
+        dmc.Footer(
+            height=60,
+            fixed=False,
+            children=[
+                dmc.Center(
+                    children=[
+                        dmc.Text("Made by Felipe Forero Meola"),
+                    ]
+                ),
+                dmc.Center(
+                    children=[
+                        html.Br(),
+                        dmc.Text("Pokémon is © of Nintendo"),
+                    ]
+                ),
+            ],
+            style={"color": "grey"},
         ),
     ]
 )
