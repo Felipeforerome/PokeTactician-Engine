@@ -90,7 +90,7 @@ layout = html.Div(
                             data=[
                                 {"value": 1, "label": "Attack"},
                                 {"value": 2, "label": "Team Coverage"},
-                                {"value": 3, "label": "Self Coverage"},
+                                # {"value": 3, "label": "Self Coverage"},
                             ],
                             style={"marginBottom": 10, "width": "95%"},
                             required=True,

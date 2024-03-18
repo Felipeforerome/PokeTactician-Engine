@@ -62,7 +62,7 @@ def update_output(n, objFuncsParam, includedTypes, monoType):
                 if 1 in objFuncsParam:
                     objectiveFuncs.append((attackObjFun, Q, 0.1))
                 if 2 in objFuncsParam:
-                    objectiveFuncs.append((teamCoverageFun, Q, rho))
+                    objectiveFuncs.append((teamCoverageFun, Q, 0.1))
                 if 3 in objFuncsParam:
                     objectiveFuncs.append((selfCoverageFun, Q, rho))
                 mCol = MOACO(
