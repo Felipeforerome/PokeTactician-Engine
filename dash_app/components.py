@@ -71,7 +71,7 @@ class PokemonCard:
             withBorder=True,
             shadow="sm",
             radius="md",
-            style={"width": "20vw"},
+            className="pokemonCard",
         )
 
 
@@ -80,7 +80,8 @@ class PokemonTeam:
         self.pokemonCards = [
             dmc.Col(
                 PokemonCard(pokemon).layout(),
-                span=4,
+                md=4,
+                span=12,
             )
             for pokemon in pokemonList
         ]
@@ -89,3 +90,69 @@ class PokemonTeam:
         return dmc.Grid(
             children=self.pokemonCards, className="team", justify="space-evenly"
         )
+
+
+def filterComponents(suffix):
+    return [
+        dmc.MultiSelect(
+            label="Select Objectives",
+            placeholder="",
+            id={"type": "objectives-multi-select", "suffix": suffix},
+            value=[1],
+            data=[
+                {"value": 1, "label": "Attack"},
+                {"value": 2, "label": "Team Coverage"},
+                # {"value": 3, "label": "Self Coverage"},
+            ],
+            style={"marginBottom": 10, "width": "95%"},
+            required=True,
+            withAsterisk=False,
+        ),
+        html.Br(),
+        dmc.MultiSelect(
+            label="Select Types to Include",
+            placeholder="Leave empty for all",
+            id={"type": "type-multi-select", "suffix": suffix},
+            value=[],
+            data=[
+                {"value": "normal", "label": "Normal"},
+                {"value": "fire", "label": "Fire"},
+                {"value": "water", "label": "Water"},
+                {"value": "electric", "label": "Electric"},
+                {"value": "grass", "label": "Grass"},
+                {"value": "ice", "label": "Ice"},
+                {"value": "fighting", "label": "Fighting"},
+                {"value": "poison", "label": "Poison"},
+                {"value": "ground", "label": "Ground"},
+                {"value": "flying", "label": "Flying"},
+                {"value": "psychic", "label": "Psychic"},
+                {"value": "bug", "label": "Bug"},
+                {"value": "rock", "label": "Rock"},
+                {"value": "ghost", "label": "Ghost"},
+                {"value": "dragon", "label": "Dragon"},
+                {"value": "dark", "label": "Dark"},
+                {"value": "steel", "label": "Steel"},
+                {"value": "fairy", "label": "Fairy"},
+            ],
+            style={"marginBottom": 10, "width": "95%"},
+        ),
+        html.Br(),
+        dmc.Switch(
+            label="Only Mono-types?",
+            offLabel="No",
+            onLabel="Yes",
+            checked=False,
+            id={"type": "mono-type", "suffix": suffix},
+        ),
+        html.Br(),
+        dmc.Button(
+            "Suggest Team",
+            leftIcon=DashIconify(icon="ic:twotone-catching-pokemon"),
+            color="indigo",
+            id={"type": "suggest-team-btn", "suffix": suffix},
+        ),
+    ]
+
+
+navbarFilterComponents = filterComponents("navbar")
+drawerFilterComponents = filterComponents("drawer")

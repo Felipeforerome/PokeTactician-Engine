@@ -1,0 +1,31 @@
+/* For larger screens */
+@media screen and (min-width: 768px) {
+    #filter-drawer {
+        display: none;
+    }
+
+    #navbar-container {
+        display: block;
+        /* Or however you want it displayed */
+    }
+
+    .pokemonCard {
+        width: 20vw;
+    }
+
+    .filterBurger {
+        display: none;
+    }
+}
+
+/* For smaller screens */
+@media screen and (max-width: 767px) {
+    #filter-drawer {
+        display: block;
+        /* Or however you want it displayed */
+    }
+
+    #navbar-container {
+        display: none;
+    }
+}

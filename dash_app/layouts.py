@@ -1,6 +1,6 @@
 from dash import html, dcc
 import dash_mantine_components as dmc
-
+from components import drawerFilterComponents, navbarFilterComponents
 from dash_iconify import DashIconify
 
 # Define the layout
@@ -8,6 +8,10 @@ layout = html.Div(
     children=[
         # Variable share
         dcc.Store(id="memory-output"),
+        dcc.Store(id="screen-width-store"),
+        # Hidden div to listen
+        html.Div(id="resize-listener", style={"display": "none"}),
+        # Start actual layout
         dmc.Modal(
             title=dmc.Group(
                 [
@@ -32,6 +36,12 @@ layout = html.Div(
             children=[
                 html.Div(
                     children=[
+                        dmc.Burger(
+                            color="white",
+                            id="filter-button",
+                            opened=False,
+                            className="filterBurger",
+                        ),
                         # Title or logo on the left
                         html.H1(
                             "PokéTactician",
@@ -64,7 +74,7 @@ layout = html.Div(
                         "alignItems": "center",
                         "justifyContent": "space-between",
                     },
-                )
+                ),
             ],
             style={
                 "backgroundColor": "#3E65AB",
@@ -79,67 +89,18 @@ layout = html.Div(
                 # NavBar for filters
                 dmc.Navbar(
                     p="md",
+                    id="navbar-container",
                     width={"base": 300},
                     fixed=False,
-                    children=[
-                        dmc.MultiSelect(
-                            label="Select Objectives",
-                            placeholder="",
-                            id="objectives-multi-select",
-                            value=[1],
-                            data=[
-                                {"value": 1, "label": "Attack"},
-                                {"value": 2, "label": "Team Coverage"},
-                                # {"value": 3, "label": "Self Coverage"},
-                            ],
-                            style={"marginBottom": 10, "width": "95%"},
-                            required=True,
-                            withAsterisk=False,
-                        ),
-                        html.Br(),
-                        dmc.MultiSelect(
-                            label="Select Types to Include",
-                            placeholder="Leave empty for all",
-                            id="type-multi-select",
-                            value=[],
-                            data=[
-                                {"value": "normal", "label": "Normal"},
-                                {"value": "fire", "label": "Fire"},
-                                {"value": "water", "label": "Water"},
-                                {"value": "electric", "label": "Electric"},
-                                {"value": "grass", "label": "Grass"},
-                                {"value": "ice", "label": "Ice"},
-                                {"value": "fighting", "label": "Fighting"},
-                                {"value": "poison", "label": "Poison"},
-                                {"value": "ground", "label": "Ground"},
-                                {"value": "flying", "label": "Flying"},
-                                {"value": "psychic", "label": "Psychic"},
-                                {"value": "bug", "label": "Bug"},
-                                {"value": "rock", "label": "Rock"},
-                                {"value": "ghost", "label": "Ghost"},
-                                {"value": "dragon", "label": "Dragon"},
-                                {"value": "dark", "label": "Dark"},
-                                {"value": "steel", "label": "Steel"},
-                                {"value": "fairy", "label": "Fairy"},
-                            ],
-                            style={"marginBottom": 10, "width": "95%"},
-                        ),
-                        html.Br(),
-                        dmc.Switch(
-                            label="Only Mono-types?",
-                            offLabel="No",
-                            onLabel="Yes",
-                            checked=False,
-                            id="mono-type",
-                        ),
-                        html.Br(),
-                        dmc.Button(
-                            "Suggest Team",
-                            leftIcon=DashIconify(icon="ic:twotone-catching-pokemon"),
-                            color="indigo",
-                            id="suggest-team-btn",
-                        ),
-                    ],
+                    children=navbarFilterComponents,
+                ),
+                dmc.Drawer(
+                    title="",
+                    id="filter-drawer",
+                    padding="md",
+                    zIndex=10000,
+                    opened=False,
+                    children=drawerFilterComponents,
                 ),
                 # Container for results
                 dmc.Container(
