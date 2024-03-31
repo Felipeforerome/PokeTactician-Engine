@@ -11,6 +11,7 @@ from dash import (
 import sys
 from components import PokemonTeam
 import logging
+from filters import filterTypes, filterGenerations
 
 sys.path.append(sys.path[0] + "/..")
 from poketactician.MOACO import MOACO
@@ -34,25 +35,28 @@ import time
         Input({"type": "suggest-team-btn", "suffix": ALL}, "n_clicks"),
         State({"type": "objectives-multi-select", "suffix": ALL}, "value"),
         State({"type": "type-multi-select", "suffix": ALL}, "value"),
+        State({"type": "gen-multi-select", "suffix": ALL}, "value"),
         State({"type": "mono-type", "suffix": ALL}, "checked"),
         State("screen-width-store", "data"),
     ],
     prevent_initial_call=True,
 )
-def update_output(n, objFuncsParam, includedTypes, monoType, screenWidth):
+def update_output(n, objFuncsParam, includedTypes, gens, monoType, screenWidth):
     if screenWidth and screenWidth > 768:
-        n, objFuncsParam, includedTypes, monoType, screenWidth = (
+        n, objFuncsParam, includedTypes, gens, monoType, screenWidth = (
             n[0],
             objFuncsParam[0],
             includedTypes[0],
+            gens[0],
             monoType[0],
             screenWidth,
         )
     elif screenWidth and screenWidth <= 768:
-        n, objFuncsParam, includedTypes, monoType, screenWidth = (
+        n, objFuncsParam, includedTypes, gens, monoType, screenWidth = (
             n[1],
             objFuncsParam[1],
             includedTypes[1],
+            gens[1],
             monoType[1],
             screenWidth,
         )
@@ -63,27 +67,12 @@ def update_output(n, objFuncsParam, includedTypes, monoType, screenWidth):
     else:
         if len(objFuncsParam) > 0:
             try:
-                if len(includedTypes) > 0:
-                    pokList = (
-                        [
-                            pok
-                            for pok in pokPreFilter
-                            if (pok.type1 in includedTypes and pok.type2 is None)
-                        ]
-                        if monoType
-                        else [
-                            pok
-                            for pok in pokPreFilter
-                            if (
-                                pok.type1 in includedTypes or pok.type2 in includedTypes
-                            )
-                        ]
-                    )
-                else:
-                    pokList = (
-                        [pok for pok in pokPreFilter if (pok.type2 is None)]
-                        if monoType
-                        else pokPreFilter
+                pokList = filterTypes(pokPreFilter, includedTypes, monoType)
+                pokList = filterGenerations(pokList, gens)
+
+                if len(pokList) == 0:
+                    raise Exception(
+                        "No pokemon available with current filter selection"
                     )
                 start = time.time()
                 objectiveFuncs = []

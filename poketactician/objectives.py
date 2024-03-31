@@ -97,7 +97,8 @@ def team_coverage_fun(team, pokList):
 
     # # Compute total score (T_S)
     # T_S = alpha * (C_W / W if W else 0) + beta * (R / U_R if U_R else 0)
-    T_S = CW(team_types) * len(set(flatten_comprehension(team_types)))
+    # Added the +1 at the end to avoid the result to be zero because to colony.updatePhCon needs a non-zero fitness value
+    T_S = CW(team_types) * len(set(flatten_comprehension(team_types))) + 1
 
     return T_S
 
