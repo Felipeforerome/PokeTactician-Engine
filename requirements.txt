@@ -10,7 +10,7 @@ dash-iconify==0.1.2
 dash-mantine-components==0.12.1
 dash-table==5.0.0
 Flask==3.0.2
-idna==3.6
+idna==3.7
 importlib_metadata==7.0.2
 itsdangerous==2.1.2
 Jinja2==3.1.3
