@@ -41,7 +41,6 @@ def filterGenerations(pokPreFilter, gens):
 
 # Function to filter legendaries and mythicals
 def filterLegendaries(pokPreFilter, legendaries):
-    print(legendaries)
     if legendaries:
         pokList = pokPreFilter
     else:
