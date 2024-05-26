@@ -1,8 +1,9 @@
-from .cooperationStrats import selectionByDominance
-from .models.Pokemon import Pokemon
-from .models.Move import Move
 import json
 import pickle
+
+from .cooperationStrats import selectionByDominance
+from .models.Move import Move
+from .models.Pokemon import Pokemon
 
 # from models import Pokemon
 
@@ -74,38 +75,18 @@ def deserialize_move(data):
     )
 
 
-# Function to deserialize a Pokemon instance
-def deserialize_pokemon(data):
-    moves = [deserialize_move(move_data) for move_data in data["knowableMoves"]]
-    pokemon = Pokemon(
-        data["id"],
-        data["name"],
-        data["hp"],
-        data["att"],
-        data["deff"],
-        data["spatt"],
-        data["spdeff"],
-        data["spe"],
-        data["type1"],
-        data["type2"],
-    )
-    for move in moves:
-        pokemon.addKnowableMove(move)
-    return pokemon
-
-
 # Function to load and recreate the list of Pokemon from the JSON file
 def load_pokemon_from_json(file_name):
     with open(file_name, "r") as json_file:
         data = json.load(json_file)
-        return [deserialize_pokemon(pokemon_data) for pokemon_data in data]
+        return [Pokemon.from_json(pokemon_data) for pokemon_data in data]
 
 
 # Function to load and recreate the list of Moves from the JSON file
 def load_moves_from_json(file_name):
     with open(file_name, "r") as json_file:
         data = json.load(json_file)
-        return {key: deserialize_move(value) for key, value in data.items()}
+        return {key: Move.from_json(value) for key, value in data.items()}
 
 
 pokPreFilter = load_pokemon_from_json("data/pokemon_data.json")

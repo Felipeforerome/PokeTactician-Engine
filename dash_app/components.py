@@ -1,6 +1,5 @@
-from dash import html, dcc
 import dash_mantine_components as dmc
-
+from dash import dcc, html
 from dash_iconify import DashIconify
 
 
@@ -162,6 +161,14 @@ def filterComponents(suffix):
             onLabel="Yes",
             checked=False,
             id={"type": "mono-type", "suffix": suffix},
+        ),
+        html.Br(),
+        dmc.Switch(
+            label="With Legendaries?",
+            offLabel="No",
+            onLabel="Yes",
+            checked=False,
+            id={"type": "legendaries", "suffix": suffix},
         ),
         html.Br(),
         dmc.Button(

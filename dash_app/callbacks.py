@@ -1,28 +1,36 @@
+import logging
+import sys
+
+from components import PokemonTeam
 from dash import (
+    ALL,
+    MATCH,
     Input,
     Output,
-    callback,
     State,
-    no_update,
+    callback,
     clientside_callback,
-    MATCH,
-    ALL,
+    no_update,
 )
-import sys
-from components import PokemonTeam
-import logging
-from filters import filterTypes, filterGenerations
+from filters import (
+    filterGenerations,
+    filterLegendaries,
+    filterTypes,
+    removeBattleOnly,
+    removeMegas,
+)
 
 sys.path.append(sys.path[0] + "/..")
+import time
+
+from poketactician.Colony import Colony
+from poketactician.glob_var import Q, alpha, beta, pokPreFilter, rho
 from poketactician.MOACO import MOACO
-from poketactician.Colony import Colony, Colony
-from poketactician.glob_var import pokPreFilter, alpha, beta, Q, rho
 from poketactician.objectives import (
     attack_obj_fun,
-    team_coverage_fun,
     self_coverage_fun,
+    team_coverage_fun,
 )
-import time
 
 
 @callback(
@@ -37,27 +45,32 @@ import time
         State({"type": "type-multi-select", "suffix": ALL}, "value"),
         State({"type": "gen-multi-select", "suffix": ALL}, "value"),
         State({"type": "mono-type", "suffix": ALL}, "checked"),
+        State({"type": "legendaries", "suffix": ALL}, "checked"),
         State("screen-width-store", "data"),
     ],
     prevent_initial_call=True,
 )
-def update_output(n, objFuncsParam, includedTypes, gens, monoType, screenWidth):
+def update_output(
+    n, objFuncsParam, includedTypes, gens, monoType, legendaries, screenWidth
+):
     if screenWidth and screenWidth > 768:
-        n, objFuncsParam, includedTypes, gens, monoType, screenWidth = (
+        n, objFuncsParam, includedTypes, gens, monoType, legendaries, screenWidth = (
             n[0],
             objFuncsParam[0],
             includedTypes[0],
             gens[0],
             monoType[0],
+            legendaries[0],
             screenWidth,
         )
     elif screenWidth and screenWidth <= 768:
-        n, objFuncsParam, includedTypes, gens, monoType, screenWidth = (
+        n, objFuncsParam, includedTypes, gens, monoType, legendaries, screenWidth = (
             n[1],
             objFuncsParam[1],
             includedTypes[1],
             gens[1],
             monoType[1],
+            legendaries[1],
             screenWidth,
         )
     else:
@@ -67,8 +80,11 @@ def update_output(n, objFuncsParam, includedTypes, gens, monoType, screenWidth):
     else:
         if len(objFuncsParam) > 0:
             try:
-                pokList = filterTypes(pokPreFilter, includedTypes, monoType)
+                pokList = removeMegas(pokPreFilter)
+                pokList = removeBattleOnly(pokList)
+                pokList = filterTypes(pokList, includedTypes, monoType)
                 pokList = filterGenerations(pokList, gens)
+                pokList = filterLegendaries(pokList, legendaries)
 
                 if len(pokList) == 0:
                     raise Exception(

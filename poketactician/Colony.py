@@ -1,8 +1,9 @@
-import numpy as np
 import random
-from math import ceil
 from collections import Counter
-import time
+from math import ceil
+
+import numpy as np
+from numpy import array
 
 
 class Colony:

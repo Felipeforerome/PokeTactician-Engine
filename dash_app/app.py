@@ -1,8 +1,7 @@
-from dash import Dash
 import dash_bootstrap_components as dbc
-from layouts import layout
-import callbacks  # This imports the callbacks to register them with the app
+from dash import Dash
 from decouple import config
+from layouts import layout
 
 # Initialize the Dash app
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
