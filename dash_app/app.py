@@ -1,3 +1,4 @@
+import callbacks  # This imports the callbacks to register them with the app
 import dash_bootstrap_components as dbc
 from dash import Dash
 from decouple import config
