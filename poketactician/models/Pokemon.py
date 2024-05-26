@@ -2,7 +2,43 @@ from .Move import Move
 
 
 class Pokemon:
-    def __init__(self, id, name, hp, att, deff, spatt, spdeff, spe, type1, type2):
+    def __init__(
+        self,
+        id,
+        name,
+        hp,
+        att,
+        deff,
+        spatt,
+        spdeff,
+        spe,
+        type1,
+        type2,
+        mythical,
+        legendary,
+        battleOnly,
+        mega,
+        games=None,
+    ):
+        """
+        Represents a Pokemon with its attributes and moves.
+
+        :param id: The ID of the Pokemon.
+        :param name: The name of the Pokemon.
+        :param hp: The HP (Hit Points) of the Pokemon.
+        :param att: The Attack stat of the Pokemon.
+        :param deff: The Defense stat of the Pokemon.
+        :param spatt: The Special Attack stat of the Pokemon.
+        :param spdeff: The Special Defense stat of the Pokemon.
+        :param spe: The Speed stat of the Pokemon.
+        :param type1: The primary type of the Pokemon.
+        :param type2: The secondary type of the Pokemon.
+        :param mythical: Whether the Pokemon is mythical or not.
+        :param legendary: Whether the Pokemon is legendary or not.
+        :param battleOnly: Whether the Pokemon is only available in battles or not.
+        :param mega: Whether the Pokemon is a mega evolution or not.
+        :param games: The games in which the Pokemon appears (optional).
+        """
         self.id = id
         self.name = name
         self.hp = hp
@@ -11,10 +47,15 @@ class Pokemon:
         self.spatt = spatt
         self.spdeff = spdeff
         self.spe = spe
-        self.knowableMoves = []
-        self.learntMoves = []
         self.type1 = type1
         self.type2 = type2
+        self.knowableMoves = []
+        self.learntMoves = []
+        self.mythical = mythical
+        self.legendary = legendary
+        self.battleOnly = battleOnly  # Assign the battleOnly attribute
+        self.mega = mega  # Assign the battleOnly attribute
+        self.games = games
 
     def addKnowableMove(self, move):
         """
@@ -61,6 +102,12 @@ class Pokemon:
 
     @staticmethod
     def from_json(data):
+        """
+        Creates a Pokemon instance from JSON data.
+
+        :param data: The JSON data representing the Pokemon.
+        :return: The created Pokemon instance.
+        """
         pokemon = Pokemon(
             data["id"],
             data["name"],
@@ -72,6 +119,11 @@ class Pokemon:
             data["spe"],
             data["type1"],
             data["type2"],
+            data["mythical"],
+            data["legendary"],
+            data["battleOnly"],  # Include battleOnly attribute
+            data["mega"],  # Include mega attribute
+            data["games"],
         )
         moves = [Move.from_json(move_data) for move_data in data["knowableMoves"]]
 
@@ -80,7 +132,29 @@ class Pokemon:
         return pokemon
 
     def serialize(pokemon):
+        """
+        Serializes the Pokemon instance into a dictionary.
+
+        :param pokemon: The Pokemon instance to serialize.
+        :return: The serialized dictionary.
+        """
         serialized_moves = [move.serialize() for move in pokemon.knowableMoves]
+        # Prevent empty move list
+        if serialized_moves.__len__() == 0:
+            serialized_moves.append(
+                Move.from_json(
+                    {
+                        "id": "0",
+                        "name": "no-move",
+                        "type": "Normal",
+                        "damageClass": "physical",
+                        "power": 1,
+                        "accuracy": 0,
+                        "pp": 0,
+                        "priority": 0,
+                    }
+                ).serialize()
+            )
         return {
             "id": pokemon.id,
             "name": pokemon.name,
@@ -92,10 +166,20 @@ class Pokemon:
             "spe": pokemon.spe,
             "type1": pokemon.type1,
             "type2": pokemon.type2,
+            "mythical": pokemon.mythical,
+            "legendary": pokemon.legendary,
+            "battleOnly": pokemon.battleOnly,  # Include battleOnly attribute
+            "mega": pokemon.mega,  # Include battleOnly attribute
             "knowableMoves": serialized_moves,
+            "games": pokemon.games,  # Include games in serialized output
         }
 
     def serialize_instance(self):
+        """
+        Serializes the Pokemon instance into a dictionary.
+
+        :return: The serialized dictionary.
+        """
         serialized_moves = [move.serialize() for move in self.learntMoves]
         return {
             "id": self.id,
@@ -108,15 +192,26 @@ class Pokemon:
             "spe": self.spe,
             "type1": self.type1,
             "type2": self.type2,
+            "mythical": self.mythical,
+            "legendary": self.legendary,
+            "battleOnly": self.battleOnly,  # Include battleOnly attribute
+            "mega": self.mega,  # Include battleOnly attribute
             "moves": serialized_moves,
+            "games": self.games,
         }
 
     def teachMove(self, int):
+        """
+        Adds a knowable move to the learnt moves list.
+
+        :param int: The index of the knowable move to teach.
+        """
         self.learntMoves += [self.knowableMoves[int]]
 
     def overallStats(self):
         """
-        Calculates the sum of stats
-        :return: Sum of Stats
+        Calculates the sum of stats.
+
+        :return: The sum of stats.
         """
         return self.hp + self.att + self.deff + self.spatt + self.spdeff + self.spe
