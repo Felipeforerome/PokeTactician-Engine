@@ -1,0 +1,122 @@
+{
+    "0":{
+        "Game":"Red"
+    },
+    "1":{
+        "Game":"Green"
+    },
+    "2":{
+        "Game":"Blue"
+    },
+    "3":{
+        "Game":"Yellow"
+    },
+    "4":{
+        "Game":"Gold"
+    },
+    "5":{
+        "Game":"Silver"
+    },
+    "6":{
+        "Game":"Crystal"
+    },
+    "7":{
+        "Game":"Ruby"
+    },
+    "8":{
+        "Game":"Sapphire"
+    },
+    "9":{
+        "Game":"FireRed"
+    },
+    "10":{
+        "Game":"LeafGreen"
+    },
+    "11":{
+        "Game":"Emerald"
+    },
+    "12":{
+        "Game":"Colosseum"
+    },
+    "13":{
+        "Game":"XD"
+    },
+    "14":{
+        "Game":"Diamond"
+    },
+    "15":{
+        "Game":"Pearl"
+    },
+    "16":{
+        "Game":"Platinum"
+    },
+    "17":{
+        "Game":"HeartGold"
+    },
+    "18":{
+        "Game":"SoulSilver"
+    },
+    "19":{
+        "Game":"Black"
+    },
+    "20":{
+        "Game":"White"
+    },
+    "21":{
+        "Game":"Black 2"
+    },
+    "22":{
+        "Game":"White 2"
+    },
+    "23":{
+        "Game":"X"
+    },
+    "24":{
+        "Game":"Y"
+    },
+    "25":{
+        "Game":"Omega Ruby"
+    },
+    "26":{
+        "Game":"Alpha Sapphire"
+    },
+    "27":{
+        "Game":"Sun"
+    },
+    "28":{
+        "Game":"Moon"
+    },
+    "29":{
+        "Game":"Ultra Sun"
+    },
+    "30":{
+        "Game":"Ultra Moon"
+    },
+    "31":{
+        "Game":"Let's Go, Pikachu!"
+    },
+    "32":{
+        "Game":"Let's Go, Eevee!"
+    },
+    "33":{
+        "Game":"Sword"
+    },
+    "34":{
+        "Game":"Shield"
+    },
+    "35":{
+        "Game":"Brilliant Diamond"
+    },
+    "36":{
+        "Game":"Shining Pearl"
+    },
+    "37":{
+        "Game":"Legends: Arceus"
+    },
+    "38":{
+        "Game":"Scarlet"
+    },
+    "39":{
+        "Game":"Violet"
+    }
+}
