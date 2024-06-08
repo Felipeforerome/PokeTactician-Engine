@@ -12,12 +12,49 @@ import requests
 
 sys.path.append(sys.path[0] + "/..")
 import json
-import pickle
 import re
 import time
 
+import pandas as pd
+from fuzzywuzzy import fuzz
+
 from poketactician.models.Move import Move
 from poketactician.models.Pokemon import Pokemon
+
+
+def get_game_availability(pokemon_name, pokemon_id):
+    """
+    Get the game availability of a pokemon.
+
+    Args:
+        pokemon_name (str): The name of the pokemon.
+        pokemon_id (int): The id of the pokemon.
+
+    Returns:
+        list: The list of games the pokemon is available in.
+    """
+    pd.options.mode.chained_assignment = None
+    game_availability = pd.read_json("data/postproc_game_av.json", orient="index")
+    # pokemon_name = pokemon_name.replace(" galar", "").replace(" alola", "").replace(" hisui", "").replace(" paldea", "")
+    pok_name = re.sub("[^A-Za-z0-9]", "", pokemon_name.lower())
+    try:
+        poke_rows = game_availability[game_availability["#"] == pokemon_id]
+        if poke_rows.shape[0] == 1:
+            return poke_rows["Values"].tolist()[0]
+        else:
+            poke_rows = poke_rows if poke_rows.shape[0] > 1 else game_availability
+            poke_rows["similarity"] = poke_rows.index.map(
+                # lambda name: SequenceMatcher(None, pok_name, name).ratio()¨
+                lambda name: fuzz.token_sort_ratio(pok_name, name)
+                * fuzz.token_set_ratio(pok_name, name)
+                / 10000
+            )
+            most_similar_row = poke_rows.loc[poke_rows["similarity"].idxmax()]
+            print(f"{pokemon_name} : {most_similar_row.name}")
+            return most_similar_row["Values"]
+
+    except KeyError:
+        raise KeyError(f"Pokemon {pokemon_name} not found in game availability data.")
 
 
 def build_data(recalculateMoves):
@@ -92,6 +129,7 @@ def build_data(recalculateMoves):
     lastExisted = True
     normalForms = True
     print("Starting Pokemons")
+    games_dict = json.load(open("data/games.json", "r"))
     while lastExisted:
         pokemonpreJSON = requests.get(
             "http://localhost:8080/api/rest/pokemon/" + str(i),
@@ -101,6 +139,9 @@ def build_data(recalculateMoves):
         emptyListResp = len(pokemonJSON) == 0
         if not emptyListResp:
             pokemonJSON = pokemonJSON[0]
+            game_list = get_game_availability(
+                pokemonJSON["name"].replace("-", ""), pokemonJSON["id"]
+            )
             tempPoke = Pokemon(
                 pokemonJSON["id"],
                 pokemonJSON["name"],
@@ -120,6 +161,10 @@ def build_data(recalculateMoves):
                 bool(pokemonJSON["legend"]["is_legendary"]),
                 bool(pokemonJSON["formAbout"][0]["is_battle_only"]),
                 bool(pokemonJSON["formAbout"][0]["is_mega"]),
+                {
+                    games_dict[str(i)]["Game"]: game_list[i]
+                    for i in range(len(game_list))
+                },
             )
             availableMoves = pokemonJSON["moves"]
             for availableMove in availableMoves:
@@ -146,4 +191,4 @@ def build_data(recalculateMoves):
     print("Elapsed Time: {:.2f} seconds".format(elapsed_time))
 
 
-build_data(True)
+build_data(False)

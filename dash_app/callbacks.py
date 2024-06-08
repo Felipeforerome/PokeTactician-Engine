@@ -13,6 +13,7 @@ from dash import (
     no_update,
 )
 from filters import (
+    filterGames,
     filterGenerations,
     filterLegendaries,
     filterTypes,
@@ -44,6 +45,7 @@ from poketactician.objectives import (
         State({"type": "objectives-multi-select", "suffix": ALL}, "value"),
         State({"type": "type-multi-select", "suffix": ALL}, "value"),
         State({"type": "gen-multi-select", "suffix": ALL}, "value"),
+        State({"type": "game-multi-select", "suffix": ALL}, "value"),
         State({"type": "mono-type", "suffix": ALL}, "checked"),
         State({"type": "legendaries", "suffix": ALL}, "checked"),
         State("screen-width-store", "data"),
@@ -51,24 +53,44 @@ from poketactician.objectives import (
     prevent_initial_call=True,
 )
 def update_output(
-    n, objFuncsParam, includedTypes, gens, monoType, legendaries, screenWidth
+    n, objFuncsParam, includedTypes, gens, games, monoType, legendaries, screenWidth
 ):
     if screenWidth and screenWidth > 768:
-        n, objFuncsParam, includedTypes, gens, monoType, legendaries, screenWidth = (
+        (
+            n,
+            objFuncsParam,
+            includedTypes,
+            gens,
+            games,
+            monoType,
+            legendaries,
+            screenWidth,
+        ) = (
             n[0],
             objFuncsParam[0],
             includedTypes[0],
             gens[0],
+            games[0],
             monoType[0],
             legendaries[0],
             screenWidth,
         )
     elif screenWidth and screenWidth <= 768:
-        n, objFuncsParam, includedTypes, gens, monoType, legendaries, screenWidth = (
+        (
+            n,
+            objFuncsParam,
+            includedTypes,
+            gens,
+            games,
+            monoType,
+            legendaries,
+            screenWidth,
+        ) = (
             n[1],
             objFuncsParam[1],
             includedTypes[1],
             gens[1],
+            games[1],
             monoType[1],
             legendaries[1],
             screenWidth,
@@ -85,6 +107,7 @@ def update_output(
                 pokList = filterTypes(pokList, includedTypes, monoType)
                 pokList = filterGenerations(pokList, gens)
                 pokList = filterLegendaries(pokList, legendaries)
+                pokList = filterGames(pokList, games)
 
                 if len(pokList) == 0:
                     raise Exception(

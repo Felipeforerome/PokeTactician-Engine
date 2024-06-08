@@ -1,3 +1,5 @@
+import json
+
 import dash_mantine_components as dmc
 from dash import dcc, html
 from dash_iconify import DashIconify
@@ -92,6 +94,7 @@ class PokemonTeam:
 
 
 def filterComponents(suffix):
+    games_dict = json.load(open("data/games.json", "r"))
     return [
         dmc.MultiSelect(
             label="Select Objectives",
@@ -151,6 +154,21 @@ def filterComponents(suffix):
                 {"value": "dark", "label": "Dark"},
                 {"value": "steel", "label": "Steel"},
                 {"value": "fairy", "label": "Fairy"},
+            ],
+            style={"marginBottom": 10, "width": "95%"},
+        ),
+        html.Br(),
+        dmc.MultiSelect(
+            label="Select Games to Include",
+            placeholder="Leave empty for all",
+            id={"type": "game-multi-select", "suffix": suffix},
+            value=[],
+            data=[
+                {
+                    "value": games_dict[str(i)]["Game"],
+                    "label": games_dict[str(i)]["Game"],
+                }
+                for i in range(len(games_dict))
             ],
             style={"marginBottom": 10, "width": "95%"},
         ),

@@ -56,3 +56,14 @@ def removeMegas(pokPreFilter):
 # Function to remove battle only forms
 def removeBattleOnly(pokPreFilter):
     return [pok for pok in pokPreFilter if not pok.battleOnly]
+
+
+def filterGames(pokPreFilter, games):
+    if len(games) < 1:
+        pokList = pokPreFilter
+    else:
+        pokList = [
+            pok for pok in pokPreFilter if all(pok.games[game] == 1 for game in games)
+        ]
+
+    return pokList
