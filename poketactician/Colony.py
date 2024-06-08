@@ -7,13 +7,16 @@ from numpy import array
 
 
 class Colony:
-    def __init__(self, pop_sizeParam, objFuncParam, poks, alpha, beta, Q, rho):
+    def __init__(
+        self, pop_sizeParam, objFuncParam, poks, preSelected, alpha, beta, Q, rho
+    ):
         self.pop_size = pop_sizeParam
         # objFunParam should be a lambda function
         self.objFunc = objFuncParam
 
         # Filter Pokemon (now not filtering)
         self.poks = poks
+        self.preSelected = preSelected
 
         # Set Meta Params
         self.alpha = alpha
@@ -90,9 +93,11 @@ class Colony:
             # ant[:, 0] = selected_pokemon_ids
             ######### Vectorized
             team_size = min(len(self.poks), 6)
-            ant[:, 0] = np.random.choice(
+            preSelected_size = len(self.preSelected)
+            ant[0:preSelected_size, 0] = self.preSelected
+            ant[preSelected_size:, 0] = np.random.choice(
                 len(self.Prob_Poks),
-                size=team_size,
+                size=team_size - preSelected_size,
                 replace=False,
                 p=self.Prob_Poks,
             )
