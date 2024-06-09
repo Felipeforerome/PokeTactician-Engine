@@ -191,6 +191,17 @@ def open(opened):
     return opened
 
 
+@callback(
+    Output({"type": "preSelect-image", "suffix": MATCH}, "src"),
+    Input({"type": "preSelect-selector", "suffix": MATCH}, "value"),
+)
+def preSelected_images(value):
+    print(value)
+    if value:
+        return f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{value}.png"
+    return f"/assets/qmark.png"
+
+
 clientside_callback(
     """
     function(data){

@@ -106,11 +106,11 @@ class BlankPokemonCard:
                     children=[
                         dmc.Center(
                             html.Img(
+                                id={"type": "preSelect-image", "suffix": self.id},
                                 src=f"/assets/qmark.png",
                                 height="50%",
                                 width="50%",
                                 style={"margin": "auto"},
-                                id="img-placeholder",
                             )
                         ),
                         dmc.Center(  # Use dmc.Center for center alignment

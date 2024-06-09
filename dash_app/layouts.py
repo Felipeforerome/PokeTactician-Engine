@@ -134,7 +134,12 @@ layout = html.Div(
                                 html.Br(),
                                 html.Div(style={"display": "none"}, id="placeholder"),
                             ],
-                            type="default",
+                            overlay_style={
+                                "visibility": "visible",
+                                "opacity": 0.25,
+                                "backgroundColor": "white",
+                            },
+                            type="dot",
                         ),
                     ],
                 ),
