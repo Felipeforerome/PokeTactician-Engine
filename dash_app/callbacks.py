@@ -1,7 +1,6 @@
-import logging
 import sys
 
-from components import PokemonTeam
+from components import BlankPokemonTeam, PokemonTeam
 from dash import (
     ALL,
     MATCH,
@@ -19,12 +18,12 @@ from filters import (
     filterTypes,
     removeBattleOnly,
     removeMegas,
+    splitPreSelected,
 )
 
 sys.path.append(sys.path[0] + "/..")
 import time
 
-from poketactician.Colony import Colony
 from poketactician.glob_var import Q, alpha, beta, pokPreFilter, rho
 from poketactician.MOACO import MOACO
 from poketactician.objectives import (
@@ -36,7 +35,8 @@ from poketactician.objectives import (
 
 @callback(
     Output("time-to-calc", "children"),
-    Output("team-output", "children"),
+    Output("team-output", "children", allow_duplicate=True),
+    Output("blank-team-output", "hidden"),
     Output("memory-output", "data"),
     Output("filter-drawer", "opened", allow_duplicate=True),
     Output("filter-button", "opened", allow_duplicate=True),
@@ -104,10 +104,15 @@ def update_output(
             try:
                 pokList = removeMegas(pokPreFilter)
                 pokList = removeBattleOnly(pokList)
+                preSelected, pokList = splitPreSelected(
+                    pokList,
+                    [],
+                )
                 pokList = filterTypes(pokList, includedTypes, monoType)
                 pokList = filterGenerations(pokList, gens)
                 pokList = filterLegendaries(pokList, legendaries)
                 pokList = filterGames(pokList, games)
+                pokList = preSelected + pokList
 
                 if len(pokList) == 0:
                     raise Exception(
@@ -125,10 +130,10 @@ def update_output(
                 if 3 in objFuncsParam:
                     objectiveFuncs.append((selfCoverageFun, Q, rho))
                 mCol = MOACO(
-                    Colony,
                     400,
                     objectiveFuncs,
                     pokList,
+                    list(range(len(preSelected))),
                     alpha,
                     beta,
                 )
@@ -138,14 +143,24 @@ def update_output(
                 return (
                     "",
                     PokemonTeam(team.serialize()).layout(),
+                    True,
                     [time.time() - start, mCol.getObjTeamValue()],
                     False,
                     False,
                 )
             except Exception as e:
-                return (str(e), "", "", "", False)
+                return (str(e), "", True, "", "", False)
         else:
-            return (no_update, no_update, no_update, no_update, no_update)
+            return (no_update, no_update, no_update, no_update, no_update, no_update)
+
+
+# Callback to insert the BlankPokemonTeam dynamically upon page load
+@callback(Output("blank-team-output", "children"), Input("url", "pathname"))
+def display_page(_):
+    pokemon_list = [
+        {"value": pok.id, "label": pok.name.title()} for pok in pokPreFilter
+    ]
+    return BlankPokemonTeam(pokemon_list).layout()
 
 
 @callback(

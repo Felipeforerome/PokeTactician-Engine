@@ -93,6 +93,89 @@ class PokemonTeam:
         )
 
 
+class BlankPokemonCard:
+    def __init__(self, pokemonList: list, id: str):
+        self.pokemonList = pokemonList
+        self.id = id
+
+    def layout(self):
+        return dmc.Card(
+            id=f"{self.id}-div",
+            children=[
+                dmc.CardSection(
+                    children=[
+                        dmc.Center(
+                            html.Img(
+                                src=f"/assets/qmark.png",
+                                height="50%",
+                                width="50%",
+                                style={"margin": "auto"},
+                                id="img-placeholder",
+                            )
+                        ),
+                        dmc.Center(  # Use dmc.Center for center alignment
+                            dmc.Select(
+                                id=f"{self.id}-select",
+                                placeholder="Select a Pokemon",
+                                data=self.pokemonList,
+                                searchable=True,
+                                clearable=True,
+                                dropdownPosition="bottom",
+                                limit=3,
+                                w=200,
+                            ),
+                        ),
+                    ],
+                    withBorder=True,
+                    inheritPadding=True,
+                    py="xs",
+                ),
+                dmc.CardSection(
+                    children=[
+                        dmc.SimpleGrid(
+                            cols=2,
+                            children=[
+                                dmc.Center(
+                                    html.P(
+                                        "------",
+                                        className="card-content",
+                                    )
+                                )
+                                for move in range(4)
+                            ],
+                        ),
+                    ],
+                    inheritPadding=True,
+                    mt="sm",
+                    pb="md",
+                ),
+            ],
+            withBorder=True,
+            shadow="sm",
+            radius="md",
+            className="pokemonCard",
+        )
+
+
+class BlankPokemonTeam:
+    def __init__(self, pokemonList):
+        self.pokemonCards = [
+            dmc.Col(
+                BlankPokemonCard(pokemonList, f"card{i}").layout(),
+                md=4,
+                span=12,
+            )
+            for i in range(6)
+        ]
+
+    def layout(self):
+        return dmc.Grid(
+            children=self.pokemonCards,
+            className="blank-team",
+            justify="space-evenly",
+        )
+
+
 def filterComponents(suffix):
     games_dict = json.load(open("data/games.json", "r"))
     return [

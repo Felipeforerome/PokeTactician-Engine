@@ -1,12 +1,18 @@
-from dash import html, dcc
 import dash_mantine_components as dmc
-from components import drawerFilterComponents, navbarFilterComponents
+from components import (
+    BlankPokemonCard,
+    BlankPokemonTeam,
+    drawerFilterComponents,
+    navbarFilterComponents,
+)
+from dash import dcc, html
 from dash_iconify import DashIconify
 
 # Define the layout
 layout = html.Div(
     children=[
         # Variable share
+        dcc.Location(id="url", refresh=False),
         dcc.Store(id="memory-output"),
         dcc.Store(id="screen-width-store"),
         # Hidden div to listen
@@ -119,7 +125,12 @@ layout = html.Div(
                                 html.Br(),
                                 html.Div(id="time-to-calc"),
                                 html.Br(),
-                                html.Div(id="team-output"),
+                                html.Div(
+                                    id="team-output",
+                                ),
+                                html.Div(
+                                    id="blank-team-output",
+                                ),
                                 html.Br(),
                                 html.Div(style={"display": "none"}, id="placeholder"),
                             ],
@@ -129,23 +140,23 @@ layout = html.Div(
                 ),
             ],
         ),
-        dmc.Footer(
-            height=60,
-            fixed=False,
-            children=[
-                dmc.Center(
-                    children=[
-                        dmc.Text("Made by Felipe Forero Meola"),
-                    ]
-                ),
-                dmc.Center(
-                    children=[
-                        html.Br(),
-                        dmc.Text("Pokémon is © of Nintendo"),
-                    ]
-                ),
-            ],
-            style={"color": "grey"},
-        ),
+        # dmc.Footer(
+        #     height=60,
+        #     fixed=False,
+        #     children=[
+        #         dmc.Center(
+        #             children=[
+        #                 dmc.Text("Made by Felipe Forero Meola"),
+        #             ]
+        #         ),
+        #         dmc.Center(
+        #             children=[
+        #                 html.Br(),
+        #                 dmc.Text("Pokémon is © of Nintendo"),
+        #             ]
+        #         ),
+        #     ],
+        #     style={"color": "grey"},
+        # ),
     ]
 )
