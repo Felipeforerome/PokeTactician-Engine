@@ -79,28 +79,22 @@ class Colony:
         for ant in self.Pop:
             # TODO Run more tests vectorized and non-vectorized versions they tend to give different results
             # TODO Allow Repeating even if not all pokemon have been used
-            ######### Non Vectorized
-            # unique_poks = False
-            # while not unique_poks:
-            #     rand_pokemon = np.random.random(size=self.Pop.shape[1])
-            #     cumulative_probs = np.cumsum(self.Prob_Poks)
-            #     selected_pokemon_ids = np.argmax(
-            #         rand_pokemon[:, np.newaxis] <= cumulative_probs, axis=1
-            #     )
-            #     if len(set(selected_pokemon_ids)) >= min(len(self.poks), 6):
-            #         unique_poks = True
 
-            # ant[:, 0] = selected_pokemon_ids
             ######### Vectorized
             team_size = min(len(self.poks), 6)
             preSelected_size = len(self.preSelected)
             ant[0:preSelected_size, 0] = self.preSelected
+
+            # Renormalize Probabilities
+            self.Prob_Poks[self.preSelected] = 0
+            self.Prob_Poks /= self.Prob_Poks.sum()
             ant[preSelected_size:, 0] = np.random.choice(
                 len(self.Prob_Poks),
                 size=team_size - preSelected_size,
                 replace=False,
                 p=self.Prob_Poks,
             )
+            ant[preSelected_size:, 0]
             # if replacePok:
             #     ant[len(self.poks) :, 0] = np.random.choice(
             #         len(self.Prob_Poks),
