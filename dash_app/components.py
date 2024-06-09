@@ -115,7 +115,7 @@ class BlankPokemonCard:
                         ),
                         dmc.Center(  # Use dmc.Center for center alignment
                             dmc.Select(
-                                id=f"{self.id}-select",
+                                id={"type": "preSelect-selector", "suffix": self.id},
                                 placeholder="Select a Pokemon",
                                 data=self.pokemonList,
                                 searchable=True,

@@ -48,12 +48,21 @@ from poketactician.objectives import (
         State({"type": "game-multi-select", "suffix": ALL}, "value"),
         State({"type": "mono-type", "suffix": ALL}, "checked"),
         State({"type": "legendaries", "suffix": ALL}, "checked"),
+        State({"type": "preSelect-selector", "suffix": ALL}, "value"),
         State("screen-width-store", "data"),
     ],
     prevent_initial_call=True,
 )
 def update_output(
-    n, objFuncsParam, includedTypes, gens, games, monoType, legendaries, screenWidth
+    n,
+    objFuncsParam,
+    includedTypes,
+    gens,
+    games,
+    monoType,
+    legendaries,
+    preSelected,
+    screenWidth,
 ):
     if screenWidth and screenWidth > 768:
         (
@@ -102,11 +111,12 @@ def update_output(
     else:
         if len(objFuncsParam) > 0:
             try:
+                preSelected = [int(p) - 1 for p in preSelected if p is not None]
                 pokList = removeMegas(pokPreFilter)
                 pokList = removeBattleOnly(pokList)
                 preSelected, pokList = splitPreSelected(
                     pokList,
-                    [],
+                    preSelected,
                 )
                 pokList = filterTypes(pokList, includedTypes, monoType)
                 pokList = filterGenerations(pokList, gens)
