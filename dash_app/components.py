@@ -1,5 +1,6 @@
 import json
 
+import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 from dash import dcc, html
 from dash_iconify import DashIconify
@@ -101,6 +102,7 @@ class BlankPokemonCard:
     def layout(self):
         return dmc.Card(
             id=f"{self.id}-div",
+            style={"overflow": "visible"},
             children=[
                 dmc.CardSection(
                     children=[
@@ -119,14 +121,13 @@ class BlankPokemonCard:
                                 placeholder="Select a Pokemon",
                                 data=self.pokemonList,
                                 searchable=True,
+                                nothingFound="No pokemon found",
                                 clearable=True,
                                 dropdownPosition="bottom",
-                                limit=3,
-                                w=200,
                             ),
                         ),
                     ],
-                    withBorder=True,
+                    withBorder=False,
                     inheritPadding=True,
                     py="xs",
                 ),
@@ -136,9 +137,19 @@ class BlankPokemonCard:
                             cols=2,
                             children=[
                                 dmc.Center(
-                                    html.P(
-                                        "------",
-                                        className="card-content",
+                                    dmc.Select(
+                                        id={
+                                            "type": "preSelect-move-selector",
+                                            "suffix": self.id,
+                                            "move": move,
+                                        },
+                                        placeholder="Select a Pokemon",
+                                        data=[],
+                                        disabled=True,
+                                        searchable=True,
+                                        nothingFound="No move found",
+                                        clearable=True,
+                                        dropdownPosition="bottom",
                                     )
                                 )
                                 for move in range(4)
@@ -218,6 +229,9 @@ def filterComponents(suffix):
             placeholder="Leave empty for all",
             id={"type": "type-multi-select", "suffix": suffix},
             value=[],
+            searchable=True,
+            nothingFound="No type found",
+            clearable=True,
             data=[
                 {"value": "normal", "label": "Normal"},
                 {"value": "fire", "label": "Fire"},
@@ -246,6 +260,9 @@ def filterComponents(suffix):
             placeholder="Leave empty for all",
             id={"type": "game-multi-select", "suffix": suffix},
             value=[],
+            searchable=True,
+            nothingFound="Game not found",
+            clearable=True,
             data=[
                 {
                     "value": games_dict[str(i)]["Game"],

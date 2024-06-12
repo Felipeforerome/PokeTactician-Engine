@@ -69,6 +69,7 @@ class MOACO:
         objFuncs_Q_rho: List[Tuple[Callable, float, float]],
         pokemonPop: List[Any],
         preSelected: List[int],
+        preSelectedMoves: List[List[int]],
         alpha: float,
         beta: float,
         cooperationID: int = 1,
@@ -83,6 +84,7 @@ class MOACO:
         self.cooperationID = cooperationID
         self.pokemonPop = deepcopy(pokemonPop)
         self.preSelected = preSelected
+        self.preSelectedMoves = preSelectedMoves
         self.alpha = alpha
         self.beta = beta
         self.colonies = self.initialize_colonies()
@@ -109,6 +111,7 @@ class MOACO:
                 objFunc,
                 self.pokemonPop,
                 self.preSelected,
+                self.preSelectedMoves,
                 self.alpha,
                 self.beta,
                 Q,
