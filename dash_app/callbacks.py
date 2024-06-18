@@ -17,6 +17,7 @@ from filters import (
     filterGenerations,
     filterLegendaries,
     filterTypes,
+    handRemoved,
     removeBattleOnly,
     removeMegas,
     splitPreSelected,
@@ -126,7 +127,8 @@ def update_output(
                     if preSelected[i]
                 ]
                 preSelected = [int(p) - 1 for p in preSelected if p is not None]
-                pokList = removeMegas(pokPreFilter)
+                pokList = handRemoved(pokPreFilter)
+                pokList = removeMegas(pokList)
                 pokList = removeBattleOnly(pokList)
                 preSelected, pokList = splitPreSelected(
                     pokList,

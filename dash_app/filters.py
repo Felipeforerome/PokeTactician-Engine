@@ -77,3 +77,8 @@ def splitPreSelected(pokPreFilter, pokPreSelected):
         pokPreFilter[i] for i in range(len(pokPreFilter)) if i not in pokPreSelected
     ]
     return preSelected, pokList
+
+
+def handRemoved(pokPreFilter, handSelected=[]):
+    pokList = [pok for pok in pokPreFilter if pok.id not in handSelected]
+    return pokList
