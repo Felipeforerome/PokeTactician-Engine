@@ -96,17 +96,18 @@ class Colony:
             team_size = min(len(self.poks), 6)
             preSelected_size = len(self.preSelectedPok)
             ant[0:preSelected_size, 0] = self.preSelectedPok
+            if preSelected_size < team_size:
 
-            # Renormalize Probabilities
-            self.Prob_Poks[self.preSelectedPok] = 0
-            self.Prob_Poks /= self.Prob_Poks.sum()
-            ant[preSelected_size:, 0] = np.random.choice(
-                len(self.Prob_Poks),
-                size=team_size - preSelected_size,
-                replace=False,
-                p=self.Prob_Poks,
-            )
-            ant[preSelected_size:, 0]
+                # Renormalize Probabilities
+                self.Prob_Poks[self.preSelectedPok] = 0
+                self.Prob_Poks /= self.Prob_Poks.sum()
+                ant[preSelected_size:, 0] = np.random.choice(
+                    len(self.Prob_Poks),
+                    size=team_size - preSelected_size,
+                    replace=False,
+                    p=self.Prob_Poks,
+                )
+                ant[preSelected_size:, 0]
             # if replacePok:
             #     ant[len(self.poks) :, 0] = np.random.choice(
             #         len(self.Prob_Poks),

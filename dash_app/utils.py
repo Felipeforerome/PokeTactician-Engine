@@ -25,7 +25,7 @@ def generate_move_list_and_selector_status(
         moveList = [
             {"value": i, "label": pok.knowableMoves[i].name.replace("-", " ").title()}
             for i in range(len(pok.knowableMoves))
-            if pok.knowableMoves[i].id not in move_id
+            if i not in move_id
         ]
         moveSelectorDisabled = False
     return moveList, moveSelectorDisabled

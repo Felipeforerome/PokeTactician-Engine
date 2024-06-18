@@ -295,6 +295,14 @@ def filterComponents(suffix):
             color="indigo",
             id={"type": "suggest-team-btn", "suffix": suffix},
         ),
+        html.Br(),
+        html.Br(),
+        dmc.Button(
+            "Pre-Select",
+            leftIcon=DashIconify(icon="solar:restart-bold"),
+            color="indigo",
+            id={"type": "reset-team-btn", "suffix": suffix},
+        ),
     ]
 
 

@@ -39,7 +39,7 @@ from poketactician.objectives import (
 @callback(
     Output("time-to-calc", "children"),
     Output("team-output", "children", allow_duplicate=True),
-    Output("blank-team-output", "hidden"),
+    Output("blank-team-output", "hidden", allow_duplicate=True),
     Output("memory-output", "data"),
     Output("filter-drawer", "opened", allow_duplicate=True),
     Output("filter-button", "opened", allow_duplicate=True),
@@ -179,6 +179,9 @@ def update_output(
             return (no_update, no_update, no_update, no_update, no_update, no_update)
 
 
+#################### LAYOUT CALLBACKS ####################
+
+
 # Callback to insert the BlankPokemonTeam dynamically upon page load
 @callback(Output("blank-team-output", "children"), Input("url", "pathname"))
 def display_page(_):
@@ -189,6 +192,17 @@ def display_page(_):
 
 
 @callback(
+    Output("team-output", "children", allow_duplicate=True),
+    Output("blank-team-output", "hidden", allow_duplicate=True),
+    Input({"type": "reset-team-btn", "suffix": ALL}, "n_clicks"),
+    prevent_initial_call=True,
+)
+def restart_team(_):
+    return [], False
+
+
+# Callback to raise alert no Objective Function is selected
+@callback(
     Output({"type": "objectives-multi-select", "suffix": MATCH}, "error"),
     Input({"type": "objectives-multi-select", "suffix": MATCH}, "value"),
     prevent_initial_call=True,
@@ -197,6 +211,7 @@ def select_value(value):
     return "Select at least 1." if len(value) < 1 else ""
 
 
+# Callback to toggle the filter drawer
 @callback(
     Output("filter-drawer", "opened"),
     Input("filter-button", "opened"),
@@ -264,6 +279,9 @@ def preSelected_images(pok_id, move_id_1, move_id_2, move_id_3):
     )
 
 
+#################### CLIENTSIDE CALLBACKS ####################
+
+# Track data
 clientside_callback(
     """
     function(data){
@@ -276,7 +294,7 @@ clientside_callback(
     prevent_initial_call=True,
 )
 
-
+# Track screen width
 clientside_callback(
     """
     function(trigger) {
