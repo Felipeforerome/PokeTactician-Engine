@@ -1,5 +1,6 @@
 import json
 
+import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 from dash import dcc, html
 from dash_iconify import DashIconify
@@ -93,6 +94,99 @@ class PokemonTeam:
         )
 
 
+class BlankPokemonCard:
+    def __init__(self, pokemonList: list, id: str):
+        self.pokemonList = pokemonList
+        self.id = id
+
+    def layout(self):
+        return dmc.Card(
+            id=f"{self.id}-div",
+            style={"overflow": "visible"},
+            children=[
+                dmc.CardSection(
+                    children=[
+                        dmc.Center(
+                            html.Img(
+                                id={"type": "preSelect-image", "suffix": self.id},
+                                src=f"/assets/qmark.png",
+                                height="50%",
+                                width="50%",
+                                style={"margin": "auto"},
+                            )
+                        ),
+                        dmc.Center(  # Use dmc.Center for center alignment
+                            dmc.Select(
+                                id={"type": "preSelect-selector", "suffix": self.id},
+                                placeholder="Select a Pokemon",
+                                data=self.pokemonList,
+                                searchable=True,
+                                nothingFound="No pokemon found",
+                                clearable=True,
+                                dropdownPosition="bottom",
+                            ),
+                        ),
+                    ],
+                    withBorder=False,
+                    inheritPadding=True,
+                    py="xs",
+                ),
+                dmc.CardSection(
+                    children=[
+                        dmc.SimpleGrid(
+                            cols=2,
+                            children=[
+                                dmc.Center(
+                                    dmc.Select(
+                                        id={
+                                            "type": "preSelect-move-selector",
+                                            "suffix": self.id,
+                                            "move": move,
+                                        },
+                                        placeholder="Select a Pokemon",
+                                        data=[],
+                                        disabled=True,
+                                        searchable=True,
+                                        nothingFound="No move found",
+                                        clearable=True,
+                                        dropdownPosition="bottom",
+                                    )
+                                )
+                                for move in range(4)
+                            ],
+                        ),
+                    ],
+                    inheritPadding=True,
+                    mt="sm",
+                    pb="md",
+                ),
+            ],
+            withBorder=True,
+            shadow="sm",
+            radius="md",
+            className="pokemonCard",
+        )
+
+
+class BlankPokemonTeam:
+    def __init__(self, pokemonList):
+        self.pokemonCards = [
+            dmc.Col(
+                BlankPokemonCard(pokemonList, f"card{i}").layout(),
+                md=4,
+                span=12,
+            )
+            for i in range(6)
+        ]
+
+    def layout(self):
+        return dmc.Grid(
+            children=self.pokemonCards,
+            className="blank-team",
+            justify="space-evenly",
+        )
+
+
 def filterComponents(suffix):
     games_dict = json.load(open("data/games.json", "r"))
     return [
@@ -135,6 +229,9 @@ def filterComponents(suffix):
             placeholder="Leave empty for all",
             id={"type": "type-multi-select", "suffix": suffix},
             value=[],
+            searchable=True,
+            nothingFound="No type found",
+            clearable=True,
             data=[
                 {"value": "normal", "label": "Normal"},
                 {"value": "fire", "label": "Fire"},
@@ -163,6 +260,9 @@ def filterComponents(suffix):
             placeholder="Leave empty for all",
             id={"type": "game-multi-select", "suffix": suffix},
             value=[],
+            searchable=True,
+            nothingFound="Game not found",
+            clearable=True,
             data=[
                 {
                     "value": games_dict[str(i)]["Game"],
@@ -194,6 +294,14 @@ def filterComponents(suffix):
             leftIcon=DashIconify(icon="ic:twotone-catching-pokemon"),
             color="indigo",
             id={"type": "suggest-team-btn", "suffix": suffix},
+        ),
+        html.Br(),
+        html.Br(),
+        dmc.Button(
+            "Pre-Select",
+            leftIcon=DashIconify(icon="solar:restart-bold"),
+            color="indigo",
+            id={"type": "reset-team-btn", "suffix": suffix},
         ),
     ]
 

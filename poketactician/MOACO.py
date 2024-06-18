@@ -8,6 +8,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
+from .Colony import Colony
 from .glob_var import Q, alpha, beta, cooperationStatsDict, rho
 from .models.Team import Team
 from .utils import dominatedCandSet
@@ -18,11 +19,11 @@ class MOACO:
     Multi-Objective Ant Colony Optimization (MOACO) class for optimizing team composition in Pokemon battles.
 
     Args:
-        colonyClass (Any): The class representing the ant colony.
         totalPopulation (int): The total population size.
         objFuncs_Q_rho (List[Tuple[Callable, float, float]]): A list of tuples containing the objective functions,
             pheromone decay rate (Q), and pheromone evaporation rate (rho).
         pokemonPop (List[Any]): A list of Pokemon objects representing the available Pokemon population.
+        preSelected (List[int]): A list of pre-selected Pokemon IDs.
         alpha (float): The alpha parameter for the ant colony optimization algorithm.
         beta (float): The beta parameter for the ant colony optimization algorithm.
         cooperationID (int, optional): The ID of the cooperation strategy to use. Defaults to 1.
@@ -36,6 +37,7 @@ class MOACO:
             pheromone decay rate (Q), and pheromone evaporation rate (rho).
         cooperationID (int): The ID of the cooperation strategy used.
         pokemonPop (List[Any]): A list of Pokemon objects representing the available Pokemon population.
+        preSelected (List[int]): A list of pre-selected Pokemon IDs.
         alpha (float): The alpha parameter for the ant colony optimization algorithm.
         beta (float): The beta parameter for the ant colony optimization algorithm.
         colonies (List[Any]): A list of ant colony objects.
@@ -63,10 +65,11 @@ class MOACO:
 
     def __init__(
         self,
-        colonyClass: Any,
         totalPopulation: int,
         objFuncs_Q_rho: List[Tuple[Callable, float, float]],
         pokemonPop: List[Any],
+        preSelected: List[int],
+        preSelectedMoves: List[List[int]],
         alpha: float,
         beta: float,
         cooperationID: int = 1,
@@ -80,9 +83,11 @@ class MOACO:
         self.objFuncs_Q_rho = objFuncs_Q_rho
         self.cooperationID = cooperationID
         self.pokemonPop = deepcopy(pokemonPop)
+        self.preSelected = preSelected
+        self.preSelectedMoves = preSelectedMoves
         self.alpha = alpha
         self.beta = beta
-        self.colonies = self.initialize_colonies(colonyClass)
+        self.colonies = self.initialize_colonies()
         self.prevCandSet = self.initialize_prev_cand_set()
         self.bestSoFar = self.prevCandSet[0]
         self.iterNum = 1
@@ -93,21 +98,20 @@ class MOACO:
             1,
         )
 
-    def initialize_colonies(self, colonyClass):
+    def initialize_colonies(self):
         """
         Initializes the ant colonies.
-
-        Args:
-            colonyClass (Any): The class representing the ant colony.
 
         Returns:
             List[Any]: A list of ant colony objects.
         """
         return [
-            colonyClass(
+            Colony(
                 int(self.totalPopulation / len(self.objFuncs_Q_rho)),
                 objFunc,
                 self.pokemonPop,
+                self.preSelected,
+                self.preSelectedMoves,
                 self.alpha,
                 self.beta,
                 Q,

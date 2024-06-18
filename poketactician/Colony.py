@@ -7,13 +7,28 @@ from numpy import array
 
 
 class Colony:
-    def __init__(self, pop_sizeParam, objFuncParam, poks, alpha, beta, Q, rho):
+    def __init__(
+        self,
+        pop_sizeParam,
+        objFuncParam,
+        poks,
+        preSelected,
+        preSelectedMoves,
+        alpha,
+        beta,
+        Q,
+        rho,
+    ):
         self.pop_size = pop_sizeParam
         # objFunParam should be a lambda function
         self.objFunc = objFuncParam
 
-        # Filter Pokemon (now not filtering)
+        # Set Pokemon
         self.poks = poks
+
+        # Set PreSelected Pokemon and Moves
+        self.preSelectedPok = preSelected
+        self.preSelectedMoves = preSelectedMoves
 
         # Set Meta Params
         self.alpha = alpha
@@ -76,38 +91,41 @@ class Colony:
         for ant in self.Pop:
             # TODO Run more tests vectorized and non-vectorized versions they tend to give different results
             # TODO Allow Repeating even if not all pokemon have been used
-            ######### Non Vectorized
-            # unique_poks = False
-            # while not unique_poks:
-            #     rand_pokemon = np.random.random(size=self.Pop.shape[1])
-            #     cumulative_probs = np.cumsum(self.Prob_Poks)
-            #     selected_pokemon_ids = np.argmax(
-            #         rand_pokemon[:, np.newaxis] <= cumulative_probs, axis=1
-            #     )
-            #     if len(set(selected_pokemon_ids)) >= min(len(self.poks), 6):
-            #         unique_poks = True
 
-            # ant[:, 0] = selected_pokemon_ids
             ######### Vectorized
             team_size = min(len(self.poks), 6)
-            ant[:, 0] = np.random.choice(
-                len(self.Prob_Poks),
-                size=team_size,
-                replace=False,
-                p=self.Prob_Poks,
-            )
+            preSelected_size = len(self.preSelectedPok)
+            ant[0:preSelected_size, 0] = self.preSelectedPok
+            if preSelected_size < team_size:
+
+                # Renormalize Probabilities
+                self.Prob_Poks[self.preSelectedPok] = 0
+                self.Prob_Poks /= self.Prob_Poks.sum()
+                ant[preSelected_size:, 0] = np.random.choice(
+                    len(self.Prob_Poks),
+                    size=team_size - preSelected_size,
+                    replace=False,
+                    p=self.Prob_Poks,
+                )
+                ant[preSelected_size:, 0]
             # if replacePok:
             #     ant[len(self.poks) :, 0] = np.random.choice(
             #         len(self.Prob_Poks),
             #         size=6 - team_size,
             #         p=self.Prob_Poks,
             #     )
-            for pokemon in ant:
+            for ant_i in range(ant.shape[0]):
+                pokemon = ant[ant_i]
                 selected_pokemon_id = pokemon[0]
                 ######### NonVectorized
                 prob_att_temp = self.Prob_Att[selected_pokemon_id].copy()
                 for i in range(1, 5):
-                    if prob_att_temp.size - i > 0:
+                    if ant_i < len(self.preSelectedMoves) and i - 1 < len(
+                        self.preSelectedMoves[ant_i]
+                    ):
+                        pokemon[i] = self.preSelectedMoves[ant_i][i - 1]
+                        prob_att_temp[self.preSelectedMoves[ant_i][i - 1]] = 0
+                    elif prob_att_temp.size - i > 0:
                         rand_att = random.random() * prob_att_temp.sum()
                         cumulative_att_prob = np.cumsum(prob_att_temp)
                         selected_attack_id = np.argmax(rand_att <= cumulative_att_prob)

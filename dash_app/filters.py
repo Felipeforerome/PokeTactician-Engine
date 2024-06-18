@@ -58,6 +58,7 @@ def removeBattleOnly(pokPreFilter):
     return [pok for pok in pokPreFilter if not pok.battleOnly]
 
 
+# Function to filter pokemon by games
 def filterGames(pokPreFilter, games):
     if len(games) < 1:
         pokList = pokPreFilter
@@ -67,3 +68,12 @@ def filterGames(pokPreFilter, games):
         ]
 
     return pokList
+
+
+# Function to unremove preselected pokemon
+def splitPreSelected(pokPreFilter, pokPreSelected):
+    preSelected = [pokPreFilter[i] for i in pokPreSelected]
+    pokList = [
+        pokPreFilter[i] for i in range(len(pokPreFilter)) if i not in pokPreSelected
+    ]
+    return preSelected, pokList

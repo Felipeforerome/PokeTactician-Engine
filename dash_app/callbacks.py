@@ -1,7 +1,7 @@
-import logging
 import sys
+from math import floor
 
-from components import PokemonTeam
+from components import BlankPokemonTeam, PokemonTeam
 from dash import (
     ALL,
     MATCH,
@@ -19,12 +19,14 @@ from filters import (
     filterTypes,
     removeBattleOnly,
     removeMegas,
+    splitPreSelected,
 )
 
 sys.path.append(sys.path[0] + "/..")
 import time
 
-from poketactician.Colony import Colony
+from utils import generate_move_list_and_selector_status
+
 from poketactician.glob_var import Q, alpha, beta, pokPreFilter, rho
 from poketactician.MOACO import MOACO
 from poketactician.objectives import (
@@ -36,7 +38,8 @@ from poketactician.objectives import (
 
 @callback(
     Output("time-to-calc", "children"),
-    Output("team-output", "children"),
+    Output("team-output", "children", allow_duplicate=True),
+    Output("blank-team-output", "hidden", allow_duplicate=True),
     Output("memory-output", "data"),
     Output("filter-drawer", "opened", allow_duplicate=True),
     Output("filter-button", "opened", allow_duplicate=True),
@@ -48,13 +51,28 @@ from poketactician.objectives import (
         State({"type": "game-multi-select", "suffix": ALL}, "value"),
         State({"type": "mono-type", "suffix": ALL}, "checked"),
         State({"type": "legendaries", "suffix": ALL}, "checked"),
+        State({"type": "preSelect-selector", "suffix": ALL}, "value"),
+        State({"type": "preSelect-move-selector", "suffix": ALL, "move": ALL}, "value"),
         State("screen-width-store", "data"),
     ],
     prevent_initial_call=True,
 )
 def update_output(
-    n, objFuncsParam, includedTypes, gens, games, monoType, legendaries, screenWidth
+    n,
+    objFuncsParam,
+    includedTypes,
+    gens,
+    games,
+    monoType,
+    legendaries,
+    preSelected,
+    preSelectedMoves,
+    screenWidth,
 ):
+    preSelectedMovesLists = [[] for i in range(6)]
+    for i in range(len(preSelectedMoves)):
+        if preSelectedMoves[i] is not None:
+            preSelectedMovesLists[floor(i / 4)].append(int(preSelectedMoves[i]))
     if screenWidth and screenWidth > 768:
         (
             n,
@@ -102,12 +120,23 @@ def update_output(
     else:
         if len(objFuncsParam) > 0:
             try:
+                preSelectedMovesLists = [
+                    preSelectedMovesLists[i]
+                    for i in range(len(preSelectedMovesLists))
+                    if preSelected[i]
+                ]
+                preSelected = [int(p) - 1 for p in preSelected if p is not None]
                 pokList = removeMegas(pokPreFilter)
                 pokList = removeBattleOnly(pokList)
+                preSelected, pokList = splitPreSelected(
+                    pokList,
+                    preSelected,
+                )
                 pokList = filterTypes(pokList, includedTypes, monoType)
                 pokList = filterGenerations(pokList, gens)
                 pokList = filterLegendaries(pokList, legendaries)
                 pokList = filterGames(pokList, games)
+                pokList = preSelected + pokList
 
                 if len(pokList) == 0:
                     raise Exception(
@@ -125,10 +154,11 @@ def update_output(
                 if 3 in objFuncsParam:
                     objectiveFuncs.append((selfCoverageFun, Q, rho))
                 mCol = MOACO(
-                    Colony,
                     400,
                     objectiveFuncs,
                     pokList,
+                    list(range(len(preSelected))),
+                    preSelectedMovesLists,
                     alpha,
                     beta,
                 )
@@ -138,16 +168,40 @@ def update_output(
                 return (
                     "",
                     PokemonTeam(team.serialize()).layout(),
+                    True,
                     [time.time() - start, mCol.getObjTeamValue()],
                     False,
                     False,
                 )
             except Exception as e:
-                return (str(e), "", "", "", False)
+                return (str(e), "", True, "", "", False)
         else:
-            return (no_update, no_update, no_update, no_update, no_update)
+            return (no_update, no_update, no_update, no_update, no_update, no_update)
 
 
+#################### LAYOUT CALLBACKS ####################
+
+
+# Callback to insert the BlankPokemonTeam dynamically upon page load
+@callback(Output("blank-team-output", "children"), Input("url", "pathname"))
+def display_page(_):
+    pokList = removeMegas(pokPreFilter)
+    pokList = removeBattleOnly(pokList)
+    pokemon_list = [{"value": pok.id, "label": pok.name.title()} for pok in pokList]
+    return BlankPokemonTeam(pokemon_list).layout()
+
+
+@callback(
+    Output("team-output", "children", allow_duplicate=True),
+    Output("blank-team-output", "hidden", allow_duplicate=True),
+    Input({"type": "reset-team-btn", "suffix": ALL}, "n_clicks"),
+    prevent_initial_call=True,
+)
+def restart_team(_):
+    return [], False
+
+
+# Callback to raise alert no Objective Function is selected
 @callback(
     Output({"type": "objectives-multi-select", "suffix": MATCH}, "error"),
     Input({"type": "objectives-multi-select", "suffix": MATCH}, "value"),
@@ -157,6 +211,7 @@ def select_value(value):
     return "Select at least 1." if len(value) < 1 else ""
 
 
+# Callback to toggle the filter drawer
 @callback(
     Output("filter-drawer", "opened"),
     Input("filter-button", "opened"),
@@ -166,6 +221,67 @@ def open(opened):
     return opened
 
 
+#################### PRESELECTED POKEMON AND MOVE CALLBACKS ####################
+@callback(
+    Output({"type": "preSelect-image", "suffix": MATCH}, "src"),
+    Output({"type": "preSelect-move-selector", "suffix": MATCH, "move": 0}, "data"),
+    Output({"type": "preSelect-move-selector", "suffix": MATCH, "move": 0}, "disabled"),
+    Input({"type": "preSelect-selector", "suffix": MATCH}, "value"),
+)
+def preSelected_images(value):
+    image = "/assets/qmark.png"
+    if value:
+        image = f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{value}.png"
+    return image, *generate_move_list_and_selector_status(value)
+
+
+@callback(
+    Output({"type": "preSelect-move-selector", "suffix": MATCH, "move": 1}, "data"),
+    Output({"type": "preSelect-move-selector", "suffix": MATCH, "move": 1}, "disabled"),
+    State({"type": "preSelect-selector", "suffix": MATCH}, "value"),
+    Input({"type": "preSelect-move-selector", "suffix": MATCH, "move": 0}, "value"),
+)
+def preSelected_images(pok_id, move_id):
+    return generate_move_list_and_selector_status(
+        pok_id,
+        [
+            move_id,
+        ],
+    )
+
+
+@callback(
+    Output({"type": "preSelect-move-selector", "suffix": MATCH, "move": 2}, "data"),
+    Output({"type": "preSelect-move-selector", "suffix": MATCH, "move": 2}, "disabled"),
+    State({"type": "preSelect-selector", "suffix": MATCH}, "value"),
+    State({"type": "preSelect-move-selector", "suffix": MATCH, "move": 0}, "value"),
+    Input({"type": "preSelect-move-selector", "suffix": MATCH, "move": 1}, "value"),
+)
+def preSelected_images(
+    pok_id,
+    move_id_1,
+    move_id_2,
+):
+    return generate_move_list_and_selector_status(pok_id, [move_id_1, move_id_2])
+
+
+@callback(
+    Output({"type": "preSelect-move-selector", "suffix": MATCH, "move": 3}, "data"),
+    Output({"type": "preSelect-move-selector", "suffix": MATCH, "move": 3}, "disabled"),
+    State({"type": "preSelect-selector", "suffix": MATCH}, "value"),
+    State({"type": "preSelect-move-selector", "suffix": MATCH, "move": 0}, "value"),
+    State({"type": "preSelect-move-selector", "suffix": MATCH, "move": 1}, "value"),
+    Input({"type": "preSelect-move-selector", "suffix": MATCH, "move": 2}, "value"),
+)
+def preSelected_images(pok_id, move_id_1, move_id_2, move_id_3):
+    return generate_move_list_and_selector_status(
+        pok_id, [move_id_1, move_id_2, move_id_3]
+    )
+
+
+#################### CLIENTSIDE CALLBACKS ####################
+
+# Track data
 clientside_callback(
     """
     function(data){
@@ -178,7 +294,7 @@ clientside_callback(
     prevent_initial_call=True,
 )
 
-
+# Track screen width
 clientside_callback(
     """
     function(trigger) {
@@ -186,7 +302,5 @@ clientside_callback(
     }
     """,
     Output("screen-width-store", "data"),
-    [
-        Input("resize-listener", "n_clicks")
-    ],  # This input is just a trigger; you might use dcc.Interval or dcc.Location if you want periodic or navigation-based triggers.
+    [Input("resize-listener", "n_clicks")],
 )
