@@ -1,4 +1,3 @@
-import dash_loading_spinners as dls
 import dash_mantine_components as dmc
 from components import (
     BlankPokemonCard,
@@ -36,7 +35,7 @@ layout = html.Div(
                     "This is a project I've developed in my free time to put some theory to practice and have fun with my passion for Pokemon. This webapp started as a way for me to practice implementing some Multi Objective Metaheuristic Algorithms to solve NP-Hard problems, and practice frontend development. It has been developed with the goal of providing a tool for different people to use and tailor the results they want to get. It is built implementing a Multi Objective Ant Colony Optimization for the composition of the team, and Dash with Dash Mantine for the interface."
                 ),
             ],
-            opened=False,
+            opened=True,
         ),
         # Header
         html.Header(
@@ -51,26 +50,34 @@ layout = html.Div(
                         ),
                         # Title or logo on the left
                         html.H1(
-                            "PokéTactician",
+                            children=[
+                                html.Img(
+                                    src="/assets/favicon.png",
+                                    style={
+                                        "margin": "auto",
+                                        "height": "1.15em",
+                                        "paddingBottom": "0.2em",
+                                        "paddingRight": "0.2em",
+                                    },
+                                ),
+                                "PokéTactician",
+                            ],
                             style={
-                                "flex": 1,
                                 "color": "#F7CE46",
                                 "textAlign": "left",
                                 "textShadow": "-1px 1px 0 #000,1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;",
+                                "animation": "glow 1s ease-in-out infinite alternate",
                             },
                         ),
                         # Navigation links on the right
                         html.Div(
                             children=[
                                 html.A(
-                                    "Home",
-                                    href="/",
-                                    style={"marginRight": "15px", "color": "white"},
-                                ),
-                                html.A(
-                                    "Contact",
+                                    DashIconify(
+                                        icon="bi:envelope-at",
+                                    ),
                                     href="mailto:felipe.forerome@gmail.com",
-                                    style={"color": "white"},
+                                    style={"color": "white", "fontSize": "1.5em"},
                                 ),
                             ],
                             style={"flex": 1, "textAlign": "right"},

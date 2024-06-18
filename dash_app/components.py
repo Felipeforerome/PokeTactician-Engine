@@ -22,8 +22,8 @@ class PokemonCard:
                         dmc.Center(
                             html.Img(
                                 src=f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{pokemon['id']}.png",
-                                height="50%",
-                                width="50%",
+                                height="40%",
+                                width="40%",
                                 style={"margin": "auto"},
                                 id="hello",
                             )
@@ -57,9 +57,11 @@ class PokemonCard:
                         dmc.SimpleGrid(
                             cols=2,
                             children=[
-                                html.P(
-                                    move["name"].replace("-", " ").title(),
-                                    className="card-content",
+                                dmc.Center(
+                                    html.P(
+                                        move["name"].replace("-", " ").title(),
+                                        className="card-content",
+                                    )
                                 )
                                 for move in pokemon["moves"]
                             ],
@@ -110,8 +112,8 @@ class BlankPokemonCard:
                             html.Img(
                                 id={"type": "preSelect-image", "suffix": self.id},
                                 src=f"/assets/qmark.png",
-                                height="50%",
-                                width="50%",
+                                height="40%",
+                                width="40%",
                                 style={"margin": "auto"},
                             )
                         ),
