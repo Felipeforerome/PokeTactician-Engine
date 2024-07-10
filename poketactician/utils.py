@@ -1,4 +1,5 @@
 import numpy as np
+
 from .glob_var import moves
 from .models.Types import typeChart, typeOrder
 
