@@ -215,3 +215,12 @@ class Pokemon:
         :return: The sum of stats.
         """
         return self.hp + self.att + self.deff + self.spatt + self.spdeff + self.spe
+
+    def isRole(self, role_checker) -> bool:
+        """
+        Checks if the Pokemon fulfills a specific role.
+
+        :param role_checker: A function that takes a Pokemon and returns True if the Pokemon fulfills a role.
+        :return: True if the Pokemon fulfills the role, False otherwise.
+        """
+        return role_checker(self)
