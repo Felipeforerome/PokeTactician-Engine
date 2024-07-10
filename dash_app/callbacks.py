@@ -37,6 +37,67 @@ from poketactician.objectives import (
 )
 
 
+def preprocess_moves(pre_selected_moves):
+    """
+    Preprocess pre-selected moves into lists.
+    """
+    move_lists = [[] for _ in range(6)]
+    for idx, move in enumerate(pre_selected_moves):
+        if move is not None:
+            move_lists[idx // 4].append(int(move))
+    return move_lists
+
+
+def filter_pokemon_list(
+    pre_selected, included_types, mono_type, generations, include_legendaries, games
+):
+    """
+    Apply filters to the Pokémon list.
+    """
+    pok_list = handRemoved(pokPreFilter)
+    pok_list = removeMegas(pok_list)
+    pok_list = removeBattleOnly(pok_list)
+    pre_selected, pok_list = splitPreSelected(pok_list, pre_selected)
+    pok_list = filterTypes(pok_list, included_types, mono_type)
+    pok_list = filterGenerations(pok_list, generations)
+    pok_list = filterLegendaries(pok_list, include_legendaries)
+    pok_list = filterGames(pok_list, games)
+    return pre_selected + pok_list
+
+
+def define_objective_functions(obj_funcs_param, pok_list):
+    """
+    Define the objective functions for team optimization.
+    """
+    objective_funcs = []
+    if 1 in obj_funcs_param:
+        objective_funcs.append((lambda team: attack_obj_fun(team, pok_list), Q, 0.1))
+    if 2 in obj_funcs_param:
+        objective_funcs.append((lambda team: team_coverage_fun(team, pok_list), Q, 0.1))
+    if 3 in obj_funcs_param:
+        objective_funcs.append((lambda team: self_coverage_fun(team, pok_list), Q, rho))
+    return objective_funcs
+
+
+def optimize_team_selection(
+    pok_list, pre_selected, pre_selected_moves_lists, objective_funcs
+):
+    """
+    Optimize team selection using MOACO algorithm.
+    """
+    m_col = MOACO(
+        400,
+        objective_funcs,
+        pok_list,
+        list(range(len(pre_selected))),
+        pre_selected_moves_lists,
+        alpha,
+        beta,
+    )
+    m_col.optimize(iters=25, time_limit=None)
+    return m_col.getSoln(), m_col.getObjTeamValue()
+
+
 @callback(
     Output("time-to-calc", "children"),
     Output("team-output", "children", allow_duplicate=True),
@@ -59,126 +120,84 @@ from poketactician.objectives import (
     prevent_initial_call=True,
 )
 def update_output(
-    n,
-    objFuncsParam,
-    includedTypes,
-    gens,
+    n_clicks,
+    obj_funcs_param,
+    included_types,
+    generations,
     games,
-    monoType,
-    legendaries,
-    preSelected,
-    preSelectedMoves,
-    screenWidth,
+    mono_type,
+    include_legendaries,
+    pre_selected,
+    pre_selected_moves,
+    screen_width,
 ):
-    preSelectedMovesLists = [[] for i in range(6)]
-    for i in range(len(preSelectedMoves)):
-        if preSelectedMoves[i] is not None:
-            preSelectedMovesLists[floor(i / 4)].append(int(preSelectedMoves[i]))
-    if screenWidth and screenWidth > 768:
-        (
-            n,
-            objFuncsParam,
-            includedTypes,
-            gens,
-            games,
-            monoType,
-            legendaries,
-            screenWidth,
-        ) = (
-            n[0],
-            objFuncsParam[0],
-            includedTypes[0],
-            gens[0],
-            games[0],
-            monoType[0],
-            legendaries[0],
-            screenWidth,
-        )
-    elif screenWidth and screenWidth <= 768:
-        (
-            n,
-            objFuncsParam,
-            includedTypes,
-            gens,
-            games,
-            monoType,
-            legendaries,
-            screenWidth,
-        ) = (
-            n[1],
-            objFuncsParam[1],
-            includedTypes[1],
-            gens[1],
-            games[1],
-            monoType[1],
-            legendaries[1],
-            screenWidth,
-        )
-    else:
-        return "", "", "", "", False
-    if n is None:
-        return "", "", "", "", False
-    else:
-        if len(objFuncsParam) > 0:
-            try:
-                preSelectedMovesLists = [
-                    preSelectedMovesLists[i]
-                    for i in range(len(preSelectedMovesLists))
-                    if preSelected[i]
-                ]
-                preSelected = [int(p) - 1 for p in preSelected if p is not None]
-                pokList = handRemoved(pokPreFilter)
-                pokList = removeMegas(pokList)
-                pokList = removeBattleOnly(pokList)
-                preSelected, pokList = splitPreSelected(
-                    pokList,
-                    preSelected,
-                )
-                pokList = filterTypes(pokList, includedTypes, monoType)
-                pokList = filterGenerations(pokList, gens)
-                pokList = filterLegendaries(pokList, legendaries)
-                pokList = filterGames(pokList, games)
-                pokList = preSelected + pokList
+    """
+    Callback to update team output based on user selections and screen width.
+    """
+    pre_selected_moves_lists = preprocess_moves(pre_selected_moves)
 
-                if len(pokList) == 0:
-                    raise Exception(
-                        "No pokemon available with current filter selection"
-                    )
-                start = time.time()
-                objectiveFuncs = []
-                attackObjFun = lambda team: attack_obj_fun(team, pokList)
-                teamCoverageFun = lambda team: team_coverage_fun(team, pokList)
-                selfCoverageFun = lambda team: self_coverage_fun(team, pokList)
-                if 1 in objFuncsParam:
-                    objectiveFuncs.append((attackObjFun, Q, 0.1))
-                if 2 in objFuncsParam:
-                    objectiveFuncs.append((teamCoverageFun, Q, 0.1))
-                if 3 in objFuncsParam:
-                    objectiveFuncs.append((selfCoverageFun, Q, rho))
-                mCol = MOACO(
-                    400,
-                    objectiveFuncs,
-                    pokList,
-                    list(range(len(preSelected))),
-                    preSelectedMovesLists,
-                    alpha,
-                    beta,
-                )
-                mCol.optimize(iters=25, time_limit=None)
-                # mCol.optimize(iters=30, time_limit=None)
-                team = mCol.getSoln()
-                return (
-                    "",
-                    PokemonTeam(team.serialize()).layout(),
-                    True,
-                    [time.time() - start, mCol.getObjTeamValue()],
-                    False,
-                    False,
-                )
-            except Exception as e:
-                return (str(e), "", True, "", "", False)
-        else:
-            return (no_update, no_update, no_update, no_update, no_update, no_update)
+    # Adjust parameters based on screen width
+    if screen_width:
+        idx = 0 if screen_width > 768 else 1
+        n_clicks = n_clicks[idx]
+        obj_funcs_param = obj_funcs_param[idx]
+        included_types = included_types[idx]
+        generations = generations[idx]
+        games = games[idx]
+        mono_type = mono_type[idx]
+        include_legendaries = include_legendaries[idx]
+    elif screen_width is None or n_clicks is None:
+        return "", "", "", "", False
+
+    # Check if there are objective functions selected
+    if not obj_funcs_param:
+        return no_update, no_update, no_update, no_update, no_update, no_update
+
+    try:
+        # Filter and process pre-selected moves
+        pre_selected_moves_lists = [
+            move_list
+            for i, move_list in enumerate(pre_selected_moves_lists)
+            if pre_selected[i]
+        ]
+        pre_selected = [int(p) - 1 for p in pre_selected if p is not None]
+
+        # Apply filters to the Pokémon list
+        pok_list = filter_pokemon_list(
+            pre_selected,
+            included_types,
+            mono_type,
+            generations,
+            include_legendaries,
+            games,
+        )
+
+        # Check if any Pokémon remain after filtering
+        if not pok_list:
+            raise ValueError("No Pokémon available with current filter selection")
+
+        # Define objective functions
+        objective_funcs = define_objective_functions(obj_funcs_param, pok_list)
+
+        # Optimize team selection
+        start_time = time.time()
+        team, obj_value = optimize_team_selection(
+            pok_list, pre_selected, pre_selected_moves_lists, objective_funcs
+        )
+        elapsed_time = time.time() - start_time
+
+        return (
+            "",
+            PokemonTeam(team.serialize()).layout(),
+            True,
+            [elapsed_time, obj_value],
+            False,
+            False,
+        )
+    except ValueError as ve:
+        return str(ve), "", True, "", "", False
+    except Exception as e:
+        return str(e), "", True, "", "", False
 
 
 #################### LAYOUT CALLBACKS ####################
