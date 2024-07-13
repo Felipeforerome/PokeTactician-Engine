@@ -1,6 +1,7 @@
 import numpy as np
 
 from .glob_var import moves
+from .models.Pokemon import Pokemon
 from .models.Types import typeChart, typeOrder
 
 
@@ -112,6 +113,20 @@ def hoyerSparseness(x):
 def getTeamNames(team, pokList):
     for pok in team:
         print(pokList[pok[0]].name)
+
+
+def antToTeam(ant, pokList: list) -> list:
+    team = []
+    for pok in range(ant.__len__()):
+        temp_pok = (
+            Pokemon.from_json(pokList[pok[0]])
+            .teachMove(pok[1])
+            .teachMove(pok[2])
+            .teachMove(pok[3])
+            .teachMove(pok[4])
+        )
+        team.append(temp_pok)
+    return team
 
 
 # Add feature to choose cooperation algorithms
