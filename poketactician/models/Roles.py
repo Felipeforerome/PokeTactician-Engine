@@ -1,8 +1,8 @@
 # https://www.smogon.com/dp/articles/pokemon_dictionary
-from Pokemon import Pokemon
-
 from poketactician.models import Move
 from poketactician.models.model_utils import process_items
+
+from .Pokemon import Pokemon
 
 
 def has_move(pokemon: Pokemon, moves: list) -> float:
@@ -441,6 +441,33 @@ def is_Trapper(pokemon: Pokemon) -> float:
     return has_ability(pokemon, ["Arena Trap", "Shadow Tag", "Magnet Pull"])
 
 
+def is_ReliableRecovery(pokemon: Pokemon) -> float:
+    """
+    Determines if a Pokemon has reliable recovery.
+
+    A Pokemon is considered to have reliable recovery if it can recover HP consistently.
+
+    Args:
+        pokemon (Pokemon): The Pokemon to check.
+
+    Returns:
+        bool: True if the Pokemon has reliable recovery, False otherwise.
+    """
+    return has_move(
+        pokemon,
+        [
+            "Recover",
+            "Roost",
+            "Soft-Boiled",
+            "Synthesis",
+            "Moonlight",
+            "Morning Sun",
+            "Shore Up",
+            "Slack Off",
+        ],
+    )
+
+
 def is_Wall(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a wall.
@@ -454,19 +481,5 @@ def is_Wall(pokemon: Pokemon) -> float:
         bool: True if the Pokemon is a wall, False otherwise.
     """
     return (
-        is_Tank(pokemon)
-        * has_move(
-            pokemon,
-            [
-                "Recover",
-                "Roost",
-                "Soft-Boiled",
-                "Synthesis",
-                "Moonlight",
-                "Morning Sun",
-                "Shore Up",
-                "Slack Off",
-            ],
-        )
-        * has_good_stat(pokemon, ["hp"])
+        is_Tank(pokemon) * is_ReliableRecovery(pokemon) * has_good_stat(pokemon, ["hp"])
     )
