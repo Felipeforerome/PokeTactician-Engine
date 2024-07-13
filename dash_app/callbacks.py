@@ -32,6 +32,9 @@ from poketactician.glob_var import Q, alpha, beta, pokPreFilter, rho
 from poketactician.MOACO import MOACO
 from poketactician.objectives import (
     attack_obj_fun,
+    defensive_team_fun,
+    generalist_team_fun,
+    offensive_team_fun,
     self_coverage_fun,
     team_coverage_fun,
 )
@@ -76,6 +79,18 @@ def define_objective_functions(obj_funcs_param, pok_list):
         objective_funcs.append((lambda team: team_coverage_fun(team, pok_list), Q, 0.1))
     if 3 in obj_funcs_param:
         objective_funcs.append((lambda team: self_coverage_fun(team, pok_list), Q, rho))
+    if 4 in obj_funcs_param:
+        objective_funcs.append(
+            (lambda team: generalist_team_fun(team, pok_list), Q, rho)
+        )
+    if 5 in obj_funcs_param:
+        objective_funcs.append(
+            (lambda team: offensive_team_fun(team, pok_list), Q, rho)
+        )
+    if 6 in obj_funcs_param:
+        objective_funcs.append(
+            (lambda team: defensive_team_fun(team, pok_list), Q, rho)
+        )
     return objective_funcs
 
 
