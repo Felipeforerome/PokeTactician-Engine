@@ -68,7 +68,7 @@ def filter_pokemon_list(
     return pre_selected + pok_list
 
 
-def define_objective_functions(obj_funcs_param, pok_list):
+def define_objective_functions(obj_funcs_param, strategy, roles, pok_list):
     """
     Define the objective functions for team optimization.
     """
@@ -79,15 +79,17 @@ def define_objective_functions(obj_funcs_param, pok_list):
         objective_funcs.append((lambda team: team_coverage_fun(team, pok_list), Q, 0.1))
     if 3 in obj_funcs_param:
         objective_funcs.append((lambda team: self_coverage_fun(team, pok_list), Q, rho))
-    if 4 in obj_funcs_param:
+
+    # Define strategy-specific objective functions
+    if strategy == "gen":
         objective_funcs.append(
             (lambda team: generalist_team_fun(team, pok_list), Q, rho)
         )
-    if 5 in obj_funcs_param:
+    elif strategy == "off":
         objective_funcs.append(
-            (lambda team: offensive_team_fun(team, pok_list), Q, rho)
+            (lambda team: offensive_team_fun(team, pok_list), Q, 0.15)
         )
-    if 6 in obj_funcs_param:
+    elif strategy == "def":
         objective_funcs.append(
             (lambda team: defensive_team_fun(team, pok_list), Q, rho)
         )
@@ -128,6 +130,8 @@ def optimize_team_selection(
         State({"type": "game-multi-select", "suffix": ALL}, "value"),
         State({"type": "mono-type", "suffix": ALL}, "checked"),
         State({"type": "legendaries", "suffix": ALL}, "checked"),
+        State({"type": "strategy", "suffix": ALL}, "value"),
+        State({"type": "roles", "suffix": ALL}, "value"),
         State({"type": "preSelect-selector", "suffix": ALL}, "value"),
         State({"type": "preSelect-move-selector", "suffix": ALL, "move": ALL}, "value"),
         State("screen-width-store", "data"),
@@ -142,6 +146,8 @@ def update_output(
     games,
     mono_type,
     include_legendaries,
+    strategy,
+    roles,
     pre_selected,
     pre_selected_moves,
     screen_width,
@@ -161,6 +167,8 @@ def update_output(
         games = games[idx]
         mono_type = mono_type[idx]
         include_legendaries = include_legendaries[idx]
+        strategy = strategy[idx]
+        roles = roles[idx]
     elif screen_width is None or n_clicks is None:
         return "", "", "", "", False
 
@@ -192,7 +200,9 @@ def update_output(
             raise ValueError("No Pokémon available with current filter selection")
 
         # Define objective functions
-        objective_funcs = define_objective_functions(obj_funcs_param, pok_list)
+        objective_funcs = define_objective_functions(
+            obj_funcs_param, strategy, roles, pok_list
+        )
 
         # Optimize team selection
         start_time = time.time()

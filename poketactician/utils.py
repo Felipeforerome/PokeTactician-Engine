@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 
 from .glob_var import moves
@@ -117,14 +119,12 @@ def getTeamNames(team, pokList):
 
 def antToTeam(ant, pokList: list) -> list:
     team = []
-    for pok in range(ant.__len__()):
-        temp_pok = (
-            Pokemon.from_json(pokList[pok[0]])
-            .teachMove(pok[1])
-            .teachMove(pok[2])
-            .teachMove(pok[3])
-            .teachMove(pok[4])
-        )
+    for pok in ant:
+        temp_pok = deepcopy(pokList[pok[0]])
+        temp_pok.teachMove(pok[1])
+        temp_pok.teachMove(pok[2])
+        temp_pok.teachMove(pok[3])
+        temp_pok.teachMove(pok[4])
         team.append(temp_pok)
     return team
 
