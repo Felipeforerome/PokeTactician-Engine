@@ -225,7 +225,7 @@ class Pokemon:
         :return: Returns total power of the learned moves
         """
         currentPower = 0
-        for learnedMove in self.learnedMoves:
+        for learnedMove in self.learntMoves:
             moveType = learnedMove.type
             movePower = learnedMove.power
             moveDamageClass = learnedMove.damageClass
