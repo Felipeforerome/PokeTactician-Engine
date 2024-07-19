@@ -1,5 +1,4 @@
 import sys
-from math import floor
 
 from components import BlankPokemonTeam, PokemonTeam
 from dash import (
@@ -111,6 +110,7 @@ def optimize_team_selection(
         alpha,
         beta,
     )
+
     m_col.optimize(iters=25, time_limit=None)
     return m_col.getSoln(), m_col.getObjTeamValue()
 
@@ -203,7 +203,6 @@ def update_output(
         objective_funcs = define_objective_functions(
             obj_funcs_param, strategy, roles, pok_list
         )
-
         # Optimize team selection
         start_time = time.time()
         team, obj_value = optimize_team_selection(

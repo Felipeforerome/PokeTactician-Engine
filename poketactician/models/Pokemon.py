@@ -206,7 +206,10 @@ class Pokemon:
 
         :param int: The index of the knowable move to teach.
         """
-        self.learntMoves += [self.knowableMoves[int]]
+        if len(self.learntMoves) < 4:
+            self.learntMoves += [self.knowableMoves[int]]
+        else:
+            raise ValueError("Can't teach more than 4 moves")
 
     def overallStats(self):
         """
