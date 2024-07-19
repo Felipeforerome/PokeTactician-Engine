@@ -7,7 +7,6 @@ from .models.Roles import *
 from .models.Team import Team
 from .models.Types import typeChart, typeOrder
 from .utils import (
-    currentPower,
     dominatedCandSet,
     getLearnedMoves,
     getMoveWeakness,
