@@ -19,9 +19,9 @@ class Move:
         self.pp = pp
         self.priority = priority
 
-    @staticmethod
-    def from_json(moveJSON):
-        return Move(
+    @classmethod
+    def from_json(cls, moveJSON):
+        return cls(
             moveJSON["id"],
             moveJSON["name"],
             moveJSON["type"],

@@ -1,9 +1,9 @@
 import random
-from collections import Counter
 from math import ceil
 
 import numpy as np
-from numpy import array
+
+from .models.Team import Team
 
 
 class Colony:
@@ -18,6 +18,7 @@ class Colony:
         beta,
         Q,
         rho,
+        roles=[],
     ):
         self.pop_size = pop_sizeParam
         # objFunParam should be a lambda function
@@ -29,6 +30,9 @@ class Colony:
         # Set PreSelected Pokemon and Moves
         self.preSelectedPok = preSelected
         self.preSelectedMoves = preSelectedMoves
+
+        # Set Roles
+        self.roles = roles
 
         # Set Meta Params
         self.alpha = alpha
@@ -80,73 +84,85 @@ class Colony:
             self.H_Atts.append(np.zeros(size))
 
         # Create Population$
-        # TODO Change to min(6, len(self.poks)) to 6 in case incomplete teams are not allowed
+        # TODO Change min(6, len(self.poks)) to 6 in case incomplete teams are not allowed
         self.Pop = np.ones([self.pop_size, min(6, len(self.poks)), 5], dtype=int) * (-1)
 
         # Initial Run of the Meta-Heuristic
         self.ACO()
 
+    def role_constraint(self, ant):
+        team = Team.ant_to_team(ant, self.poks)
+        team.team_has_roles(self.roles)
+        return True
+
+    def create_ant(self):
+        # TODO Run more tests vectorized and non-vectorized versions they tend to give different results
+        # TODO Allow Repeating even if not all pokemon have been used
+
+        ######### Vectorized
+        ant = np.ones([min(6, len(self.poks)), 5], dtype=int) * (-1)
+        team_size = min(len(self.poks), 6)
+        preSelected_size = len(self.preSelectedPok)
+        ant[0:preSelected_size, 0] = self.preSelectedPok
+        if preSelected_size < team_size:
+
+            # Renormalize Probabilities
+            self.Prob_Poks[self.preSelectedPok] = 0
+            self.Prob_Poks /= self.Prob_Poks.sum()
+            ant[preSelected_size:, 0] = np.random.choice(
+                len(self.Prob_Poks),
+                size=team_size - preSelected_size,
+                replace=False,
+                p=self.Prob_Poks,
+            )
+        # if replacePok:
+        #     ant[len(self.poks) :, 0] = np.random.choice(
+        #         len(self.Prob_Poks),
+        #         size=6 - team_size,
+        #         p=self.Prob_Poks,
+        #     )
+        for ant_i in range(ant.shape[0]):
+            pokemon = ant[ant_i]
+            selected_pokemon_id = pokemon[0]
+            ######### NonVectorized
+            prob_att_temp = self.Prob_Att[selected_pokemon_id].copy()
+            for i in range(1, 5):
+                if ant_i < len(self.preSelectedMoves) and i - 1 < len(
+                    self.preSelectedMoves[ant_i]
+                ):
+                    pokemon[i] = self.preSelectedMoves[ant_i][i - 1]
+                    prob_att_temp[self.preSelectedMoves[ant_i][i - 1]] = 0
+                elif prob_att_temp.size - i > 0:
+                    rand_att = random.random() * prob_att_temp.sum()
+                    cumulative_att_prob = np.cumsum(prob_att_temp)
+                    selected_attack_id = np.argmax(rand_att <= cumulative_att_prob)
+
+                    pokemon[i] = selected_attack_id
+                    prob_att_temp[selected_attack_id] = 0
+                else:
+                    pokemon[i] = -1
+            ######### Vectorized
+            # Get Knowable Moves
+            # prob_att_temp = self.Prob_Att[selected_pokemon_id]
+            # # TODO Ensure no repeated attacks and if the pokemon has less than 4 attacks, fill with -1 the remaining
+            # num_req_atts = min(4, len(prob_att_temp))
+            # selected_attack_ids = -1 * np.ones(4)
+            # selected_attack_ids[0:num_req_atts] = np.random.choice(
+            #     len(prob_att_temp),
+            #     size=num_req_atts,
+            #     replace=False,
+            #     p=prob_att_temp,
+            # )
+            # pokemon[1:5] = selected_attack_ids
+        return ant
+
     def ACO(self):
         # Assign Population
-        for ant in self.Pop:
-            # TODO Run more tests vectorized and non-vectorized versions they tend to give different results
-            # TODO Allow Repeating even if not all pokemon have been used
-
-            ######### Vectorized
-            team_size = min(len(self.poks), 6)
-            preSelected_size = len(self.preSelectedPok)
-            ant[0:preSelected_size, 0] = self.preSelectedPok
-            if preSelected_size < team_size:
-
-                # Renormalize Probabilities
-                self.Prob_Poks[self.preSelectedPok] = 0
-                self.Prob_Poks /= self.Prob_Poks.sum()
-                ant[preSelected_size:, 0] = np.random.choice(
-                    len(self.Prob_Poks),
-                    size=team_size - preSelected_size,
-                    replace=False,
-                    p=self.Prob_Poks,
-                )
-                ant[preSelected_size:, 0]
-            # if replacePok:
-            #     ant[len(self.poks) :, 0] = np.random.choice(
-            #         len(self.Prob_Poks),
-            #         size=6 - team_size,
-            #         p=self.Prob_Poks,
-            #     )
-            for ant_i in range(ant.shape[0]):
-                pokemon = ant[ant_i]
-                selected_pokemon_id = pokemon[0]
-                ######### NonVectorized
-                prob_att_temp = self.Prob_Att[selected_pokemon_id].copy()
-                for i in range(1, 5):
-                    if ant_i < len(self.preSelectedMoves) and i - 1 < len(
-                        self.preSelectedMoves[ant_i]
-                    ):
-                        pokemon[i] = self.preSelectedMoves[ant_i][i - 1]
-                        prob_att_temp[self.preSelectedMoves[ant_i][i - 1]] = 0
-                    elif prob_att_temp.size - i > 0:
-                        rand_att = random.random() * prob_att_temp.sum()
-                        cumulative_att_prob = np.cumsum(prob_att_temp)
-                        selected_attack_id = np.argmax(rand_att <= cumulative_att_prob)
-
-                        pokemon[i] = selected_attack_id
-                        prob_att_temp[selected_attack_id] = 0
-                    else:
-                        pokemon[i] = -1
-                ######### Vectorized
-                # Get Knowable Moves
-                # prob_att_temp = self.Prob_Att[selected_pokemon_id]
-                # # TODO Ensure no repeated attacks and if the pokemon has less than 4 attacks, fill with -1 the remaining
-                # num_req_atts = min(4, len(prob_att_temp))
-                # selected_attack_ids = -1 * np.ones(4)
-                # selected_attack_ids[0:num_req_atts] = np.random.choice(
-                #     len(prob_att_temp),
-                #     size=num_req_atts,
-                #     replace=False,
-                #     p=prob_att_temp,
-                # )
-                # pokemon[1:5] = selected_attack_ids
+        for i in range(self.pop_size):
+            tempAnt = self.create_ant()
+            while len(self.roles) > 0 and not self.role_constraint(tempAnt):
+                tempAnt = self.create_ant()
+            self.Pop[i] = tempAnt
 
     def updatePhCon(self, candidateSet):
         # User Defined Variables

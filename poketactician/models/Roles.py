@@ -76,7 +76,7 @@ def has_good_stat(pokemon: Pokemon, stats: list) -> float:
     return sum(stat_values) / len(stat_values)
 
 
-def is_Cleric(pokemon: Pokemon) -> float:
+def is_cleric(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a cleric.
 
@@ -107,7 +107,7 @@ def is_Cleric(pokemon: Pokemon) -> float:
     )
 
 
-def is_DualScreener(pokemon: Pokemon) -> float:
+def is_dual_screener(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a dual screener.
 
@@ -122,7 +122,7 @@ def is_DualScreener(pokemon: Pokemon) -> float:
     return has_move(pokemon, ["light-screen", "reflect"]) * has_move(pokemon, ["wish"])
 
 
-def is_Phazer(pokemon: Pokemon) -> float:
+def is_phazer(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a phazer.
 
@@ -140,7 +140,7 @@ def is_Phazer(pokemon: Pokemon) -> float:
     )
 
 
-def is_Stallbreaker(pokemon: Pokemon) -> float:
+def is_stallbreaker(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a stallbreaker.
 
@@ -168,7 +168,7 @@ def is_Stallbreaker(pokemon: Pokemon) -> float:
     )
 
 
-def is_OffensivePivot(pokemon: Pokemon) -> float:
+def is_offensive_pivot(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is an offensive pivot.
 
@@ -197,7 +197,7 @@ def is_OffensivePivot(pokemon: Pokemon) -> float:
 # TODO Add DefensivePivot
 
 
-def is_PhysicalSweeper(pokemon: Pokemon) -> float:
+def is_physical_sweeper(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a physical sweeper.
 
@@ -217,7 +217,7 @@ def is_PhysicalSweeper(pokemon: Pokemon) -> float:
     )
 
 
-def is_SpecialSweeper(pokemon: Pokemon) -> float:
+def is_special_sweeper(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a special sweeper.
 
@@ -237,7 +237,7 @@ def is_SpecialSweeper(pokemon: Pokemon) -> float:
     )
 
 
-def is_Spinner(pokemon: Pokemon) -> float:
+def is_spinner(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a spinner.
 
@@ -252,7 +252,7 @@ def is_Spinner(pokemon: Pokemon) -> float:
     return has_move(pokemon, ["rapid-spin", "defog"])
 
 
-def is_RevengeKiller(pokemon: Pokemon) -> float:
+def is_revenge_killer(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a revenge killer.
 
@@ -271,7 +271,7 @@ def is_RevengeKiller(pokemon: Pokemon) -> float:
     )
 
 
-def is_HazardSetter(pokemon: Pokemon) -> float:
+def is_hazard_setter(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a hazard setter.
 
@@ -289,7 +289,7 @@ def is_HazardSetter(pokemon: Pokemon) -> float:
     )
 
 
-def is_SpinBlocker(pokemon: Pokemon) -> float:
+def is_spin_blocker(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a spin blocker.
 
@@ -304,7 +304,7 @@ def is_SpinBlocker(pokemon: Pokemon) -> float:
     return has_type(pokemon, ["ghost"])
 
 
-def is_StatAbsorberSleep(pokemon: Pokemon) -> float:
+def is_stat_absorber_sleep(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a status absorber.
 
@@ -319,7 +319,7 @@ def is_StatAbsorberSleep(pokemon: Pokemon) -> float:
     return has_move(pokemon, ["rest", "sleep-talk"])
 
 
-def is_StatAbsorberPoison(pokemon: Pokemon) -> float:
+def is_stat_absorber_poison(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a status absorber.
 
@@ -335,7 +335,7 @@ def is_StatAbsorberPoison(pokemon: Pokemon) -> float:
     return has_type(pokemon, ["poison", "steel"])
 
 
-def is_StatAbsorberBurn(pokemon: Pokemon) -> float:
+def is_stat_absorber_burn(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a status absorber.
 
@@ -351,7 +351,7 @@ def is_StatAbsorberBurn(pokemon: Pokemon) -> float:
     return has_type(pokemon, ["fire"])
 
 
-def is_StatAbsorberFreeze(pokemon: Pokemon) -> float:
+def is_stat_absorber_freeze(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a status absorber.
 
@@ -369,7 +369,7 @@ def is_StatAbsorberFreeze(pokemon: Pokemon) -> float:
     return has_type(pokemon, ["ice"])
 
 
-def is_StatAbsorberParalysis(pokemon: Pokemon) -> float:
+def is_stat_absorber_paralysis(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a status absorber.
 
@@ -386,7 +386,7 @@ def is_StatAbsorberParalysis(pokemon: Pokemon) -> float:
     return has_type(pokemon, ["electric"])
 
 
-def is_SuicideLead(pokemon: Pokemon) -> float:
+def is_suicide_lead(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a suicide lead.
 
@@ -410,7 +410,7 @@ def is_SuicideLead(pokemon: Pokemon) -> float:
     )
 
 
-def is_Tank(pokemon: Pokemon) -> float:
+def is_tank(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a tank.
 
@@ -425,7 +425,7 @@ def is_Tank(pokemon: Pokemon) -> float:
     return max(has_good_stat(pokemon, ["deff"]), has_good_stat(pokemon, ["spdeff"]))
 
 
-def is_Trapper(pokemon: Pokemon) -> float:
+def is_trapper(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a trapper.
 
@@ -441,7 +441,7 @@ def is_Trapper(pokemon: Pokemon) -> float:
     return has_ability(pokemon, ["arena-trap", "shadow-tag", "magnet-pull"])
 
 
-def is_ReliableRecovery(pokemon: Pokemon) -> float:
+def is_reliable_recovery(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon has reliable recovery.
 
@@ -468,7 +468,7 @@ def is_ReliableRecovery(pokemon: Pokemon) -> float:
     )
 
 
-def is_Wall(pokemon: Pokemon) -> float:
+def is_wall(pokemon: Pokemon) -> float:
     """
     Determines if a Pokemon is a wall.
 
@@ -481,5 +481,7 @@ def is_Wall(pokemon: Pokemon) -> float:
         bool: True if the Pokemon is a wall, False otherwise.
     """
     return (
-        is_Tank(pokemon) * is_ReliableRecovery(pokemon) * has_good_stat(pokemon, ["hp"])
+        is_tank(pokemon)
+        * is_reliable_recovery(pokemon)
+        * has_good_stat(pokemon, ["hp"])
     )

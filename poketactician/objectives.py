@@ -1,12 +1,12 @@
-from functools import lru_cache, reduce
+from functools import lru_cache
 
 import numpy as np
 
 from .glob_var import moves, pokPreFilter
 from .models.Roles import *
+from .models.Team import Team
 from .models.Types import typeChart, typeOrder
 from .utils import (
-    antToTeam,
     currentPower,
     dominatedCandSet,
     getLearnedMoves,
@@ -17,14 +17,12 @@ from .utils import (
 
 
 def attack_obj_fun(team, pokList):
+    temp_team = Team.ant_to_team(team, pokList)
     return sum(
         list(
             map(
-                lambda x: currentPower(
-                    pokList[x[0]],
-                    getLearnedMoves(pokList, x, [x[1], x[2], x[3], x[4]]),
-                ),
-                team,
+                lambda pokemon: pokemon.currentPower(),
+                temp_team.pokemons,
             )
         )
     )
@@ -162,21 +160,7 @@ def self_coverage_fun(team):
     )
 
 
-def team_roles_fun(team, roles: list = []) -> float:
-    """
-    Calculates the total score of Pokémon in a team that have the specified roles.
-
-    Args:
-        team (list): A list of Pokémon objects representing the team.
-        roles (list, optional): A list of strings representing the roles to check. Defaults to [].
-
-    Returns:
-        float: The total number of Pokémon in the team that have the specified roles.
-    """
-    return sum([pok.isRole(role) for pok in team for role in roles])
-
-
-def generalist_team_fun(team, pokList):
+def generalist_team_fun(ant, pokList):
     """
     Evaluates the given team based on their roles as a hazard setter, spinner, and cleric.
 
@@ -186,12 +170,12 @@ def generalist_team_fun(team, pokList):
     Returns:
         dict: A dictionary containing the evaluation results for each role.
     """
-    roles = [is_HazardSetter, is_Spinner, is_Cleric]
-    team = antToTeam(team, pokList)
-    return team_roles_fun(team, roles)
+    roles = [is_hazard_setter, is_spinner, is_cleric]
+    team = Team.ant_to_team(ant, pokList)
+    return team.team_roles_fun(roles)
 
 
-def defensive_team_fun(team, pokList):
+def defensive_team_fun(ant, pokList):
     """
     Evaluates the given team based on their roles as a cleric, status_move, and Phazer.
 
@@ -202,12 +186,12 @@ def defensive_team_fun(team, pokList):
         dict: A dictionary containing the evaluation results for each role.
     """
     # TODO Missing status move evaluator
-    roles = [is_Wall, is_Phazer]
-    team = antToTeam(team, pokList)
-    return team_roles_fun(team, roles)
+    roles = [is_wall, is_phazer]
+    team = Team.ant_to_team(ant, pokList)
+    return team.team_roles_fun(roles)
 
 
-def offensive_team_fun(team, pokList):
+def offensive_team_fun(ant, pokList):
     """
     Evaluates the given team based on their roles as a Special Sweeper, Physical Sweeper, Choice Item, Boosting Move, and Volt-Switch.
 
@@ -218,6 +202,6 @@ def offensive_team_fun(team, pokList):
         dict: A dictionary containing the evaluation results for each role.
     """
     # TODO Missing status move evaluator
-    roles = [is_SpecialSweeper, is_PhysicalSweeper]
-    team = antToTeam(team, pokList)
-    return team_roles_fun(team, roles)
+    roles = [is_special_sweeper, is_physical_sweeper]
+    team = Team.ant_to_team(ant, pokList)
+    return team.team_roles_fun(roles)

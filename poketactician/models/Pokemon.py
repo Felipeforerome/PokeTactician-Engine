@@ -100,15 +100,15 @@ class Pokemon:
         if not sameTypeClass:
             self.knowableMoves.append(move)
 
-    @staticmethod
-    def from_json(data):
+    @classmethod
+    def from_json(cls, data):
         """
         Creates a Pokemon instance from JSON data.
 
         :param data: The JSON data representing the Pokemon.
         :return: The created Pokemon instance.
         """
-        pokemon = Pokemon(
+        pokemon = cls(
             data["id"],
             data["name"],
             data["hp"],
@@ -218,6 +218,23 @@ class Pokemon:
         :return: The sum of stats.
         """
         return self.hp + self.att + self.deff + self.spatt + self.spdeff + self.spe
+
+    def current_power(self):
+        """
+        Calculates the current power of the pokemon based on Stats, Attacks, and Type
+        :return: Returns total power of the learned moves
+        """
+        currentPower = 0
+        for learnedMove in self.learnedMoves:
+            moveType = learnedMove.type
+            movePower = learnedMove.power
+            moveDamageClass = learnedMove.damageClass
+            moveAccuracy = learnedMove.accuracy
+            stab = 1.5 if (moveType == self.type1 or moveType == self.type2) else 1
+            split = self.att if (moveDamageClass == "physical") else self.spatt
+            expectedPower = (stab * movePower) * split * moveAccuracy
+            currentPower += expectedPower
+        return currentPower
 
     def isRole(self, role_checker) -> bool:
         """

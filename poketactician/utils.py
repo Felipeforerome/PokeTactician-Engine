@@ -2,6 +2,7 @@ import numpy as np
 
 from .glob_var import moves
 from .models.Pokemon import Pokemon
+from .models.Team import Team
 from .models.Types import typeChart, typeOrder
 
 
@@ -51,24 +52,6 @@ def moveTotalCounter(PokemonsList):
     return numberofmoves
 
 
-def currentPower(pok, learnedMoves):
-    """
-    Calculates the current power of the pokemon based on Stats, Attacks, and Type
-    :return: Returns total power of the learned moves
-    """
-    currentPower = 0
-    for learnedMove in learnedMoves:
-        moveType = learnedMove.type
-        movePower = learnedMove.power
-        moveDamageClass = learnedMove.damageClass
-        moveAccuracy = learnedMove.accuracy
-        stab = 1.5 if (moveType == pok.type1 or moveType == pok.type2) else 1
-        split = pok.att if (moveDamageClass == "physical") else pok.spatt
-        expectedPower = (stab * movePower) * split * moveAccuracy
-        currentPower += expectedPower
-    return currentPower
-
-
 def getLearnedMoves(pokemonList, pok, ids):
     # TODO Handle -1 in ids because it has no attack (Like Ditto)
     temp = []
@@ -113,18 +96,6 @@ def hoyerSparseness(x):
 def getTeamNames(team, pokList):
     for pok in team:
         print(pokList[pok[0]].name)
-
-
-def antToTeam(ant, pokList: list) -> list:
-    team = []
-    for pok in ant:
-        temp_pok = Pokemon.from_json(pokList[pok[0]].serialize())
-        temp_pok.teachMove(pok[1])
-        temp_pok.teachMove(pok[2])
-        temp_pok.teachMove(pok[3])
-        temp_pok.teachMove(pok[4])
-        team.append(temp_pok)
-    return team
 
 
 # Add feature to choose cooperation algorithms

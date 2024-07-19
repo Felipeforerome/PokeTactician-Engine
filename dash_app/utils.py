@@ -38,7 +38,8 @@ def generate_roles_list() -> list:
     return [
         {
             "value": role.lower().replace(" ", "_"),
-            "label": " " + re.sub(r"(?<=[a-z])(?=[A-Z])", " ", role[3:]).title(),
+            "label": " "
+            + re.sub(r"(?<=[a-z])(?=[A-Z])", " ", role[3:]).title().replace("_", " "),
         }
         for role in dir(Roles)
         if role.startswith("is_")
