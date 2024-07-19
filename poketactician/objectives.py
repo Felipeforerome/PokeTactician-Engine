@@ -20,7 +20,7 @@ def attack_obj_fun(team, pokList):
     return sum(
         list(
             map(
-                lambda pokemon: pokemon.currentPower(),
+                lambda pokemon: pokemon.current_power(),
                 temp_team.pokemons,
             )
         )
