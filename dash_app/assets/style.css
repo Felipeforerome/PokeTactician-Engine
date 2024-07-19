@@ -29,3 +29,7 @@
         display: none;
     }
 }
+
+.mantine-Accordion-content {
+    padding-left: 0;
+}

@@ -1,9 +1,13 @@
 import json
+import sys
 
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 from dash import dcc, html
 from dash_iconify import DashIconify
+
+sys.path.append(sys.path[0] + "/..")
+from utils import generate_roles_list
 
 
 class PokemonCard:
@@ -292,6 +296,50 @@ def filterComponents(suffix):
             onLabel="Yes",
             checked=False,
             id={"type": "legendaries", "suffix": suffix},
+        ),
+        html.Br(),
+        dmc.Divider(variant="solid"),
+        dmc.Accordion(
+            children=[
+                dmc.AccordionItem(
+                    [
+                        dmc.AccordionControl(
+                            "Strategy & Roles",
+                            style={"paddingLeft": 0},
+                        ),
+                        dmc.AccordionPanel(
+                            style={"paddingLeft": 0},
+                            children=[
+                                dmc.Text("Styles of Play", size="sm"),
+                                dmc.SegmentedControl(
+                                    id={"type": "strategy", "suffix": suffix},
+                                    orientation="vertical",
+                                    fullWidth=True,
+                                    data=[
+                                        {"value": "no", "label": "None"},
+                                        {"value": "gen", "label": "Generalist"},
+                                        {"value": "off", "label": "Offensive"},
+                                        {"value": "def", "label": "Defensive"},
+                                    ],
+                                ),
+                            ],
+                        ),
+                        dmc.AccordionPanel(
+                            children=[
+                                dmc.Text("Roles", size="sm"),
+                                dcc.Checklist(
+                                    options=generate_roles_list(),
+                                    id={"type": "roles", "suffix": suffix},
+                                    inputClassName="form-check-input",
+                                    # inputStyle={"marginRight": 5},
+                                ),
+                            ],
+                        ),
+                    ],
+                    value="info",
+                )
+            ],
+            style={"paddingLeft": 0},
         ),
         html.Br(),
         dmc.Button(

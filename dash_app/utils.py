@@ -1,4 +1,7 @@
+import re
+
 from poketactician.glob_var import pokPreFilter
+from poketactician.models import Roles
 
 
 def generate_move_list_and_selector_status(
@@ -29,3 +32,15 @@ def generate_move_list_and_selector_status(
         ]
         moveSelectorDisabled = False
     return moveList, moveSelectorDisabled
+
+
+def generate_roles_list() -> list:
+    return [
+        {
+            "value": role.lower().replace(" ", "_"),
+            "label": " "
+            + re.sub(r"(?<=[a-z])(?=[A-Z])", " ", role[3:]).title().replace("_", " "),
+        }
+        for role in dir(Roles)
+        if role.startswith("is_")
+    ]
