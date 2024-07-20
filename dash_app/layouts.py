@@ -115,7 +115,12 @@ layout = html.Div(
                     padding="md",
                     zIndex=10000,
                     opened=False,
-                    children=drawerFilterComponents,
+                    children=dmc.ScrollArea(
+                        offsetScrollbars=True,
+                        type="scroll",
+                        style={"height": "100vh"},
+                        children=drawerFilterComponents,
+                    ),
                 ),
                 # Container for results
                 dmc.Container(
