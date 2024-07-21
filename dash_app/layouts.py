@@ -94,12 +94,13 @@ layout = html.Div(
             style={
                 "backgroundColor": "#3E65AB",
                 "padding": "10px",
-                "marginBottom": "25px",
             },
         ),
         # Main content flex container
         html.Div(
-            style={"display": "flex", "height": "calc(100vh - 56px)"},
+            style={
+                "display": "flex",
+            },
             children=[
                 # NavBar for filters
                 dmc.Navbar(
@@ -118,7 +119,7 @@ layout = html.Div(
                     children=dmc.ScrollArea(
                         offsetScrollbars=True,
                         type="scroll",
-                        style={"height": "100vh"},
+                        style={"height": "85vh"},
                         children=drawerFilterComponents,
                     ),
                 ),
