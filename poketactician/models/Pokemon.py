@@ -1,61 +1,61 @@
+from dataclasses import dataclass, field
+
 from .Move import Move
+from .Types import PokemonType
 
 
+@dataclass
 class Pokemon:
-    def __init__(
-        self,
-        id,
-        name,
-        hp,
-        att,
-        deff,
-        spatt,
-        spdeff,
-        spe,
-        type1,
-        type2,
-        mythical,
-        legendary,
-        battleOnly,
-        mega,
-        games=None,
-    ):
-        """
-        Represents a Pokemon with its attributes and moves.
+    """
+    Represents a Pokemon with its attributes and moves.
 
-        :param id: The ID of the Pokemon.
-        :param name: The name of the Pokemon.
-        :param hp: The HP (Hit Points) of the Pokemon.
-        :param att: The Attack stat of the Pokemon.
-        :param deff: The Defense stat of the Pokemon.
-        :param spatt: The Special Attack stat of the Pokemon.
-        :param spdeff: The Special Defense stat of the Pokemon.
-        :param spe: The Speed stat of the Pokemon.
-        :param type1: The primary type of the Pokemon.
-        :param type2: The secondary type of the Pokemon.
-        :param mythical: Whether the Pokemon is mythical or not.
-        :param legendary: Whether the Pokemon is legendary or not.
-        :param battleOnly: Whether the Pokemon is only available in battles or not.
-        :param mega: Whether the Pokemon is a mega evolution or not.
-        :param games: The games in which the Pokemon appears (optional).
-        """
-        self.id = id
-        self.name = name
-        self.hp = hp
-        self.att = att
-        self.deff = deff
-        self.spatt = spatt
-        self.spdeff = spdeff
-        self.spe = spe
-        self.type1 = type1
-        self.type2 = type2
-        self.knowableMoves = []
-        self.learntMoves = []
-        self.mythical = mythical
-        self.legendary = legendary
-        self.battleOnly = battleOnly  # Assign the battleOnly attribute
-        self.mega = mega  # Assign the battleOnly attribute
-        self.games = games
+    Attributes:
+        id (int): The ID of the Pokemon.
+        name (str): The name of the Pokemon.
+        hp (int): The hit points of the Pokemon.
+        att (int): The attack stat of the Pokemon.
+        deff (int): The defense stat of the Pokemon.
+        spatt (int): The special attack stat of the Pokemon.
+        spdeff (int): The special defense stat of the Pokemon.
+        spe (int): The speed stat of the Pokemon.
+        type1 (PokemonType): The primary type of the Pokemon.
+        type2 (PokemonType): The secondary type of the Pokemon.
+        knowableMoves (list): The list of moves that the Pokemon can potentially learn.
+        learntMoves (list): The list of moves that the Pokemon has learned.
+        mythical (bool): Indicates if the Pokemon is mythical.
+        legendary (bool): Indicates if the Pokemon is legendary.
+        battleOnly (bool): Indicates if the Pokemon is only available in battles.
+        mega (bool): Indicates if the Pokemon has a mega evolution.
+        games (list): The list of games in which the Pokemon appears.
+
+    Methods:
+        addKnowableMove(move): Adds a move to the list of knowable moves.
+        from_json(data): Creates a Pokemon instance from JSON data.
+        serialize(): Serializes the Pokemon instance into a dictionary.
+        serialize_instance(): Serializes the Pokemon instance into a dictionary.
+        teachMove(index): Adds a knowable move to the learnt moves list.
+        overallStats(): Calculates the sum of stats.
+        current_power(): Calculates the current power of the Pokemon based on stats, attacks, and type.
+        isRole(role_checker): Checks if the Pokemon fulfills a specific role.
+    """
+
+    id: int
+    name: str
+    hp: int
+    att: int
+    deff: int
+    spatt: int
+    spdeff: int
+    spe: int
+    type1: PokemonType
+    type2: PokemonType
+    knowableMoves: list = field(default_factory=list)
+    learntMoves: list = field(default_factory=list)
+    mythical: bool
+    legendary: bool
+    battleOnly: bool
+    mega: bool
+    games: list = field(default_factory=list)
 
     def addKnowableMove(self, move):
         """
@@ -117,8 +117,8 @@ class Pokemon:
             data["spatt"],
             data["spdeff"],
             data["spe"],
-            data["type1"],
-            data["type2"],
+            PokemonType(data["type1"]),
+            PokemonType(data["type2"]),
             data["mythical"],
             data["legendary"],
             data["battleOnly"],  # Include battleOnly attribute
@@ -131,14 +131,14 @@ class Pokemon:
             pokemon.addKnowableMove(move)
         return pokemon
 
-    def serialize(pokemon):
+    def serialize(self):
         """
         Serializes the Pokemon instance into a dictionary.
 
         :param pokemon: The Pokemon instance to serialize.
         :return: The serialized dictionary.
         """
-        serialized_moves = [move.serialize() for move in pokemon.knowableMoves]
+        serialized_moves = [move.serialize() for move in self.knowableMoves]
         # Prevent empty move list
         if serialized_moves.__len__() == 0:
             serialized_moves.append(
@@ -156,22 +156,22 @@ class Pokemon:
                 ).serialize()
             )
         return {
-            "id": pokemon.id,
-            "name": pokemon.name,
-            "hp": pokemon.hp,
-            "att": pokemon.att,
-            "deff": pokemon.deff,
-            "spatt": pokemon.spatt,
-            "spdeff": pokemon.spdeff,
-            "spe": pokemon.spe,
-            "type1": pokemon.type1,
-            "type2": pokemon.type2,
-            "mythical": pokemon.mythical,
-            "legendary": pokemon.legendary,
-            "battleOnly": pokemon.battleOnly,  # Include battleOnly attribute
-            "mega": pokemon.mega,  # Include battleOnly attribute
+            "id": self.id,
+            "name": self.name,
+            "hp": self.hp,
+            "att": self.att,
+            "deff": self.deff,
+            "spatt": self.spatt,
+            "spdeff": self.spdeff,
+            "spe": self.spe,
+            "type1": self.type1,
+            "type2": self.type2,
+            "mythical": self.mythical,
+            "legendary": self.legendary,
+            "battleOnly": self.battleOnly,  # Include battleOnly attribute
+            "mega": self.mega,  # Include battleOnly attribute
             "knowableMoves": serialized_moves,
-            "games": pokemon.games,  # Include games in serialized output
+            "games": self.games,  # Include games in serialized output
         }
 
     def serialize_instance(self):

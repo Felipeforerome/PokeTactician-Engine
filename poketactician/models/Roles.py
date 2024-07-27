@@ -1,6 +1,8 @@
 # https://www.smogon.com/dp/articles/pokemon_dictionary
 from poketactician.models import Move
 from poketactician.models.model_utils import process_items
+from poketactician.models.Move import DamageClass
+from poketactician.models.Types import PokemonType
 
 from .Pokemon import Pokemon
 
@@ -72,7 +74,9 @@ def has_good_stat(pokemon: Pokemon, stats: list) -> float:
     """
     # If threshold needs to vary, create here a dictionary with the stat as key and the threshold as value.
     # If it needs to vary even more, update this t take a dicttionary with stat as key and threshold as value
-    stat_values = [getattr(pokemon, stat) / 100 for stat in stats]
+
+    good_stat_threshold = 100
+    stat_values = [getattr(pokemon, stat) / good_stat_threshold for stat in stats]
     return sum(stat_values) / len(stat_values)
 
 
@@ -212,7 +216,9 @@ def is_physical_sweeper(pokemon: Pokemon) -> float:
     # TODO See if it makes sense to check for physical stat-improving moves
     return (
         has_good_stat(pokemon, ["att"])
-        * sum([move.damageClass == "physical" for move in pokemon.learntMoves])
+        * sum(
+            [move.damageClass == DamageClass.PHYSICAL for move in pokemon.learntMoves]
+        )
         * 0.25
     )
 
@@ -232,7 +238,7 @@ def is_special_sweeper(pokemon: Pokemon) -> float:
     # TODO See if it makes sense to check for special stat-improving moves
     return (
         has_good_stat(pokemon, ["spatt"])
-        * sum([move.damageClass == "special" for move in pokemon.learntMoves])
+        * sum([move.damageClass == DamageClass.SPECIAL for move in pokemon.learntMoves])
         * 0.25
     )
 
@@ -301,7 +307,7 @@ def is_spin_blocker(pokemon: Pokemon) -> float:
     Returns:
         bool: True if the Pokemon is a spin blocker, False otherwise.
     """
-    return has_type(pokemon, ["ghost"])
+    return has_type(pokemon, [PokemonType.GHOST])
 
 
 def is_stat_absorber_sleep(pokemon: Pokemon) -> float:
@@ -332,7 +338,7 @@ def is_stat_absorber_poison(pokemon: Pokemon) -> float:
         bool: True if the Pokemon is a status absorber, False otherwise.
     """
     # TODO Add abilities like immunity and Poison Heal
-    return has_type(pokemon, ["poison", "steel"])
+    return has_type(pokemon, [PokemonType.POISON, PokemonType.STEEL])
 
 
 def is_stat_absorber_burn(pokemon: Pokemon) -> float:
@@ -348,7 +354,7 @@ def is_stat_absorber_burn(pokemon: Pokemon) -> float:
         bool: True if the Pokemon is a status absorber, False otherwise.
     """
     # TODO Add abilities like Water Veil, Water Bubble, Flash Fire, Guts, Magic Guard,
-    return has_type(pokemon, ["fire"])
+    return has_type(pokemon, [PokemonType.FIRE])
 
 
 def is_stat_absorber_freeze(pokemon: Pokemon) -> float:
@@ -366,7 +372,7 @@ def is_stat_absorber_freeze(pokemon: Pokemon) -> float:
     # TODO Add abilities like Magma Armor, Flame Body, Ice Body, Comatose or Purifying Salt, having flash fire,
     # is negative since it prevents fire-type moves from thawing the user
     # There are also partial helps like having Natural Care, Hydration, Shed Skin
-    return has_type(pokemon, ["ice"])
+    return has_type(pokemon, [PokemonType.ICE])
 
 
 def is_stat_absorber_paralysis(pokemon: Pokemon) -> float:
@@ -383,7 +389,7 @@ def is_stat_absorber_paralysis(pokemon: Pokemon) -> float:
     """
     # TODO Add abilities like Limber, Electric Surge, Electric Skin, Quick Feet, Guts, Magic Guard.
     # Being ground could also give something since most paralysis causing moves are electric
-    return has_type(pokemon, ["electric"])
+    return has_type(pokemon, [PokemonType.ELECTRIC])
 
 
 def is_suicide_lead(pokemon: Pokemon) -> float:

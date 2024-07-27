@@ -1,9 +1,11 @@
+from dataclasses import dataclass, field
+
 from .Pokemon import Pokemon
 
 
+@dataclass
 class Team:
-    def __init__(self):
-        self.pokemons = []
+    pokemons: list = field(default_factory=list)
 
     def addPokemon(self, pokemon):
         if len(self.pokemons) < 6:
