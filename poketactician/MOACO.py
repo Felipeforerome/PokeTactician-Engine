@@ -129,7 +129,7 @@ class MOACO:
         """
         coopCandSet = deepcopy(
             dominatedCandSet(
-                [colony.candidateSet() for colony in self.colonies],
+                [colony.candidate_set() for colony in self.colonies],
                 [objFunc[0] for objFunc in self.objFuncs_Q_rho],
             )
         )
@@ -183,7 +183,7 @@ class MOACO:
         """
         currentCandSet = deepcopy(
             dominatedCandSet(
-                [colony.candidateSet() for colony in self.colonies],
+                [colony.candidate_set() for colony in self.colonies],
                 [objFunc[0] for objFunc in self.objFuncs_Q_rho],
             )
         )
@@ -231,7 +231,7 @@ class MOACO:
                 tempPokemon = deepcopy(self.pokemonPop[pok[0]])
                 for move_index in pok[1:]:
                     tempPokemon.teachMove(move_index)
-                team.addPokemon(tempPokemon)
+                team.add_pokemon(tempPokemon)
             return team
         else:
             raise Exception("Optimization has not been run.")

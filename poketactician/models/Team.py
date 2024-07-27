@@ -7,7 +7,7 @@ from .Pokemon import Pokemon
 class Team:
     pokemons: list = field(default_factory=list)
 
-    def addPokemon(self, pokemon):
+    def add_pokemon(self, pokemon):
         if len(self.pokemons) < 6:
             self.pokemons += [pokemon]
         else:
@@ -22,7 +22,7 @@ class Team:
             temp_pok.teachMove(pok[2])
             temp_pok.teachMove(pok[3])
             temp_pok.teachMove(pok[4])
-            team.addPokemon(temp_pok)
+            team.add_pokemon(temp_pok)
         return team
 
     def team_has_roles(self, roles):
