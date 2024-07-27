@@ -42,9 +42,9 @@ class PokemonCard:
                             dmc.Group(
                                 children=[
                                     dmc.Image(
-                                        src=f"/assets/{pokType}.png",
+                                        src=f"/assets/{pokType.value}.png",
                                         width=30,
-                                        alt=pokType.capitalize(),
+                                        alt=pokType.value.capitalize(),
                                     )
                                     for pokType in [pokemon["type1"], pokemon["type2"]]
                                     if pokType is not None

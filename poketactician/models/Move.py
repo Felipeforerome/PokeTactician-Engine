@@ -29,11 +29,11 @@ class Move:
     id: str
     name: str
     type: PokemonType
-    damageClass: str
+    damageClass: DamageClass
     power: int = field(default=0)
     accuracy: int = field(default=1)
-    pp: int
-    priority: int
+    pp: int = field(default=0)
+    priority: int = field(default=0)
 
     def post_init(self):
         self.power = self.power if self.power is not None else 0
@@ -48,7 +48,7 @@ class Move:
         return cls(
             moveJSON["id"],
             moveJSON["name"],
-            PokemonType(moveJSON["type"]),
+            PokemonType(moveJSON["type"].lower()),
             DamageClass(moveJSON["damageClass"]),
             moveJSON["power"],
             moveJSON["accuracy"],

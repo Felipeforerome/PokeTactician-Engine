@@ -49,13 +49,13 @@ class Pokemon:
     spe: int
     type1: PokemonType
     type2: PokemonType
-    knowableMoves: list = field(default_factory=list)
-    learntMoves: list = field(default_factory=list)
     mythical: bool
     legendary: bool
     battleOnly: bool
     mega: bool
     games: list = field(default_factory=list)
+    knowableMoves: list = field(default_factory=list)
+    learntMoves: list = field(default_factory=list)
 
     def addKnowableMove(self, move):
         """
@@ -118,7 +118,7 @@ class Pokemon:
             data["spdeff"],
             data["spe"],
             PokemonType(data["type1"]),
-            PokemonType(data["type2"]),
+            PokemonType(data["type2"]) if data["type2"] else None,
             data["mythical"],
             data["legendary"],
             data["battleOnly"],  # Include battleOnly attribute
