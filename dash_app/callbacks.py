@@ -97,7 +97,7 @@ def optimize_team_selection(
         beta,
     )
 
-    m_col.optimize(iters=3, time_limit=None)
+    m_col.optimize(iters=25, time_limit=None)
     return m_col.get_solution(), m_col.get_objective_value()
 
 
