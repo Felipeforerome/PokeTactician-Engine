@@ -79,7 +79,7 @@ def build_data(recalculateMoves):
                 "id": "0",
                 "name": "no-move",
                 "type": "Normal",
-                "damageClass": "physical",
+                "damage_class": "physical",
                 "power": 1,
                 "accuracy": 0,
                 "pp": 0,
@@ -170,7 +170,7 @@ def build_data(recalculateMoves):
             for availableMove in availableMoves:
                 number = availableMove["move"]["id"]
                 appendMove = Moves[str(number)]
-                tempPoke.addKnowableMove(appendMove)
+                tempPoke.add_knowable_move(appendMove)
 
             Pokemons.append(tempPoke)
             movesTotal += pokemonJSON["moves"].__len__()

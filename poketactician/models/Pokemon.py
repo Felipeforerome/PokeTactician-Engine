@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from .Move import Move
+from .Move import DamageClass, Move
 from .Types import PokemonType
 
 
@@ -20,7 +20,7 @@ class Pokemon:
         spe (int): The speed stat of the Pokemon.
         type1 (PokemonType): The primary type of the Pokemon.
         type2 (PokemonType): The secondary type of the Pokemon.
-        knowableMoves (list): The list of moves that the Pokemon can potentially learn.
+        knowable_moves (list): The list of moves that the Pokemon can potentially learn.
         learntMoves (list): The list of moves that the Pokemon has learned.
         mythical (bool): Indicates if the Pokemon is mythical.
         legendary (bool): Indicates if the Pokemon is legendary.
@@ -34,7 +34,7 @@ class Pokemon:
         serialize(): Serializes the Pokemon instance into a dictionary.
         serialize_instance(): Serializes the Pokemon instance into a dictionary.
         teachMove(index): Adds a knowable move to the learnt moves list.
-        overallStats(): Calculates the sum of stats.
+        overall_stats(): Calculates the sum of stats.
         current_power(): Calculates the current power of the Pokemon based on stats, attacks, and type.
         isRole(role_checker): Checks if the Pokemon fulfills a specific role.
     """
@@ -51,54 +51,57 @@ class Pokemon:
     type2: PokemonType
     mythical: bool
     legendary: bool
-    battleOnly: bool
+    battle_only: bool
     mega: bool
     games: list = field(default_factory=list)
-    knowableMoves: list = field(default_factory=list)
-    learntMoves: list = field(default_factory=list)
+    knowable_moves: list = field(default_factory=list)
+    learnt_moves: list = field(default_factory=list)
 
-    def addKnowableMove(self, move):
+    def add_knowable_move(self, move):
         """
         TODO This should be changed once more info about the moves is added, like effects or whatever. Right now it does reduce the decision space
         Adds move to list of knowable move if it has power greater to 0, its between the best 3 moves wtht that type and class
         :param move: Move to add
         """
-        sameTypeClass = False
-        sameTypeClassMoves = []
-        numTypeClass = 0
+        same_type_class = False
+        same_type_class_moves = []
+        num_type_class = 0
         if move.power == 0:
             return
 
-        for knownMove in self.knowableMoves:
-            diffType = knownMove.type != move.type
-            diffClass = knownMove.damageClass != move.damageClass
-            if diffType or diffClass:
+        for known_move in self.knowable_moves:
+            diff_type = known_move.type != move.type
+            diff_class = known_move.damage_class != move.damage_class
+            if diff_type or diff_class:
                 continue
             else:
-                numTypeClass = numTypeClass + 1
-                sameTypeClassMoves.append(knownMove)
-                lenTypeClassMoves = sameTypeClassMoves.__len__()
+                num_type_class = num_type_class + 1
+                same_type_class_moves.append(known_move)
+                num_same_type_class_moves = same_type_class_moves.__len__()
 
-                if lenTypeClassMoves == 3:
-                    sameTypeClass = True
-                    sameTypeClassMoves.sort(key=lambda x: x.power * x.accuracy)
-                    for knownTypeClass in sameTypeClassMoves:
-                        increasedPowerAccuracy = (
-                            knownTypeClass.power * knownTypeClass.accuracy
+                if num_same_type_class_moves == 3:
+                    same_type_class = True
+                    same_type_class_moves.sort(key=lambda x: x.power * x.accuracy)
+                    for known_type_class in same_type_class_moves:
+                        increased_power_accuracy = (
+                            known_type_class.power * known_type_class.accuracy
                             <= move.power * move.accuracy
                         )
-                        increasedPP = knownMove.pp * 0.75 <= move.pp
+                        increased_pp = known_move.pp * 0.75 <= move.pp
 
-                        if increasedPowerAccuracy:
-                            if increasedPP or knownTypeClass.power + 30 <= move.power:
-                                self.knowableMoves.remove(knownTypeClass)
-                                self.knowableMoves.append(move)
+                        if increased_power_accuracy:
+                            if (
+                                increased_pp
+                                or known_type_class.power + 30 <= move.power
+                            ):
+                                self.knowable_moves.remove(known_type_class)
+                                self.knowable_moves.append(move)
                                 return
                         else:
                             return
 
-        if not sameTypeClass:
-            self.knowableMoves.append(move)
+        if not same_type_class:
+            self.knowable_moves.append(move)
 
     @classmethod
     def from_json(cls, data):
@@ -125,10 +128,10 @@ class Pokemon:
             data["mega"],  # Include mega attribute
             data["games"],
         )
-        moves = [Move.from_json(move_data) for move_data in data["knowableMoves"]]
+        moves = [Move.from_json(move_data) for move_data in data["knowable_moves"]]
 
         for move in moves:
-            pokemon.addKnowableMove(move)
+            pokemon.add_knowable_move(move)
         return pokemon
 
     def serialize(self):
@@ -138,7 +141,7 @@ class Pokemon:
         :param pokemon: The Pokemon instance to serialize.
         :return: The serialized dictionary.
         """
-        serialized_moves = [move.serialize() for move in self.knowableMoves]
+        serialized_moves = [move.serialize() for move in self.knowable_moves]
         # Prevent empty move list
         if serialized_moves.__len__() == 0:
             serialized_moves.append(
@@ -147,7 +150,7 @@ class Pokemon:
                         "id": "0",
                         "name": "no-move",
                         "type": "Normal",
-                        "damageClass": "physical",
+                        "damage_class": "physical",
                         "power": 1,
                         "accuracy": 0,
                         "pp": 0,
@@ -164,13 +167,13 @@ class Pokemon:
             "spatt": self.spatt,
             "spdeff": self.spdeff,
             "spe": self.spe,
-            "type1": self.type1,
-            "type2": self.type2,
+            "type1": self.type1.value,
+            "type2": self.type2.value if self.type2 else None,
             "mythical": self.mythical,
             "legendary": self.legendary,
-            "battleOnly": self.battleOnly,  # Include battleOnly attribute
+            "battleOnly": self.battle_only,  # Include battleOnly attribute
             "mega": self.mega,  # Include battleOnly attribute
-            "knowableMoves": serialized_moves,
+            "knowable_moves": serialized_moves,
             "games": self.games,  # Include games in serialized output
         }
 
@@ -180,7 +183,7 @@ class Pokemon:
 
         :return: The serialized dictionary.
         """
-        serialized_moves = [move.serialize() for move in self.learntMoves]
+        serialized_moves = [move.serialize() for move in self.learnt_moves]
         return {
             "id": self.id,
             "name": self.name,
@@ -190,28 +193,28 @@ class Pokemon:
             "spatt": self.spatt,
             "spdeff": self.spdeff,
             "spe": self.spe,
-            "type1": self.type1,
-            "type2": self.type2,
+            "type1": self.type1.value,
+            "type2": self.type2.value if self.type2 else None,
             "mythical": self.mythical,
             "legendary": self.legendary,
-            "battleOnly": self.battleOnly,  # Include battleOnly attribute
+            "battleOnly": self.battle_only,  # Include battleOnly attribute
             "mega": self.mega,  # Include battleOnly attribute
             "moves": serialized_moves,
             "games": self.games,
         }
 
-    def teachMove(self, int):
+    def teach_move(self, int):
         """
         Adds a knowable move to the learnt moves list.
 
         :param int: The index of the knowable move to teach.
         """
-        if len(self.learntMoves) < 4:
-            self.learntMoves += [self.knowableMoves[int]]
+        if len(self.learnt_moves) < 4:
+            self.learnt_moves += [self.knowable_moves[int]]
         else:
             raise ValueError("Can't teach more than 4 moves")
 
-    def overallStats(self):
+    def overall_stats(self):
         """
         Calculates the sum of stats.
 
@@ -224,17 +227,19 @@ class Pokemon:
         Calculates the current power of the pokemon based on Stats, Attacks, and Type
         :return: Returns total power of the learned moves
         """
-        currentPower = 0
-        for learnedMove in self.learntMoves:
-            moveType = learnedMove.type
-            movePower = learnedMove.power
-            moveDamageClass = learnedMove.damageClass
-            moveAccuracy = learnedMove.accuracy
-            stab = 1.5 if (moveType == self.type1 or moveType == self.type2) else 1
-            split = self.att if (moveDamageClass == "physical") else self.spatt
-            expectedPower = (stab * movePower) * split * moveAccuracy
-            currentPower += expectedPower
-        return currentPower
+        current_power = 0
+        for learned_move in self.learnt_moves:
+            move_type = learned_move.type
+            move_power = learned_move.power
+            move_damage_class = learned_move.damage_class
+            move_accuracy = learned_move.accuracy
+            stab = 1.5 if (move_type == self.type1 or move_type == self.type2) else 1
+            split = (
+                self.att if (move_damage_class == DamageClass.PHYSICAL) else self.spatt
+            )
+            expected_power = (stab * move_power) * split * move_accuracy
+            current_power += expected_power
+        return current_power
 
     def isRole(self, role_checker) -> bool:
         """

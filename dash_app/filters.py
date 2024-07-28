@@ -1,5 +1,12 @@
-def filterTypes(pokPreFilter, includedTypes, monoType):
+from poketactician.models.Pokemon import Pokemon
+from poketactician.models.Types import PokemonType
+
+
+def filterTypes(
+    pokPreFilter: list[Pokemon], includedTypes: list[PokemonType], monoType: bool
+):
     if len(includedTypes) > 0:
+        includedTypes = [PokemonType(includedType) for includedType in includedTypes]
         pokList = (
             [
                 pok
@@ -23,7 +30,7 @@ def filterTypes(pokPreFilter, includedTypes, monoType):
 
 
 # Function to check if an id is within any of the provided ranges
-def filterGenerations(pokPreFilter, gens):
+def filterGenerations(pokPreFilter: list[Pokemon], gens: list):
     def is_id_in_range(id, ranges):
         for start, end in ranges:
             if start <= id <= end:
@@ -40,7 +47,7 @@ def filterGenerations(pokPreFilter, gens):
 
 
 # Function to filter legendaries and mythicals
-def filterLegendaries(pokPreFilter, legendaries):
+def filterLegendaries(pokPreFilter: list[Pokemon], legendaries: bool):
     if legendaries:
         pokList = pokPreFilter
     else:
@@ -49,17 +56,17 @@ def filterLegendaries(pokPreFilter, legendaries):
 
 
 # Function to remove mega evolutions
-def removeMegas(pokPreFilter):
+def removeMegas(pokPreFilter: list[Pokemon]):
     return [pok for pok in pokPreFilter if not pok.mega]
 
 
 # Function to remove battle only forms
-def removeBattleOnly(pokPreFilter):
-    return [pok for pok in pokPreFilter if not pok.battleOnly]
+def removeBattleOnly(pokPreFilter: list[Pokemon]):
+    return [pok for pok in pokPreFilter if not pok.battle_only]
 
 
 # Function to filter pokemon by games
-def filterGames(pokPreFilter, games):
+def filterGames(pokPreFilter: list[Pokemon], games: list[str]):
     if len(games) < 1:
         pokList = pokPreFilter
     else:
@@ -71,7 +78,7 @@ def filterGames(pokPreFilter, games):
 
 
 # Function to unremove preselected pokemon
-def splitPreSelected(pokPreFilter, pokPreSelected):
+def splitPreSelected(pokPreFilter: list[Pokemon], pokPreSelected: list[int]):
     preSelected = [pokPreFilter[i] for i in pokPreSelected]
     pokList = [
         pokPreFilter[i] for i in range(len(pokPreFilter)) if i not in pokPreSelected
@@ -79,6 +86,6 @@ def splitPreSelected(pokPreFilter, pokPreSelected):
     return preSelected, pokList
 
 
-def handRemoved(pokPreFilter, handSelected=[]):
+def handRemoved(pokPreFilter: list[Pokemon], handSelected: list = []):
     pokList = [pok for pok in pokPreFilter if pok.id not in handSelected]
     return pokList

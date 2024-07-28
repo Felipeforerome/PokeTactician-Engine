@@ -2,10 +2,10 @@ from functools import lru_cache
 
 import numpy as np
 
-from .glob_var import moves, pokPreFilter
+from .glob_var import moves, pok_pre_filter
 from .models.Roles import *
 from .models.Team import Team
-from .models.Types import typeChart, typeOrder
+from .models.Types import type_chart, type_order
 from .utils import (
     dominatedCandSet,
     getLearnedMoves,
@@ -52,7 +52,7 @@ def attack_obj_fun(team, pokList):
 @lru_cache(maxsize=324)
 def defense(types):
     defense = np.product(
-        typeChart[:, np.array([typeOrder.index(type_) for type_ in types])], axis=1
+        type_chart[:, np.array([type_order.index(type_) for type_ in types])], axis=1
     )
     return defense
 

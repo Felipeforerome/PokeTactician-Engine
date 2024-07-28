@@ -9,6 +9,8 @@ from dash_iconify import DashIconify
 sys.path.append(sys.path[0] + "/..")
 from utils import generate_roles_list
 
+from poketactician.models.Types import PokemonType
+
 
 class PokemonCard:
     def __init__(
@@ -42,9 +44,9 @@ class PokemonCard:
                             dmc.Group(
                                 children=[
                                     dmc.Image(
-                                        src=f"/assets/{pokType.value}.png",
+                                        src=f"/assets/{pokType}.png",
                                         width=30,
-                                        alt=pokType.value.capitalize(),
+                                        alt=pokType.capitalize(),
                                     )
                                     for pokType in [pokemon["type1"], pokemon["type2"]]
                                     if pokType is not None
@@ -241,25 +243,29 @@ def filterComponents(suffix):
             searchable=True,
             nothingFound="No type found",
             clearable=True,
+            # data=[
+            #     {"value": "normal", "label": "Normal"},
+            #     {"value": "fire", "label": "Fire"},
+            #     {"value": "water", "label": "Water"},
+            #     {"value": "electric", "label": "Electric"},
+            #     {"value": "grass", "label": "Grass"},
+            #     {"value": "ice", "label": "Ice"},
+            #     {"value": "fighting", "label": "Fighting"},
+            #     {"value": "poison", "label": "Poison"},
+            #     {"value": "ground", "label": "Ground"},
+            #     {"value": "flying", "label": "Flying"},
+            #     {"value": "psychic", "label": "Psychic"},
+            #     {"value": "bug", "label": "Bug"},
+            #     {"value": "rock", "label": "Rock"},
+            #     {"value": "ghost", "label": "Ghost"},
+            #     {"value": "dragon", "label": "Dragon"},
+            #     {"value": "dark", "label": "Dark"},
+            #     {"value": "steel", "label": "Steel"},
+            #     {"value": "fairy", "label": "Fairy"},
+            # ],
             data=[
-                {"value": "normal", "label": "Normal"},
-                {"value": "fire", "label": "Fire"},
-                {"value": "water", "label": "Water"},
-                {"value": "electric", "label": "Electric"},
-                {"value": "grass", "label": "Grass"},
-                {"value": "ice", "label": "Ice"},
-                {"value": "fighting", "label": "Fighting"},
-                {"value": "poison", "label": "Poison"},
-                {"value": "ground", "label": "Ground"},
-                {"value": "flying", "label": "Flying"},
-                {"value": "psychic", "label": "Psychic"},
-                {"value": "bug", "label": "Bug"},
-                {"value": "rock", "label": "Rock"},
-                {"value": "ghost", "label": "Ghost"},
-                {"value": "dragon", "label": "Dragon"},
-                {"value": "dark", "label": "Dark"},
-                {"value": "steel", "label": "Steel"},
-                {"value": "fairy", "label": "Fairy"},
+                {"value": member.value, "label": member.value.capitalize()}
+                for member in PokemonType
             ],
             style={"marginBottom": 10, "width": "95%"},
         ),

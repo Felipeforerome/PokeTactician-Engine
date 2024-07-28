@@ -19,7 +19,7 @@ class Move:
         id (str): The unique identifier of the move.
         name (str): The name of the move.
         type (PokemonType): The type of the move.
-        damageClass (str): The damage class of the move.
+        damage_class (str): The damage class of the move.
         power (int): The power of the move.
         accuracy (int): The accuracy of the move.
         pp (int): The power points of the move.
@@ -29,7 +29,7 @@ class Move:
     id: str
     name: str
     type: PokemonType
-    damageClass: DamageClass
+    damage_class: DamageClass
     power: int = field(default=0)
     accuracy: int = field(default=1)
     pp: int = field(default=0)
@@ -44,16 +44,16 @@ class Move:
         return self.power * self.accuracy
 
     @classmethod
-    def from_json(cls, moveJSON):
+    def from_json(cls, move_json):
         return cls(
-            moveJSON["id"],
-            moveJSON["name"],
-            PokemonType(moveJSON["type"].lower()),
-            DamageClass(moveJSON["damageClass"]),
-            moveJSON["power"],
-            moveJSON["accuracy"],
-            moveJSON["pp"],
-            moveJSON["priority"],
+            move_json["id"],
+            move_json["name"],
+            PokemonType(move_json["type"].lower()),
+            DamageClass(move_json["damage_class"]),
+            move_json["power"],
+            move_json["accuracy"],
+            move_json["pp"],
+            move_json["priority"],
         )
 
     def serialize(self):
@@ -61,7 +61,7 @@ class Move:
             "id": self.id,
             "name": self.name,
             "type": self.type.value,
-            "damageClass": self.damageClass.value,
+            "damage_class": self.damage_class.value,
             "power": self.power,
             "accuracy": self.accuracy,
             "pp": self.pp,

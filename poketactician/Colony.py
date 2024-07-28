@@ -45,7 +45,7 @@ class Colony:
 
         # Create Decision Space of Moves
         self.decision_space_moves = [
-            np.arange(len(pok.knowableMoves)) for pok in self.pokemons
+            np.arange(len(pok.knowable_moves)) for pok in self.pokemons
         ]
 
         # Create Probability Vector for Pokemon
@@ -56,7 +56,7 @@ class Colony:
         # Create Probability of Attacks
         self.move_probabilities = []
         for pokemon in self.pokemons:
-            size = pokemon.knowableMoves.__len__()
+            size = pokemon.knowable_moves.__len__()
             if size == 0:
                 self.move_probabilities.append([])
             else:
@@ -68,7 +68,7 @@ class Colony:
         # Create Pheromone of Attacks
         self.move_pheromones = []
         for pokemon in self.pokemons:
-            size = pokemon.knowableMoves.__len__()
+            size = pokemon.knowable_moves.__len__()
             if size == 0:
                 size = 1
             self.move_pheromones.append(np.zeros(size))
@@ -82,7 +82,7 @@ class Colony:
         # Create Heuristic Value of Attack
         self.move_heuristics = []
         for pokemon in self.pokemons:
-            size = pokemon.knowableMoves.__len__()
+            size = pokemon.knowable_moves.__len__()
             if size == 0:
                 size = 1
             self.move_heuristics.append(np.zeros(size))
@@ -241,7 +241,7 @@ class Colony:
         return fitness_value
 
     def heuristic_pokemon_fun(self, pokemon, pokemon_index):
-        heuristic_value = pokemon[pokemon_index].overallStats() / 500
+        heuristic_value = pokemon[pokemon_index].overall_stats() / 500
         return heuristic_value
 
     def candidate_set(self):

@@ -18,7 +18,7 @@ def has_move(pokemon: Pokemon, moves: list) -> float:
     Returns:
         bool: True if the Pokemon has the move, False otherwise.
     """
-    return any([move.name in moves for move in pokemon.learntMoves]) * 1.0
+    return any([move.name in moves for move in pokemon.learnt_moves]) * 1.0
 
 
 def has_type(pokemon: Pokemon, types: list) -> float:
@@ -217,7 +217,7 @@ def is_physical_sweeper(pokemon: Pokemon) -> float:
     return (
         has_good_stat(pokemon, ["att"])
         * sum(
-            [move.damageClass == DamageClass.PHYSICAL for move in pokemon.learntMoves]
+            [move.damage_class == DamageClass.PHYSICAL for move in pokemon.learnt_moves]
         )
         * 0.25
     )
@@ -238,7 +238,9 @@ def is_special_sweeper(pokemon: Pokemon) -> float:
     # TODO See if it makes sense to check for special stat-improving moves
     return (
         has_good_stat(pokemon, ["spatt"])
-        * sum([move.damageClass == DamageClass.SPECIAL for move in pokemon.learntMoves])
+        * sum(
+            [move.damage_class == DamageClass.SPECIAL for move in pokemon.learnt_moves]
+        )
         * 0.25
     )
 
@@ -273,7 +275,7 @@ def is_revenge_killer(pokemon: Pokemon) -> float:
     # TODO Depends on opponent that it might be facing
     return (
         has_good_stat(pokemon, ["spe"])
-        and any([move.priority > 0 for move in pokemon.learntMoves]) * 1.0
+        and any([move.priority > 0 for move in pokemon.learnt_moves]) * 1.0
     )
 
 

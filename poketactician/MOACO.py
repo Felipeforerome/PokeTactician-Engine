@@ -9,7 +9,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from .Colony import Colony
-from .glob_var import Q, alpha, beta, cooperationStatsDict, rho
+from .glob_var import CooperationStats, Q, alpha, beta, rho
 from .models.Team import Team
 from .utils import dominatedCandSet
 
@@ -26,7 +26,7 @@ class MOACO:
         preSelected (List[int]): A list of pre-selected Pokemon IDs.
         alpha (float): The alpha parameter for the ant colony optimization algorithm.
         beta (float): The beta parameter for the ant colony optimization algorithm.
-        cooperationID (int, optional): The ID of the cooperation strategy to use. Defaults to 1.
+        cooperation_strategy (int, optional): The ID of the cooperation strategy to use. Defaults to 1.
 
     Raises:
         ValueError: If totalPopulation is not a positive integer or if alpha or beta are negative.
@@ -67,12 +67,12 @@ class MOACO:
         self,
         totalPopulation: int,
         objFuncs_Q_rho: List[Tuple[Callable, float, float]],
-        pokemonPop: List[Any],
-        preSelected: List[int],
-        preSelectedMoves: List[List[int]],
+        pokemon_pop: List[Any],
+        preselected: List[int],
+        preselected_moves: List[List[int]],
         alpha: float,
         beta: float,
-        cooperationID: int = 1,
+        cooperation_strategy: Callable = CooperationStats.SELECTION_BY_DOMINANCE,
     ):
         if totalPopulation <= 0:
             raise ValueError("totalPopulation must be a positive integer")
@@ -81,10 +81,10 @@ class MOACO:
 
         self.totalPopulation = totalPopulation
         self.objFuncs_Q_rho = objFuncs_Q_rho
-        self.cooperationID = cooperationID
-        self.pokemonPop = deepcopy(pokemonPop)
-        self.preSelected = preSelected
-        self.preSelectedMoves = preSelectedMoves
+        self.cooperation_strategy = cooperation_strategy
+        self.pokemonPop = deepcopy(pokemon_pop)
+        self.preSelected = preselected
+        self.preSelectedMoves = preselected_moves
         self.alpha = alpha
         self.beta = beta
         self.colonies = self.initialize_colonies()
@@ -173,7 +173,7 @@ class MOACO:
         Performs a single iteration step of the optimization.
         """
         self.iterNum += 1
-        coopStratFun = cooperationStatsDict[self.cooperationID]
+        coopStratFun = self.cooperation_strategy
         self.colonies = coopStratFun(self.colonies, self.prevCandSet)
         self.update_candidate_sets()
 
@@ -230,7 +230,7 @@ class MOACO:
             for pok in self.bestSoFar:
                 tempPokemon = deepcopy(self.pokemonPop[pok[0]])
                 for move_index in pok[1:]:
-                    tempPokemon.teachMove(move_index)
+                    tempPokemon.teach_move(move_index)
                 team.add_pokemon(tempPokemon)
             return team
         else:

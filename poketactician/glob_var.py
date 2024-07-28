@@ -1,5 +1,5 @@
 import json
-import pickle
+from enum import Enum
 
 from .cooperationStrats import selectionByDominance
 from .models.Move import Move
@@ -18,7 +18,10 @@ rho = 0.1
 alpha = 1
 beta = 0
 
-cooperationStatsDict = {1: selectionByDominance}
+
+class CooperationStats(Enum):
+    SELECTION_BY_DOMINANCE = selectionByDominance
+
 
 # Save to a JSON file the pokemon_list
 
@@ -42,5 +45,5 @@ def load_moves_from_json(file_name):
         return {key: Move.from_json(value) for key, value in data.items()}
 
 
-pokPreFilter = load_pokemon_from_json("data/pokemon_data.json")
+pok_pre_filter = load_pokemon_from_json("data/pokemon_data.json")
 moves = load_moves_from_json("data/move_data.json")

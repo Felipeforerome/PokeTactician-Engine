@@ -27,7 +27,7 @@ import time
 
 from utils import generate_move_list_and_selector_status
 
-from poketactician.glob_var import Q, alpha, beta, pokPreFilter, rho
+from poketactician.glob_var import Q, alpha, beta, pok_pre_filter, rho
 from poketactician.MOACO import MOACO
 from poketactician.objectives import (
     attack_obj_fun,
@@ -56,7 +56,7 @@ def filter_pokemon_list(
     """
     Apply filters to the Pokémon list.
     """
-    pok_list = handRemoved(pokPreFilter)
+    pok_list = handRemoved(pok_pre_filter)
     pok_list = removeMegas(pok_list)
     pok_list = removeBattleOnly(pok_list)
     pre_selected, pok_list = splitPreSelected(pok_list, pre_selected)
@@ -230,7 +230,7 @@ def update_output(
 # Callback to insert the BlankPokemonTeam dynamically upon page load
 @callback(Output("blank-team-output", "children"), Input("url", "pathname"))
 def display_page(_):
-    pokList = removeMegas(pokPreFilter)
+    pokList = removeMegas(pok_pre_filter)
     pokList = removeBattleOnly(pokList)
     pokemon_list = [{"value": pok.id, "label": pok.name.title()} for pok in pokList]
     return BlankPokemonTeam(pokemon_list).layout()

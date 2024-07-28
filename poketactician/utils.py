@@ -3,7 +3,7 @@ import numpy as np
 from .glob_var import moves
 from .models.Pokemon import Pokemon
 from .models.Team import Team
-from .models.Types import typeChart, typeOrder
+from .models.Types import type_chart, type_order
 
 
 def moveExactCounter(PokemonsList):
@@ -18,7 +18,7 @@ def moveExactCounter(PokemonsList):
     while i < 36:
         quantPok = 0
         for pok in PokemonsList:
-            quantMoves = pok.knowableMoves.__len__()
+            quantMoves = pok.knowable_moves.__len__()
             if quantMoves == i:
                 quantPok = quantPok + 1
         numberofmoves.append(quantPok)
@@ -41,7 +41,7 @@ def moveTotalCounter(PokemonsList):
     while tempmove != 1:
         quantPok = 0
         for pok in PokemonsList:
-            quantMoves = pok.knowableMoves.__len__()
+            quantMoves = pok.knowable_moves.__len__()
             if quantMoves >= i:
                 quantPok = quantPok + 1
         numberofmoves.append(quantPok)
@@ -57,14 +57,14 @@ def getLearnedMoves(pokemonList, pok, ids):
     temp = []
     for id in ids:
         if id != -1:
-            temp.append(pokemonList[pok[0]].knowableMoves[id])
+            temp.append(pokemonList[pok[0]].knowable_moves[id])
     return temp
 
 
 def getWeakness(pok):
-    weakness = typeChart[:, typeOrder.index(pok.type1)]
+    weakness = type_chart[:, type_order.index(pok.type1)]
     try:
-        weakness2 = typeChart[:, typeOrder.index(pok.type2)]
+        weakness2 = type_chart[:, type_order.index(pok.type2)]
         weakness = np.multiply(weakness, weakness2)
     except:
         pass
@@ -78,8 +78,8 @@ def getMoveWeakness(pok, pokMoves, pokList):
         if move == -1:
             pass
         else:
-            moveType = moves.get(pokList[pok].knowableMoves[move].id).type
-            weakness = np.multiply(weakness, typeChart[:, typeOrder.index(moveType)])
+            moveType = moves.get(pokList[pok].knowable_moves[move].id).type
+            weakness = np.multiply(weakness, type_chart[:, type_order.index(moveType)])
             weakness = np.multiply(weakness, getWeakness(pokList[pok]))
             weakness = [weak if weak <= 256 else 512 for weak in weakness]
     return weakness

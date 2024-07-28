@@ -14,14 +14,14 @@ class Team:
             raise Exception("Team is full")
 
     @classmethod
-    def ant_to_team(cls, ant, pokList: list):
+    def ant_to_team(cls, ant, pokemons_list: list):
         team = cls()
         for pok in ant:
-            temp_pok = Pokemon.from_json(pokList[pok[0]].serialize())
-            temp_pok.teachMove(pok[1])
-            temp_pok.teachMove(pok[2])
-            temp_pok.teachMove(pok[3])
-            temp_pok.teachMove(pok[4])
+            temp_pok = Pokemon.from_json(pokemons_list[pok[0]].serialize())
+            temp_pok.teach_move(pok[1])
+            temp_pok.teach_move(pok[2])
+            temp_pok.teach_move(pok[3])
+            temp_pok.teach_move(pok[4])
             team.add_pokemon(temp_pok)
         return team
 

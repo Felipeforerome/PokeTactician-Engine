@@ -1,6 +1,6 @@
 import re
 
-from poketactician.glob_var import pokPreFilter
+from poketactician.glob_var import pok_pre_filter
 from poketactician.models import Roles
 
 
@@ -24,10 +24,12 @@ def generate_move_list_and_selector_status(
         "------",
     ]
     if pok_id:
-        pok = next((pokemon for pokemon in pokPreFilter if pokemon.id == pok_id), None)
+        pok = next(
+            (pokemon for pokemon in pok_pre_filter if pokemon.id == pok_id), None
+        )
         moveList = [
-            {"value": i, "label": pok.knowableMoves[i].name.replace("-", " ").title()}
-            for i in range(len(pok.knowableMoves))
+            {"value": i, "label": pok.knowable_moves[i].name.replace("-", " ").title()}
+            for i in range(len(pok.knowable_moves))
             if i not in move_id
         ]
         moveSelectorDisabled = False

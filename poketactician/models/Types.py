@@ -44,7 +44,7 @@ class PokemonType(Enum):
     FAIRY = "fairy"
 
 
-typeOrder = [
+type_order = [
     PokemonType.NORMAL,
     PokemonType.FIRE,
     PokemonType.WATER,
@@ -64,7 +64,7 @@ typeOrder = [
     PokemonType.STEEL,
     PokemonType.FAIRY,
 ]
-typeChart = np.stack(
+type_chart = np.stack(
     [
         Normal,
         Fire,
