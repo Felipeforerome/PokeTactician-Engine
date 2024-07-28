@@ -10,8 +10,9 @@ import plotly.graph_objects as go
 
 from .Colony import Colony
 from .glob_var import CooperationStats, Q, alpha, beta, rho
+from .models.Pokemon import Pokemon
 from .models.Team import Team
-from .utils import dominatedCandSet
+from .utils import dominated_candidate_set
 
 
 class MOACO:
@@ -65,36 +66,39 @@ class MOACO:
 
     def __init__(
         self,
-        totalPopulation: int,
-        objFuncs_Q_rho: List[Tuple[Callable, float, float]],
-        pokemon_pop: List[Any],
-        preselected: List[int],
+        total_population: int,
+        objective_functions_Q_rho: List[Tuple[Callable, float, float]],
+        pokemon_pop: List[Pokemon],
+        preselected_pokemons: List[int],
         preselected_moves: List[List[int]],
         alpha: float,
         beta: float,
         cooperation_strategy: Callable = CooperationStats.SELECTION_BY_DOMINANCE,
     ):
-        if totalPopulation <= 0:
+        if total_population <= 0:
             raise ValueError("totalPopulation must be a positive integer")
         if alpha < 0 or beta < 0:
             raise ValueError("alpha and beta must be non-negative")
 
-        self.totalPopulation = totalPopulation
-        self.objFuncs_Q_rho = objFuncs_Q_rho
+        self.total_population = total_population
+        self.objective_functions_Q_rho = objective_functions_Q_rho
         self.cooperation_strategy = cooperation_strategy
-        self.pokemonPop = deepcopy(pokemon_pop)
-        self.preSelected = preselected
-        self.preSelectedMoves = preselected_moves
+        self.pokemon_pop = pokemon_pop
+        self.preselected_pokemons = preselected_pokemons
+        self.preSelected_moves = preselected_moves
         self.alpha = alpha
         self.beta = beta
         self.colonies = self.initialize_colonies()
-        self.prevCandSet = self.initialize_prev_cand_set()
-        self.bestSoFar = self.prevCandSet[0]
-        self.iterNum = 1
-        self.candSetsPerIter = [self.prevCandSet]
-        self.jointFun = lambda team: reduce(
+        self.prev_candidate_set = self.initialize_prev_cand_set()
+        self.best_so_far = self.prev_candidate_set[0]
+        self.iteration_number = 1
+        self.candidate_sets_per_iteration = [self.prev_candidate_set]
+        self.joint_function = lambda team: reduce(
             lambda acc, f: acc * f(team),
-            [objFunc[0] for objFunc in self.objFuncs_Q_rho],
+            [
+                objective_function[0]
+                for objective_function in self.objective_functions_Q_rho
+            ],
             1,
         )
 
@@ -107,17 +111,17 @@ class MOACO:
         """
         return [
             Colony(
-                int(self.totalPopulation / len(self.objFuncs_Q_rho)),
+                int(self.total_population / len(self.objective_functions_Q_rho)),
                 objFunc,
-                self.pokemonPop,
-                self.preSelected,
-                self.preSelectedMoves,
+                self.pokemon_pop,
+                self.preselected_pokemons,
+                self.preSelected_moves,
                 self.alpha,
                 self.beta,
                 Q,
                 rho,
             )
-            for objFunc, Q, rho in self.objFuncs_Q_rho
+            for objFunc, Q, rho in self.objective_functions_Q_rho
         ]
 
     def initialize_prev_cand_set(self):
@@ -127,13 +131,13 @@ class MOACO:
         Returns:
             List[Any]: The previous candidate set.
         """
-        coopCandSet = deepcopy(
-            dominatedCandSet(
+        cooperative_candidate_set = deepcopy(
+            dominated_candidate_set(
                 [colony.candidate_set() for colony in self.colonies],
-                [objFunc[0] for objFunc in self.objFuncs_Q_rho],
+                [objFunc[0] for objFunc in self.objective_functions_Q_rho],
             )
         )
-        return coopCandSet
+        return cooperative_candidate_set
 
     def optimize(self, iters: int = None, time_limit: float = None):
         """
@@ -164,7 +168,7 @@ class MOACO:
         Returns:
             bool: True if the optimization should continue, False otherwise.
         """
-        return (iters is None or self.iterNum < iters) and (
+        return (iters is None or self.iteration_number < iters) and (
             time_limit is None or (time.time() - start_time) < time_limit
         )
 
@@ -172,32 +176,34 @@ class MOACO:
         """
         Performs a single iteration step of the optimization.
         """
-        self.iterNum += 1
-        coopStratFun = self.cooperation_strategy
-        self.colonies = coopStratFun(self.colonies, self.prevCandSet)
+        self.iteration_number += 1
+        cooperation_function = self.cooperation_strategy
+        self.colonies = cooperation_function(self.colonies, self.prev_candidate_set)
         self.update_candidate_sets()
 
     def update_candidate_sets(self):
         """
         Updates the candidate sets.
         """
-        currentCandSet = deepcopy(
-            dominatedCandSet(
+        current_candidate_set = deepcopy(
+            dominated_candidate_set(
                 [colony.candidate_set() for colony in self.colonies],
-                [objFunc[0] for objFunc in self.objFuncs_Q_rho],
+                [objFunc[0] for objFunc in self.objective_functions_Q_rho],
             )
         )
-        self.prevCandSet = deepcopy(
-            dominatedCandSet(
-                [self.prevCandSet, currentCandSet],
-                [objFunc[0] for objFunc in self.objFuncs_Q_rho],
+        self.prev_candidate_set = deepcopy(
+            dominated_candidate_set(
+                [self.prev_candidate_set, current_candidate_set],
+                [objFunc[0] for objFunc in self.objective_functions_Q_rho],
             )
         )
-        self.candSetsPerIter.append(self.prevCandSet)
-        iterationBest = self.prevCandSet[0]
-        self.bestSoFar = max([iterationBest, self.bestSoFar], key=self.jointFun)
+        self.candidate_sets_per_iteration.append(self.prev_candidate_set)
+        iteration_best = self.prev_candidate_set[0]
+        self.best_so_far = max(
+            [iteration_best, self.best_so_far], key=self.joint_function
+        )
 
-    def getSolnTeamNames(self):
+    def get_solution_team_names(self):
         """
         Returns the names of the Pokemon in the best solution.
 
@@ -208,14 +214,14 @@ class MOACO:
             Exception: If the optimization has not been run.
         """
         team = []
-        if self.bestSoFar is not None:
-            for pok in self.bestSoFar:
-                team += [self.pokemonPop[pok[0]].name]
+        if self.best_so_far is not None:
+            for pok in self.best_so_far:
+                team += [self.pokemon_pop[pok[0]].name]
             return team
         else:
             raise Exception("Optimization has not been run.")
 
-    def getSoln(self):
+    def get_solution(self):
         """
         Returns the best solution as a Team object.
 
@@ -226,17 +232,18 @@ class MOACO:
             Exception: If the optimization has not been run.
         """
         team = Team()
-        if self.bestSoFar is not None:
-            for pok in self.bestSoFar:
-                tempPokemon = deepcopy(self.pokemonPop[pok[0]])
+        if self.best_so_far is not None:
+            for pok in self.best_so_far:
+                # TODO instead of this deepcopy, do the serialize to from_json trick
+                temp_pokemon = deepcopy(self.pokemon_pop[pok[0]])
                 for move_index in pok[1:]:
-                    tempPokemon.teach_move(move_index)
-                team.add_pokemon(tempPokemon)
+                    temp_pokemon.teach_move(move_index)
+                team.add_pokemon(temp_pokemon)
             return team
         else:
             raise Exception("Optimization has not been run.")
 
-    def getObjTeamValue(self):
+    def get_objective_value(self):
         """
         Returns the objective value of the best solution.
 
@@ -246,12 +253,12 @@ class MOACO:
         Raises:
             Exception: If the optimization has not been run.
         """
-        if self.bestSoFar is not None:
-            return self.jointFun(self.bestSoFar)
+        if self.best_so_far is not None:
+            return self.joint_function(self.best_so_far)
         else:
             raise Exception("Optimization has not been run.")
 
-    def plot_soln(self, sortedIters):
+    def plot_soln(self, sorted_iterations):
         """
         Plots the values of the last cooperation candidate set.
 
@@ -261,10 +268,10 @@ class MOACO:
         Returns:
             go.Figure: The plotly figure object.
         """
-        if sortedIters:
-            a = sorted(list(map(self.jointFun, self.bestSoFar)))
+        if sorted_iterations:
+            a = sorted(list(map(self.joint_function, self.best_so_far)))
         else:
-            a = list(map(self.jointFun, self.bestSoFar))
+            a = list(map(self.joint_function, self.best_so_far))
         b = np.array(a)
         fig = go.Figure
         fig.add_trace(
@@ -272,12 +279,12 @@ class MOACO:
                 x=range(0, b.size),
                 y=b,
                 mode="lines",
-                name=f"Last Cand Set Team Values: Iter: {str(self.iterNum)} - rho: {str(self.rho)} - Q: {str(self.Q)}",
+                name=f"Last Cand Set Team Values: Iter: {str(self.iteration_number)} - rho: {str(self.rho)} - Q: {str(self.Q)}",
             )
         )
         return fig
 
-    def plot_iters(self, sortedIters):
+    def plot_iters(self, sorted_iterations):
         """
         Plots the values of the candidate sets for each iteration.
 
@@ -287,24 +294,24 @@ class MOACO:
         Returns:
             go.Figure: The plotly figure object.
         """
-        sortedDF = pd.DataFrame(
+        sorted_df = pd.DataFrame(
             [
-                sorted(list(map(self.jointFun, iteration_points[0])))
-                for i, iteration_points in enumerate(self.candSetsPerIter)
+                sorted(list(map(self.joint_function, iteration_points[0])))
+                for i, iteration_points in enumerate(self.candidate_sets_per_iteration)
             ]
         )
-        unsortedDF = pd.DataFrame(
+        unsorted_df = pd.DataFrame(
             [
-                list(map(self.jointFun, iteration_points[0]))
-                for i, iteration_points in enumerate(self.candSetsPerIter)
+                list(map(self.joint_function, iteration_points[0]))
+                for i, iteration_points in enumerate(self.candidate_sets_per_iteration)
             ]
         )
 
         fig = go.Figure()
-        if sortedIters:
-            df = sortedDF
+        if sorted_iterations:
+            df = sorted_df
         else:
-            df = unsortedDF
+            df = unsorted_df
         for i in range(len(df)):
             fig.add_trace(
                 go.Scatter(
@@ -328,8 +335,8 @@ class MOACO:
             go.Figure: The plotly figure object.
         """
         averages = [
-            np.mean(list(map(self.jointFun, iteration_points[0])))
-            for iteration_points in self.candSetsPerIter
+            np.mean(list(map(self.joint_function, iteration_points[0])))
+            for iteration_points in self.candidate_sets_per_iteration
         ]
 
         fig = px.line(
@@ -355,8 +362,8 @@ class MOACO:
             go.Figure: The plotly figure object.
         """
         averages = [
-            self.jointFun(iteration_points[0][0])
-            for iteration_points in self.candSetsPerIter
+            self.joint_function(iteration_points[0][0])
+            for iteration_points in self.candidate_sets_per_iteration
         ]
 
         fig = px.line(

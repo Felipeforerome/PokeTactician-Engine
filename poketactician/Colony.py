@@ -170,41 +170,45 @@ class Colony:
                 temp_ant = self.create_ant()
             self.population[i] = temp_ant
 
-    def update_ph_concentration(self, candidateSet):
+    def update_ph_concentration(self, candidate_set):
         # User Defined Variables
         Q = self.Q
         rho = self.rho
         # Update Pheromone Concentration
         # Evaporate Pheromones
         self.pokemon_pheromones = (1 - rho) * self.pokemon_pheromones
-        for idx, Ph_Att in enumerate(self.move_pheromones):
-            self.move_pheromones[idx] = (1 - rho) * Ph_Att
+        for idx, move_pheromone in enumerate(self.move_pheromones):
+            self.move_pheromones[idx] = (1 - rho) * move_pheromone
 
-        for ant in candidateSet:
-            fitnessValue = self.fitness(ant)
-            deltaConcentr = Q * fitnessValue
+        for ant in candidate_set:
+            fitness_value = self.fitness(ant)
+            delta_concentration = Q * fitness_value
             for pokemon in ant:
                 self.pokemon_pheromones[pokemon[0]] = (
-                    self.pokemon_pheromones[pokemon[0]] + deltaConcentr
+                    self.pokemon_pheromones[pokemon[0]] + delta_concentration
                 )
                 if pokemon[1] >= 0:
                     self.move_pheromones[pokemon[0]][pokemon[1]] = (
-                        self.move_pheromones[pokemon[0]][pokemon[1]] + deltaConcentr
+                        self.move_pheromones[pokemon[0]][pokemon[1]]
+                        + delta_concentration
                     )
 
                 if pokemon[2] >= 0:
                     self.move_pheromones[pokemon[0]][pokemon[2]] = (
-                        self.move_pheromones[pokemon[0]][pokemon[2]] + deltaConcentr
+                        self.move_pheromones[pokemon[0]][pokemon[2]]
+                        + delta_concentration
                     )
 
                 if pokemon[3] >= 0:
                     self.move_pheromones[pokemon[0]][pokemon[3]] = (
-                        self.move_pheromones[pokemon[0]][pokemon[3]] + deltaConcentr
+                        self.move_pheromones[pokemon[0]][pokemon[3]]
+                        + delta_concentration
                     )
 
                 if pokemon[4] >= 0:
                     self.move_pheromones[pokemon[0]][pokemon[4]] = (
-                        self.move_pheromones[pokemon[0]][pokemon[4]] + deltaConcentr
+                        self.move_pheromones[pokemon[0]][pokemon[4]]
+                        + delta_concentration
                     )
 
     def update_pokemon_prob(self):
@@ -221,20 +225,24 @@ class Colony:
             self.pokemon_probabilities[i] = pokemon_numerators[i] / pokemon_denominators
 
         # Update Attack Probabilities
-        numeratorsAtt = []
-        denomAtt = []
-        for Ph_Att, H_Att in zip(self.move_pheromones, self.move_heuristics):
-            temp = self.numerator_fun(Ph_Att, H_Att)
-            numeratorsAtt.append(temp)
-            denomAttTemp = temp.sum()
-            if denomAttTemp == 0:
-                denomAttTemp = 1
-            denomAtt.append(denomAttTemp)
+        move_numerators = []
+        move_denominators = []
+        for move_pheromone, move_heuristic in zip(
+            self.move_pheromones, self.move_heuristics
+        ):
+            temp = self.numerator_fun(move_pheromone, move_heuristic)
+            move_numerators.append(temp)
+            temp_move_denominator = temp.sum()
+            if temp_move_denominator == 0:
+                temp_move_denominator = 1
+            move_denominators.append(temp_move_denominator)
 
-        for i in range(0, numeratorsAtt.__len__()):
-            for j in range(0, numeratorsAtt[i].__len__()):
-                if denomAtt[i] > 0:
-                    self.move_probabilities[i][j] = numeratorsAtt[i][j] / denomAtt[i]
+        for i in range(0, move_numerators.__len__()):
+            for j in range(0, move_numerators[i].__len__()):
+                if move_denominators[i] > 0:
+                    self.move_probabilities[i][j] = (
+                        move_numerators[i][j] / move_denominators[i]
+                    )
 
     def fitness(self, ant):
         fitness_value = self.objective_function(ant)

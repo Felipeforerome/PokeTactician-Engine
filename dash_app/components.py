@@ -10,6 +10,7 @@ sys.path.append(sys.path[0] + "/..")
 from utils import generate_roles_list
 
 from poketactician.models.Types import PokemonType
+from poketactician.objectives import ObjectiveFunctions, StrategyFunctions
 
 
 class PokemonCard:
@@ -86,25 +87,25 @@ class PokemonCard:
 
 
 class PokemonTeam:
-    def __init__(self, pokemonList):
-        self.pokemonCards = [
+    def __init__(self, pokemon_list):
+        self.pokemon_cards = [
             dmc.Col(
                 PokemonCard(pokemon).layout(),
                 md=4,
                 span=12,
             )
-            for pokemon in pokemonList
+            for pokemon in pokemon_list
         ]
 
     def layout(self):
         return dmc.Grid(
-            children=self.pokemonCards, className="team", justify="space-evenly"
+            children=self.pokemon_cards, className="team", justify="space-evenly"
         )
 
 
 class BlankPokemonCard:
-    def __init__(self, pokemonList: list, id: str):
-        self.pokemonList = pokemonList
+    def __init__(self, pokemon_list: list, id: str):
+        self.pokemon_list = pokemon_list
         self.id = id
 
     def layout(self):
@@ -127,7 +128,7 @@ class BlankPokemonCard:
                             dmc.Select(
                                 id={"type": "preSelect-selector", "suffix": self.id},
                                 placeholder="Select a Pokemon",
-                                data=self.pokemonList,
+                                data=self.pokemon_list,
                                 searchable=True,
                                 nothingFound="No pokemon found",
                                 clearable=True,
@@ -177,10 +178,10 @@ class BlankPokemonCard:
 
 
 class BlankPokemonTeam:
-    def __init__(self, pokemonList):
-        self.pokemonCards = [
+    def __init__(self, pokemon_list):
+        self.pokemon_cards = [
             dmc.Col(
-                BlankPokemonCard(pokemonList, f"card{i}").layout(),
+                BlankPokemonCard(pokemon_list, f"card{i}").layout(),
                 md=4,
                 span=12,
             )
@@ -189,13 +190,13 @@ class BlankPokemonTeam:
 
     def layout(self):
         return dmc.Grid(
-            children=self.pokemonCards,
+            children=self.pokemon_cards,
             className="blank-team",
             justify="space-evenly",
         )
 
 
-def filterComponents(suffix):
+def filter_components(suffix):
     games_dict = json.load(open("data/games.json", "r"))
     return [
         dmc.MultiSelect(
@@ -243,26 +244,6 @@ def filterComponents(suffix):
             searchable=True,
             nothingFound="No type found",
             clearable=True,
-            # data=[
-            #     {"value": "normal", "label": "Normal"},
-            #     {"value": "fire", "label": "Fire"},
-            #     {"value": "water", "label": "Water"},
-            #     {"value": "electric", "label": "Electric"},
-            #     {"value": "grass", "label": "Grass"},
-            #     {"value": "ice", "label": "Ice"},
-            #     {"value": "fighting", "label": "Fighting"},
-            #     {"value": "poison", "label": "Poison"},
-            #     {"value": "ground", "label": "Ground"},
-            #     {"value": "flying", "label": "Flying"},
-            #     {"value": "psychic", "label": "Psychic"},
-            #     {"value": "bug", "label": "Bug"},
-            #     {"value": "rock", "label": "Rock"},
-            #     {"value": "ghost", "label": "Ghost"},
-            #     {"value": "dragon", "label": "Dragon"},
-            #     {"value": "dark", "label": "Dark"},
-            #     {"value": "steel", "label": "Steel"},
-            #     {"value": "fairy", "label": "Fairy"},
-            # ],
             data=[
                 {"value": member.value, "label": member.value.capitalize()}
                 for member in PokemonType
@@ -365,5 +346,5 @@ def filterComponents(suffix):
     ]
 
 
-navbarFilterComponents = filterComponents("navbar")
-drawerFilterComponents = filterComponents("drawer")
+navbar_filter_components = filter_components("navbar")
+drawer_filter_components = filter_components("drawer")

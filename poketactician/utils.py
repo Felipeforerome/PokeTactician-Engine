@@ -6,7 +6,7 @@ from .models.Team import Team
 from .models.Types import type_chart, type_order
 
 
-def moveExactCounter(PokemonsList):
+def count_pokemon_with_exact_moves(PokemonsList):
     """
     Count the number of pokemon that have X number of knowable attacks (until 36)
     :param PokemonsList: List of Pokemon to run through
@@ -28,7 +28,7 @@ def moveExactCounter(PokemonsList):
     return numberofmoves
 
 
-def moveTotalCounter(PokemonsList):
+def count_pokemon_with_min_moves(PokemonsList):
     """
     Count the number of pokemon that have at least X number of knowable attacks (until 36)
     :param PokemonsList: List of Pokemon to run through
@@ -52,7 +52,7 @@ def moveTotalCounter(PokemonsList):
     return numberofmoves
 
 
-def getLearnedMoves(pokemonList, pok, ids):
+def get_learned_moves(pokemonList, pok, ids):
     # TODO Handle -1 in ids because it has no attack (Like Ditto)
     temp = []
     for id in ids:
@@ -61,7 +61,7 @@ def getLearnedMoves(pokemonList, pok, ids):
     return temp
 
 
-def getWeakness(pok):
+def get_weakness(pok):
     weakness = type_chart[:, type_order.index(pok.type1)]
     try:
         weakness2 = type_chart[:, type_order.index(pok.type2)]
@@ -72,7 +72,7 @@ def getWeakness(pok):
     return weakness
 
 
-def getMoveWeakness(pok, pokMoves, pokList):
+def get_move_weakness(pok, pokMoves, pokList):
     weakness = np.ones(18)
     for move in pokMoves:
         if move == -1:
@@ -80,12 +80,12 @@ def getMoveWeakness(pok, pokMoves, pokList):
         else:
             moveType = moves.get(pokList[pok].knowable_moves[move].id).type
             weakness = np.multiply(weakness, type_chart[:, type_order.index(moveType)])
-            weakness = np.multiply(weakness, getWeakness(pokList[pok]))
+            weakness = np.multiply(weakness, get_weakness(pokList[pok]))
             weakness = [weak if weak <= 256 else 512 for weak in weakness]
     return weakness
 
 
-def hoyerSparseness(x):
+def hoyer_sparseness(x):
     k = x.__len__()
     value = (np.sqrt(k) - ((np.linalg.norm(x, 1)) / (np.linalg.norm(x, 2)))) / (
         np.sqrt(k) - 1
@@ -93,13 +93,13 @@ def hoyerSparseness(x):
     return value
 
 
-def getTeamNames(team, pokList):
+def get_team_names(team, pokList):
     for pok in team:
         print(pokList[pok[0]].name)
 
 
 # Add feature to choose cooperation algorithms
-def dominatedCandSet(candSets, objFuns):
+def dominated_candidate_set(candidate_sets, objective_functions):
     """
     Performs multi-objective optimization using a cooperative colony approach.
     The function operates as follows:
@@ -117,25 +117,29 @@ def dominatedCandSet(candSets, objFuns):
     - list: A subset of candidate solutions from the input sets that dominate across multiple objectives.
     """
 
-    totalCandSet = []
-    candSetObjs = []
-    for i in candSets:
-        totalCandSet += i
+    total_candidate_sets = []
+    normalized_objectives = []
+    for i in candidate_sets:
+        total_candidate_sets += i
 
-    for j in objFuns:
-        candSetObjsTemp = np.array(list(map(j, totalCandSet)))
-        candSetObjs += [candSetObjsTemp / (candSetObjsTemp.max())]
+    for j in objective_functions:
+        candidate_set_objectives_temp = np.array(list(map(j, total_candidate_sets)))
+        normalized_objectives += [
+            candidate_set_objectives_temp / (candidate_set_objectives_temp.max())
+        ]
 
-    dominanceVector = np.ones(totalCandSet.__len__())
+    dominance_vector = np.ones(total_candidate_sets.__len__())
 
-    for x in candSetObjs:
-        dominanceVector = np.multiply(dominanceVector, x)
+    for x in normalized_objectives:
+        dominance_vector = np.multiply(dominance_vector, x)
 
-    dominatedCandSet = [
+    dominated_candidate_set = [
         x
         for _, x in sorted(
-            zip(dominanceVector, totalCandSet), key=lambda pair: pair[0], reverse=True
+            zip(dominance_vector, total_candidate_sets),
+            key=lambda pair: pair[0],
+            reverse=True,
         )
-    ][0 : int(dominanceVector.__len__() / candSets.__len__())]
+    ][0 : int(dominance_vector.__len__() / candidate_sets.__len__())]
 
-    return dominatedCandSet
+    return dominated_candidate_set

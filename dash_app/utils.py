@@ -19,21 +19,21 @@ def generate_move_list_and_selector_status(
             - moveList (list[dict[str, Any]] | list[str]): The generated move list. Each move is represented as a dictionary with 'value' and 'label' keys.
             - moveSelectorDisabled (bool): The status of the move selector. True if disabled, False otherwise.
     """
-    moveSelectorDisabled = True
-    moveList = [
+    move_selector_disabled = True
+    move_list = [
         "------",
     ]
     if pok_id:
         pok = next(
             (pokemon for pokemon in pok_pre_filter if pokemon.id == pok_id), None
         )
-        moveList = [
+        move_list = [
             {"value": i, "label": pok.knowable_moves[i].name.replace("-", " ").title()}
             for i in range(len(pok.knowable_moves))
             if i not in move_id
         ]
-        moveSelectorDisabled = False
-    return moveList, moveSelectorDisabled
+        move_selector_disabled = False
+    return move_list, move_selector_disabled
 
 
 def generate_roles_list() -> list:

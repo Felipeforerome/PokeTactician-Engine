@@ -2,8 +2,8 @@ import dash_mantine_components as dmc
 from components import (
     BlankPokemonCard,
     BlankPokemonTeam,
-    drawerFilterComponents,
-    navbarFilterComponents,
+    drawer_filter_components,
+    navbar_filter_components,
 )
 from dash import dcc, html
 from dash_iconify import DashIconify
@@ -108,7 +108,7 @@ layout = html.Div(
                     id="navbar-container",
                     width={"base": 300},
                     fixed=False,
-                    children=navbarFilterComponents,
+                    children=navbar_filter_components,
                 ),
                 dmc.Drawer(
                     title="",
@@ -120,7 +120,7 @@ layout = html.Div(
                         offsetScrollbars=True,
                         type="scroll",
                         style={"height": "85vh"},
-                        children=drawerFilterComponents,
+                        children=drawer_filter_components,
                     ),
                 ),
                 # Container for results

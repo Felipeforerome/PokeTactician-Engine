@@ -12,14 +12,15 @@ from dash import (
     no_update,
 )
 from filters import (
-    filterGames,
-    filterGenerations,
-    filterLegendaries,
-    filterTypes,
-    handRemoved,
-    removeBattleOnly,
-    removeMegas,
-    splitPreSelected,
+    filter_games,
+    filter_generations,
+    filter_legendaries,
+    filter_types,
+    hand_removed,
+    remove_battle_only,
+    remove_megas,
+    remove_totems,
+    split_preselected,
 )
 
 sys.path.append(sys.path[0] + "/..")
@@ -39,7 +40,7 @@ from poketactician.objectives import (
 )
 
 
-def preprocess_moves(pre_selected_moves):
+def preprocess_moves(pre_selected_moves: list[int | None]) -> list[list[int]]:
     """
     Preprocess pre-selected moves into lists.
     """
@@ -51,19 +52,25 @@ def preprocess_moves(pre_selected_moves):
 
 
 def filter_pokemon_list(
-    pre_selected, included_types, mono_type, generations, include_legendaries, games
+    pre_selected: list[int],
+    included_types: list[str],
+    mono_type: bool,
+    generations: list[list[int]],
+    include_legendaries: bool,
+    games: list[str],
 ):
     """
     Apply filters to the Pokémon list.
     """
-    pok_list = handRemoved(pok_pre_filter)
-    pok_list = removeMegas(pok_list)
-    pok_list = removeBattleOnly(pok_list)
-    pre_selected, pok_list = splitPreSelected(pok_list, pre_selected)
-    pok_list = filterTypes(pok_list, included_types, mono_type)
-    pok_list = filterGenerations(pok_list, generations)
-    pok_list = filterLegendaries(pok_list, include_legendaries)
-    pok_list = filterGames(pok_list, games)
+    pok_list = hand_removed(pok_pre_filter)
+    pok_list = remove_megas(pok_list)
+    pok_list = remove_battle_only(pok_list)
+    pok_list = remove_totems(pok_list)
+    pre_selected, pok_list = split_preselected(pok_list, pre_selected)
+    pok_list = filter_types(pok_list, included_types, mono_type)
+    pok_list = filter_generations(pok_list, generations)
+    pok_list = filter_legendaries(pok_list, include_legendaries)
+    pok_list = filter_games(pok_list, games)
     return pre_selected + pok_list
 
 
@@ -111,8 +118,8 @@ def optimize_team_selection(
         beta,
     )
 
-    m_col.optimize(iters=25, time_limit=None)
-    return m_col.getSoln(), m_col.getObjTeamValue()
+    m_col.optimize(iters=3, time_limit=None)
+    return m_col.get_solution(), m_col.get_objective_value()
 
 
 @callback(
@@ -230,10 +237,12 @@ def update_output(
 # Callback to insert the BlankPokemonTeam dynamically upon page load
 @callback(Output("blank-team-output", "children"), Input("url", "pathname"))
 def display_page(_):
-    pokList = removeMegas(pok_pre_filter)
-    pokList = removeBattleOnly(pokList)
-    pokemon_list = [{"value": pok.id, "label": pok.name.title()} for pok in pokList]
-    return BlankPokemonTeam(pokemon_list).layout()
+    pokemon_list = remove_megas(pok_pre_filter)
+    pokemon_list = remove_battle_only(pokemon_list)
+    pokemon_team = [
+        {"value": pok.id, "label": pok.name.title()} for pok in pokemon_list
+    ]
+    return BlankPokemonTeam(pokemon_team).layout()
 
 
 @callback(

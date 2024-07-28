@@ -1,22 +1,24 @@
+from enum import Enum
 from functools import lru_cache
 
 import numpy as np
 
-from .glob_var import moves, pok_pre_filter
+from .glob_var import Q, rho
+from .models.Pokemon import Pokemon
 from .models.Roles import *
 from .models.Team import Team
 from .models.Types import type_chart, type_order
 from .utils import (
-    dominatedCandSet,
-    getLearnedMoves,
-    getMoveWeakness,
-    getWeakness,
-    hoyerSparseness,
+    dominated_candidate_set,
+    get_learned_moves,
+    get_move_weakness,
+    get_weakness,
+    hoyer_sparseness,
 )
 
 
-def attack_obj_fun(team, pokList):
-    temp_team = Team.ant_to_team(team, pokList)
+def attack_obj_fun(ant: np.ndarray, pokemon_list: list[Pokemon]) -> float:
+    temp_team = Team.ant_to_team(ant, pokemon_list)
     return sum(
         list(
             map(
@@ -80,12 +82,12 @@ def CW(team_types):
     )
 
 
-def team_coverage_fun(team, pokList):
+def team_coverage_fun(team, pokemon_list):
     team_types = [
         tuple(
-            pokType
-            for pokType in [pokList[pok[0]].type1, pokList[pok[0]].type2]
-            if pokType is not None
+            pok_type
+            for pok_type in [pokemon_list[pok[0]].type1, pokemon_list[pok[0]].type2]
+            if pok_type is not None
         )
         for pok in team
     ]
@@ -150,7 +152,9 @@ def self_coverage_fun(team):
                 lambda x: 1
                 / (
                     np.power(
-                        np.ones(18) * 2, getMoveWeakness(x[0], x[1:5]), dtype=np.float64
+                        np.ones(18) * 2,
+                        get_move_weakness(x[0], x[1:5]),
+                        dtype=np.float64,
                     ).mean()
                 ),
                 team,
@@ -159,7 +163,7 @@ def self_coverage_fun(team):
     )
 
 
-def generalist_team_fun(ant, pokList):
+def generalist_team_fun(ant: np.ndarray, pokemon_list: list[Pokemon]):
     """
     Evaluates the given team based on their roles as a hazard setter, spinner, and cleric.
 
@@ -170,11 +174,11 @@ def generalist_team_fun(ant, pokList):
         dict: A dictionary containing the evaluation results for each role.
     """
     roles = [is_hazard_setter, is_spinner, is_cleric]
-    team = Team.ant_to_team(ant, pokList)
+    team = Team.ant_to_team(ant, pokemon_list)
     return team.team_roles_fun(roles)
 
 
-def defensive_team_fun(ant, pokList):
+def defensive_team_fun(ant: np.ndarray, pokemon_list: list[Pokemon]):
     """
     Evaluates the given team based on their roles as a cleric, status_move, and Phazer.
 
@@ -186,11 +190,11 @@ def defensive_team_fun(ant, pokList):
     """
     # TODO Missing status move evaluator
     roles = [is_wall, is_phazer]
-    team = Team.ant_to_team(ant, pokList)
+    team = Team.ant_to_team(ant, pokemon_list)
     return team.team_roles_fun(roles)
 
 
-def offensive_team_fun(ant, pokList):
+def offensive_team_fun(ant: np.ndarray, pokemon_list: list[Pokemon]):
     """
     Evaluates the given team based on their roles as a Special Sweeper, Physical Sweeper, Choice Item, Boosting Move, and Volt-Switch.
 
@@ -202,5 +206,5 @@ def offensive_team_fun(ant, pokList):
     """
     # TODO Missing status move evaluator
     roles = [is_special_sweeper, is_physical_sweeper]
-    team = Team.ant_to_team(ant, pokList)
+    team = Team.ant_to_team(ant, pokemon_list)
     return team.team_roles_fun(roles)
