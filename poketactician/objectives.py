@@ -208,3 +208,71 @@ def offensive_team_fun(ant: np.ndarray, pokemon_list: list[Pokemon]):
     roles = [is_special_sweeper, is_physical_sweeper]
     team = Team.ant_to_team(ant, pokemon_list)
     return team.team_roles_fun(roles)
+
+
+class ObjectiveFunctions(Enum):
+    """
+    Enum class that represents the different objective functions available for team evaluation.
+    """
+
+    ATTACK = "Attack"
+    # DEFENSE = "Defense"
+    TEAM_COVERAGE = "Team Coverage"
+    # SELF_COVERAGE = "Self Coverage"
+
+    def get_function(self, pok_list: list[Pokemon]):
+        """
+        Returns the corresponding function for the objective function.
+
+        Returns:
+            function: The function corresponding to the objective function.
+        """
+        return {
+            ObjectiveFunctions.ATTACK: (
+                lambda team: attack_obj_fun(team, pok_list),
+                Q,
+                rho,
+            ),
+            # ObjectiveFunctions.DEFENSE: (lambda team:defense_obj_fun, Q, rho),
+            ObjectiveFunctions.TEAM_COVERAGE: (
+                lambda team: team_coverage_fun(team, pok_list),
+                Q,
+                rho,
+            ),
+            # ObjectiveFunctions.SELF_COVERAGE: (lambda team:self_coverage_fun,, Q, rho),
+        }[self]
+
+
+class StrategyFunctions(Enum):
+    """
+    Enum class that represents the different objective functions available for team evaluation.
+    """
+
+    GENERALIST_TEAM = "Generalist"
+    DEFENSIVE_TEAM = "Defensive"
+    OFFENSIVE_TEAM = "Offensive"
+
+    def get_function(self, pok_list: list[Pokemon]):
+        """
+        Returns the corresponding function for the objective function.
+
+        Returns:
+            function: The function corresponding to the objective function.
+        """
+        return {
+            StrategyFunctions.GENERALIST_TEAM: (
+                lambda team: generalist_team_fun(team, pok_list),
+                Q,
+                rho,
+            ),
+            StrategyFunctions.DEFENSIVE_TEAM: (
+                lambda team: defensive_team_fun(team, pok_list),
+                Q,
+                rho,
+            ),
+            StrategyFunctions.OFFENSIVE_TEAM: (
+                lambda team: offensive_team_fun(team, pok_list),
+                Q,
+                0.15,
+            ),
+        }[self]

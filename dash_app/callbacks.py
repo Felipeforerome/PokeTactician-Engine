@@ -30,14 +30,7 @@ from utils import generate_move_list_and_selector_status
 
 from poketactician.glob_var import Q, alpha, beta, pok_pre_filter, rho
 from poketactician.MOACO import MOACO
-from poketactician.objectives import (
-    attack_obj_fun,
-    defensive_team_fun,
-    generalist_team_fun,
-    offensive_team_fun,
-    self_coverage_fun,
-    team_coverage_fun,
-)
+from poketactician.objectives import ObjectiveFunctions, StrategyFunctions
 
 
 def preprocess_moves(pre_selected_moves: list[int | None]) -> list[list[int]]:
@@ -74,31 +67,17 @@ def filter_pokemon_list(
     return pre_selected + pok_list
 
 
-def define_objective_functions(obj_funcs_param, strategy, roles, pok_list):
+def define_objective_functions(obj_funcs_param: list[int], strategy, roles, pok_list):
     """
     Define the objective functions for team optimization.
     """
     objective_funcs = []
-    if 1 in obj_funcs_param:
-        objective_funcs.append((lambda team: attack_obj_fun(team, pok_list), Q, 0.1))
-    if 2 in obj_funcs_param:
-        objective_funcs.append((lambda team: team_coverage_fun(team, pok_list), Q, 0.1))
-    if 3 in obj_funcs_param:
-        objective_funcs.append((lambda team: self_coverage_fun(team, pok_list), Q, rho))
-
-    # Define strategy-specific objective functions
-    if strategy == "gen":
+    for objective_function in obj_funcs_param:
         objective_funcs.append(
-            (lambda team: generalist_team_fun(team, pok_list), Q, rho)
+            ObjectiveFunctions(objective_function).get_function(pok_list)
         )
-    elif strategy == "off":
-        objective_funcs.append(
-            (lambda team: offensive_team_fun(team, pok_list), Q, 0.15)
-        )
-    elif strategy == "def":
-        objective_funcs.append(
-            (lambda team: defensive_team_fun(team, pok_list), Q, rho)
-        )
+    if strategy:
+        objective_funcs.append(StrategyFunctions(strategy).get_function(pok_list))
     return objective_funcs
 
 

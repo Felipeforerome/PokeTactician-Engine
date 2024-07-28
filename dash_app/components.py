@@ -203,14 +203,10 @@ def filter_components(suffix):
             label="Select Objectives",
             placeholder="",
             id={"type": "objectives-multi-select", "suffix": suffix},
-            value=[1],
+            value=[ObjectiveFunctions("Attack").value],
             data=[
-                {"value": 1, "label": "Attack"},
-                {"value": 2, "label": "Team Coverage"},
-                # {"value": 3, "label": "Self Coverage"},
-                {"value": 4, "label": "Generalist Team"},
-                {"value": 5, "label": "Offensive Team"},
-                {"value": 6, "label": "Defensive Teams"},
+                {"value": member.value, "label": member.value.capitalize()}
+                for member in ObjectiveFunctions
             ],
             style={"marginBottom": 10, "width": "95%"},
             required=True,
@@ -304,9 +300,13 @@ def filter_components(suffix):
                                     fullWidth=True,
                                     data=[
                                         {"value": "no", "label": "None"},
-                                        {"value": "gen", "label": "Generalist"},
-                                        {"value": "off", "label": "Offensive"},
-                                        {"value": "def", "label": "Defensive"},
+                                    ]
+                                    + [
+                                        {
+                                            "value": member.value,
+                                            "label": member.value.capitalize(),
+                                        }
+                                        for member in StrategyFunctions
                                     ],
                                 ),
                             ],
