@@ -12,7 +12,7 @@ class Colony:
     def __init__(
         self,
         pop_size_param: int,
-        objective_fun_param: function,
+        objective_fun_param: callable,
         pokemons_param: list[Pokemon],
         preselected_poks: list[0],
         preselected_moves: list[list[int]],

@@ -195,12 +195,12 @@ def update_output(
 
         # Define objective functions
         objective_funcs = define_objective_functions(
-            obj_funcs_param, strategy, roles, pok_list
+            obj_funcs_param, strategy, pok_list
         )
         # Optimize team selection
         start_time = time.time()
         team, obj_value = optimize_team_selection(
-            pok_list, pre_selected, pre_selected_moves_lists, objective_funcs
+            pok_list, pre_selected, pre_selected_moves_lists, objective_funcs, roles
         )
         elapsed_time = time.time() - start_time
 
