@@ -1,26 +1,28 @@
+from dataclasses import dataclass, field
+
 from .Pokemon import Pokemon
 
 
+@dataclass
 class Team:
-    def __init__(self):
-        self.pokemons = []
+    pokemons: list = field(default_factory=list)
 
-    def addPokemon(self, pokemon):
+    def add_pokemon(self, pokemon):
         if len(self.pokemons) < 6:
             self.pokemons += [pokemon]
         else:
             raise Exception("Team is full")
 
     @classmethod
-    def ant_to_team(cls, ant, pokList: list):
+    def ant_to_team(cls, ant, pokemons_list: list):
         team = cls()
         for pok in ant:
-            temp_pok = Pokemon.from_json(pokList[pok[0]].serialize())
-            temp_pok.teachMove(pok[1])
-            temp_pok.teachMove(pok[2])
-            temp_pok.teachMove(pok[3])
-            temp_pok.teachMove(pok[4])
-            team.addPokemon(temp_pok)
+            temp_pok = Pokemon.from_json(pokemons_list[pok[0]].serialize())
+            temp_pok.teach_move(pok[1])
+            temp_pok.teach_move(pok[2])
+            temp_pok.teach_move(pok[3])
+            temp_pok.teach_move(pok[4])
+            team.add_pokemon(temp_pok)
         return team
 
     def team_has_roles(self, roles):

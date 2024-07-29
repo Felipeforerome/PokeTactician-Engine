@@ -1,5 +1,5 @@
 import json
-import pickle
+from enum import Enum
 
 from .cooperationStrats import selectionByDominance
 from .models.Move import Move
@@ -18,39 +18,9 @@ rho = 0.1
 alpha = 1
 beta = 0
 
-cooperationStatsDict = {1: selectionByDominance}
 
-
-# Function to serialize a Move instance
-def serialize_move(move):
-    return {
-        "id": move.id,
-        "name": move.name,
-        "type": move.type,
-        "damageClass": move.damageClass,
-        "power": move.power,
-        "accuracy": move.accuracy,
-        "pp": move.pp,
-        "priority": move.priority,
-    }
-
-
-# Function to serialize a Pokemon instance
-def serialize_pokemon(pokemon):
-    serialized_moves = [serialize_move(move) for move in pokemon.knowableMoves]
-    return {
-        "id": pokemon.id,
-        "name": pokemon.name,
-        "hp": pokemon.hp,
-        "att": pokemon.att,
-        "deff": pokemon.deff,
-        "spatt": pokemon.spatt,
-        "spdeff": pokemon.spdeff,
-        "spe": pokemon.spe,
-        "type1": pokemon.type1,
-        "type2": pokemon.type2,
-        "knowableMoves": serialized_moves,
-    }
+class CooperationStats(Enum):
+    SELECTION_BY_DOMINANCE = selectionByDominance
 
 
 # Save to a JSON file the pokemon_list
@@ -59,20 +29,6 @@ def serialize_pokemon(pokemon):
 
 # with open("pokemon_data.json", "w") as json_file:
 #     json.dump(serialized_pokemon_list, json_file, indent=4)
-
-
-# Function to deserialize a Move instance
-def deserialize_move(data):
-    return Move(
-        data["id"],
-        data["name"],
-        data["type"],
-        data["damageClass"],
-        data["power"],
-        int(data["accuracy"] * 100),
-        data["pp"],
-        data["priority"],
-    )
 
 
 # Function to load and recreate the list of Pokemon from the JSON file
@@ -89,5 +45,5 @@ def load_moves_from_json(file_name):
         return {key: Move.from_json(value) for key, value in data.items()}
 
 
-pokPreFilter = load_pokemon_from_json("data/pokemon_data.json")
+pok_pre_filter = load_pokemon_from_json("data/pokemon_data.json")
 moves = load_moves_from_json("data/move_data.json")

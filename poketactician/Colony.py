@@ -3,33 +3,35 @@ from math import ceil
 
 import numpy as np
 
+from .models.Pokemon import Pokemon
 from .models.Team import Team
 
 
 class Colony:
+
     def __init__(
         self,
-        pop_sizeParam,
-        objFuncParam,
-        poks,
-        preSelected,
-        preSelectedMoves,
-        alpha,
-        beta,
-        Q,
-        rho,
-        roles=[],
+        pop_size_param: int,
+        objective_fun_param: function,
+        pokemons_param: list[Pokemon],
+        preselected_poks: list[0],
+        preselected_moves: list[list[int]],
+        alpha: int,
+        beta: int,
+        Q: int,
+        rho: float,
+        roles: list[str] = [],
     ):
-        self.pop_size = pop_sizeParam
+        self.pop_size = pop_size_param
         # objFunParam should be a lambda function
-        self.objFunc = objFuncParam
+        self.objective_function = objective_fun_param
 
         # Set Pokemon
-        self.poks = poks
+        self.pokemons = pokemons_param
 
         # Set PreSelected Pokemon and Moves
-        self.preSelectedPok = preSelected
-        self.preSelectedMoves = preSelectedMoves
+        self.preselected_pok = preselected_poks
+        self.preselected_moves = preselected_moves
 
         # Set Roles
         self.roles = roles
@@ -41,57 +43,63 @@ class Colony:
         self.rho = rho
 
         # Create Decision Space of Pokemon
-        self.DS_Pok = np.arange(self.poks.__len__())
+        self.decision_space_pokemon = np.arange(self.pokemons.__len__())
 
-        # Create Decision Space of Attacks
-        self.DS_Att = [np.arange(len(pok.knowableMoves)) for pok in self.poks]
+        # Create Decision Space of Moves
+        self.decision_space_moves = [
+            np.arange(len(pok.knowable_moves)) for pok in self.pokemons
+        ]
 
         # Create Probability Vector for Pokemon
-        self.Prob_Poks = np.ones(self.poks.__len__()) * (1 / self.poks.__len__())
+        self.pokemon_probabilities = np.ones(self.pokemons.__len__()) * (
+            1 / self.pokemons.__len__()
+        )
 
         # Create Probability of Attacks
-        self.Prob_Att = []
-        for pok in self.poks:
-            size = pok.knowableMoves.__len__()
+        self.move_probabilities = []
+        for pokemon in self.pokemons:
+            size = pokemon.knowable_moves.__len__()
             if size == 0:
-                self.Prob_Att.append([])
+                self.move_probabilities.append([])
             else:
-                self.Prob_Att.append(np.ones(size) * (1 / size))
+                self.move_probabilities.append(np.ones(size) * (1 / size))
 
         # Create Pheromone Vector for Pokemon
-        self.Ph_Pok = np.zeros(self.poks.__len__())
+        self.pokemon_pheromones = np.zeros(self.pokemons.__len__())
 
         # Create Pheromone of Attacks
-        self.Ph_Atts = []
-        for pok in self.poks:
-            size = pok.knowableMoves.__len__()
+        self.move_pheromones = []
+        for pokemon in self.pokemons:
+            size = pokemon.knowable_moves.__len__()
             if size == 0:
                 size = 1
-            self.Ph_Atts.append(np.zeros(size))
+            self.move_pheromones.append(np.zeros(size))
 
         # Create Heuristic Value of Pokemon
-        self.H_Poks = np.zeros(self.poks.__len__())
+        self.pokemon_heuritics = np.zeros(self.pokemons.__len__())
         i = 0
-        for i in range(0, self.H_Poks.__len__()):
-            self.H_Poks[i] = self.heuristicPokFun(self.poks, i)
+        for i in range(0, self.pokemon_heuritics.__len__()):
+            self.pokemon_heuritics[i] = self.heuristic_pokemon_fun(self.pokemons, i)
 
         # Create Heuristic Value of Attack
-        self.H_Atts = []
-        for pok in self.poks:
-            size = pok.knowableMoves.__len__()
+        self.move_heuristics = []
+        for pokemon in self.pokemons:
+            size = pokemon.knowable_moves.__len__()
             if size == 0:
                 size = 1
-            self.H_Atts.append(np.zeros(size))
+            self.move_heuristics.append(np.zeros(size))
 
         # Create Population$
         # TODO Change min(6, len(self.poks)) to 6 in case incomplete teams are not allowed
-        self.Pop = np.ones([self.pop_size, min(6, len(self.poks)), 5], dtype=int) * (-1)
+        self.population = np.ones(
+            [self.pop_size, min(6, len(self.pokemons)), 5], dtype=int
+        ) * (-1)
 
         # Initial Run of the Meta-Heuristic
         self.ACO()
 
     def role_constraint(self, ant):
-        team = Team.ant_to_team(ant, self.poks)
+        team = Team.ant_to_team(ant, self.pokemons)
         team.team_has_roles(self.roles)
         return True
 
@@ -100,20 +108,20 @@ class Colony:
         # TODO Allow Repeating even if not all pokemon have been used
 
         ######### Vectorized
-        ant = np.ones([min(6, len(self.poks)), 5], dtype=int) * (-1)
-        team_size = min(len(self.poks), 6)
-        preSelected_size = len(self.preSelectedPok)
-        ant[0:preSelected_size, 0] = self.preSelectedPok
-        if preSelected_size < team_size:
+        ant = np.ones([min(6, len(self.pokemons)), 5], dtype=int) * (-1)
+        team_size = min(len(self.pokemons), 6)
+        preselected_size = len(self.preselected_pok)
+        ant[0:preselected_size, 0] = self.preselected_pok
+        if preselected_size < team_size:
 
             # Renormalize Probabilities
-            self.Prob_Poks[self.preSelectedPok] = 0
-            self.Prob_Poks /= self.Prob_Poks.sum()
-            ant[preSelected_size:, 0] = np.random.choice(
-                len(self.Prob_Poks),
-                size=team_size - preSelected_size,
+            self.pokemon_probabilities[self.preselected_pok] = 0
+            self.pokemon_probabilities /= self.pokemon_probabilities.sum()
+            ant[preselected_size:, 0] = np.random.choice(
+                len(self.pokemon_probabilities),
+                size=team_size - preselected_size,
                 replace=False,
-                p=self.Prob_Poks,
+                p=self.pokemon_probabilities,
             )
         # if replacePok:
         #     ant[len(self.poks) :, 0] = np.random.choice(
@@ -125,13 +133,13 @@ class Colony:
             pokemon = ant[ant_i]
             selected_pokemon_id = pokemon[0]
             ######### NonVectorized
-            prob_att_temp = self.Prob_Att[selected_pokemon_id].copy()
+            prob_att_temp = self.move_probabilities[selected_pokemon_id].copy()
             for i in range(1, 5):
-                if ant_i < len(self.preSelectedMoves) and i - 1 < len(
-                    self.preSelectedMoves[ant_i]
+                if ant_i < len(self.preselected_moves) and i - 1 < len(
+                    self.preselected_moves[ant_i]
                 ):
-                    pokemon[i] = self.preSelectedMoves[ant_i][i - 1]
-                    prob_att_temp[self.preSelectedMoves[ant_i][i - 1]] = 0
+                    pokemon[i] = self.preselected_moves[ant_i][i - 1]
+                    prob_att_temp[self.preselected_moves[ant_i][i - 1]] = 0
                 elif prob_att_temp.size - i > 0:
                     rand_att = random.random() * prob_att_temp.sum()
                     cumulative_att_prob = np.cumsum(prob_att_temp)
@@ -159,82 +167,96 @@ class Colony:
     def ACO(self):
         # Assign Population
         for i in range(self.pop_size):
-            tempAnt = self.create_ant()
-            while len(self.roles) > 0 and not self.role_constraint(tempAnt):
-                tempAnt = self.create_ant()
-            self.Pop[i] = tempAnt
+            temp_ant = self.create_ant()
+            while len(self.roles) > 0 and not self.role_constraint(temp_ant):
+                temp_ant = self.create_ant()
+            self.population[i] = temp_ant
 
-    def updatePhCon(self, candidateSet):
+    def update_ph_concentration(self, candidate_set):
         # User Defined Variables
         Q = self.Q
         rho = self.rho
         # Update Pheromone Concentration
         # Evaporate Pheromones
-        self.Ph_Pok = (1 - rho) * self.Ph_Pok
-        for idx, Ph_Att in enumerate(self.Ph_Atts):
-            self.Ph_Atts[idx] = (1 - rho) * Ph_Att
+        self.pokemon_pheromones = (1 - rho) * self.pokemon_pheromones
+        for idx, move_pheromone in enumerate(self.move_pheromones):
+            self.move_pheromones[idx] = (1 - rho) * move_pheromone
 
-        for ant in candidateSet:
-            fitnessValue = self.fitness(ant)
-            deltaConcentr = Q * fitnessValue
+        for ant in candidate_set:
+            fitness_value = self.fitness(ant)
+            delta_concentration = Q * fitness_value
             for pokemon in ant:
-                self.Ph_Pok[pokemon[0]] = self.Ph_Pok[pokemon[0]] + deltaConcentr
+                self.pokemon_pheromones[pokemon[0]] = (
+                    self.pokemon_pheromones[pokemon[0]] + delta_concentration
+                )
                 if pokemon[1] >= 0:
-                    self.Ph_Atts[pokemon[0]][pokemon[1]] = (
-                        self.Ph_Atts[pokemon[0]][pokemon[1]] + deltaConcentr
+                    self.move_pheromones[pokemon[0]][pokemon[1]] = (
+                        self.move_pheromones[pokemon[0]][pokemon[1]]
+                        + delta_concentration
                     )
 
                 if pokemon[2] >= 0:
-                    self.Ph_Atts[pokemon[0]][pokemon[2]] = (
-                        self.Ph_Atts[pokemon[0]][pokemon[2]] + deltaConcentr
+                    self.move_pheromones[pokemon[0]][pokemon[2]] = (
+                        self.move_pheromones[pokemon[0]][pokemon[2]]
+                        + delta_concentration
                     )
 
                 if pokemon[3] >= 0:
-                    self.Ph_Atts[pokemon[0]][pokemon[3]] = (
-                        self.Ph_Atts[pokemon[0]][pokemon[3]] + deltaConcentr
+                    self.move_pheromones[pokemon[0]][pokemon[3]] = (
+                        self.move_pheromones[pokemon[0]][pokemon[3]]
+                        + delta_concentration
                     )
 
                 if pokemon[4] >= 0:
-                    self.Ph_Atts[pokemon[0]][pokemon[4]] = (
-                        self.Ph_Atts[pokemon[0]][pokemon[4]] + deltaConcentr
+                    self.move_pheromones[pokemon[0]][pokemon[4]] = (
+                        self.move_pheromones[pokemon[0]][pokemon[4]]
+                        + delta_concentration
                     )
 
-    def updatePokProb(self):
+    def update_pokemon_prob(self):
         # Update Pokemon Probabilities
-        numeratorsPok = self.numeratorFun(self.Ph_Pok, self.H_Poks)
-        denomPok = self.numeratorFun(self.Ph_Pok, self.H_Poks).sum()
-        if denomPok == 0:
-            denomPok = 1
-        for i in range(0, self.Prob_Poks.__len__()):
-            self.Prob_Poks[i] = numeratorsPok[i] / denomPok
+        pokemon_numerators = self.numerator_fun(
+            self.pokemon_pheromones, self.pokemon_heuritics
+        )
+        pokemon_denominators = self.numerator_fun(
+            self.pokemon_pheromones, self.pokemon_heuritics
+        ).sum()
+        if pokemon_denominators == 0:
+            pokemon_denominators = 1
+        for i in range(0, self.pokemon_probabilities.__len__()):
+            self.pokemon_probabilities[i] = pokemon_numerators[i] / pokemon_denominators
 
         # Update Attack Probabilities
-        numeratorsAtt = []
-        denomAtt = []
-        for Ph_Att, H_Att in zip(self.Ph_Atts, self.H_Atts):
-            temp = self.numeratorFun(Ph_Att, H_Att)
-            numeratorsAtt.append(temp)
-            denomAttTemp = temp.sum()
-            if denomAttTemp == 0:
-                denomAttTemp = 1
-            denomAtt.append(denomAttTemp)
+        move_numerators = []
+        move_denominators = []
+        for move_pheromone, move_heuristic in zip(
+            self.move_pheromones, self.move_heuristics
+        ):
+            temp = self.numerator_fun(move_pheromone, move_heuristic)
+            move_numerators.append(temp)
+            temp_move_denominator = temp.sum()
+            if temp_move_denominator == 0:
+                temp_move_denominator = 1
+            move_denominators.append(temp_move_denominator)
 
-        for i in range(0, numeratorsAtt.__len__()):
-            for j in range(0, numeratorsAtt[i].__len__()):
-                if denomAtt[i] > 0:
-                    self.Prob_Att[i][j] = numeratorsAtt[i][j] / denomAtt[i]
+        for i in range(0, move_numerators.__len__()):
+            for j in range(0, move_numerators[i].__len__()):
+                if move_denominators[i] > 0:
+                    self.move_probabilities[i][j] = (
+                        move_numerators[i][j] / move_denominators[i]
+                    )
 
     def fitness(self, ant):
-        fitnessValue = self.objFunc(ant)
-        return fitnessValue
+        fitness_value = self.objective_function(ant)
+        return fitness_value
 
-    def heuristicPokFun(self, poks, pokIndex):
-        heuristicValue = poks[pokIndex].overallStats() / 500
-        return heuristicValue
+    def heuristic_pokemon_fun(self, pokemon, pokemon_index):
+        heuristic_value = pokemon[pokemon_index].overall_stats() / 500
+        return heuristic_value
 
-    def candidateSet(self):
-        popSorted = sorted(self.Pop, key=self.fitness)
-        return list(popSorted[ceil(self.pop_size * 0.90) : self.pop_size])
+    def candidate_set(self):
+        sorted_population = sorted(self.population, key=self.fitness)
+        return list(sorted_population[ceil(self.pop_size * 0.90) : self.pop_size])
 
-    def numeratorFun(self, c, n):
+    def numerator_fun(self, c, n):
         return (c**self.alpha) * (n**self.beta)

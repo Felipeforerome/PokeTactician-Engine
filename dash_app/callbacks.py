@@ -12,14 +12,15 @@ from dash import (
     no_update,
 )
 from filters import (
-    filterGames,
-    filterGenerations,
-    filterLegendaries,
-    filterTypes,
-    handRemoved,
-    removeBattleOnly,
-    removeMegas,
-    splitPreSelected,
+    filter_games,
+    filter_generations,
+    filter_legendaries,
+    filter_types,
+    hand_removed,
+    remove_battle_only,
+    remove_megas,
+    remove_totems,
+    split_preselected,
 )
 
 sys.path.append(sys.path[0] + "/..")
@@ -27,19 +28,13 @@ import time
 
 from utils import generate_move_list_and_selector_status
 
-from poketactician.glob_var import Q, alpha, beta, pokPreFilter, rho
+from poketactician.glob_var import Q, alpha, beta, pok_pre_filter, rho
 from poketactician.MOACO import MOACO
-from poketactician.objectives import (
-    attack_obj_fun,
-    defensive_team_fun,
-    generalist_team_fun,
-    offensive_team_fun,
-    self_coverage_fun,
-    team_coverage_fun,
-)
+from poketactician.models.Pokemon import Pokemon
+from poketactician.objectives import ObjectiveFunctions, StrategyFunctions
 
 
-def preprocess_moves(pre_selected_moves):
+def preprocess_moves(pre_selected_moves: list[int | None]) -> list[list[int]]:
     """
     Preprocess pre-selected moves into lists.
     """
@@ -51,52 +46,49 @@ def preprocess_moves(pre_selected_moves):
 
 
 def filter_pokemon_list(
-    pre_selected, included_types, mono_type, generations, include_legendaries, games
+    pre_selected: list[int],
+    included_types: list[str],
+    mono_type: bool,
+    generations: list[list[int]],
+    include_legendaries: bool,
+    games: list[str],
 ):
     """
     Apply filters to the Pokémon list.
     """
-    pok_list = handRemoved(pokPreFilter)
-    pok_list = removeMegas(pok_list)
-    pok_list = removeBattleOnly(pok_list)
-    pre_selected, pok_list = splitPreSelected(pok_list, pre_selected)
-    pok_list = filterTypes(pok_list, included_types, mono_type)
-    pok_list = filterGenerations(pok_list, generations)
-    pok_list = filterLegendaries(pok_list, include_legendaries)
-    pok_list = filterGames(pok_list, games)
+    pok_list = hand_removed(pok_pre_filter)
+    pok_list = remove_megas(pok_list)
+    pok_list = remove_battle_only(pok_list)
+    pok_list = remove_totems(pok_list)
+    pre_selected, pok_list = split_preselected(pok_list, pre_selected)
+    pok_list = filter_types(pok_list, included_types, mono_type)
+    pok_list = filter_generations(pok_list, generations)
+    pok_list = filter_legendaries(pok_list, include_legendaries)
+    pok_list = filter_games(pok_list, games)
     return pre_selected + pok_list
 
 
-def define_objective_functions(obj_funcs_param, strategy, roles, pok_list):
+def define_objective_functions(
+    obj_funcs_param: list[int], strategy: str, roles: list[str], pok_list: list[Pokemon]
+):
     """
     Define the objective functions for team optimization.
     """
     objective_funcs = []
-    if 1 in obj_funcs_param:
-        objective_funcs.append((lambda team: attack_obj_fun(team, pok_list), Q, 0.1))
-    if 2 in obj_funcs_param:
-        objective_funcs.append((lambda team: team_coverage_fun(team, pok_list), Q, 0.1))
-    if 3 in obj_funcs_param:
-        objective_funcs.append((lambda team: self_coverage_fun(team, pok_list), Q, rho))
-
-    # Define strategy-specific objective functions
-    if strategy == "gen":
+    for objective_function in obj_funcs_param:
         objective_funcs.append(
-            (lambda team: generalist_team_fun(team, pok_list), Q, rho)
+            ObjectiveFunctions(objective_function).get_function(pok_list)
         )
-    elif strategy == "off":
-        objective_funcs.append(
-            (lambda team: offensive_team_fun(team, pok_list), Q, 0.15)
-        )
-    elif strategy == "def":
-        objective_funcs.append(
-            (lambda team: defensive_team_fun(team, pok_list), Q, rho)
-        )
+    if strategy:
+        objective_funcs.append(StrategyFunctions(strategy).get_function(pok_list))
     return objective_funcs
 
 
 def optimize_team_selection(
-    pok_list, pre_selected, pre_selected_moves_lists, objective_funcs
+    pok_list: list[Pokemon],
+    pre_selected: list[int],
+    pre_selected_moves_lists: list[list[int]],
+    objective_funcs: list[tuple[callable, float, float]],
 ):
     """
     Optimize team selection using MOACO algorithm.
@@ -112,7 +104,7 @@ def optimize_team_selection(
     )
 
     m_col.optimize(iters=25, time_limit=None)
-    return m_col.getSoln(), m_col.getObjTeamValue()
+    return m_col.get_solution(), m_col.get_objective_value()
 
 
 @callback(
@@ -230,10 +222,12 @@ def update_output(
 # Callback to insert the BlankPokemonTeam dynamically upon page load
 @callback(Output("blank-team-output", "children"), Input("url", "pathname"))
 def display_page(_):
-    pokList = removeMegas(pokPreFilter)
-    pokList = removeBattleOnly(pokList)
-    pokemon_list = [{"value": pok.id, "label": pok.name.title()} for pok in pokList]
-    return BlankPokemonTeam(pokemon_list).layout()
+    pokemon_list = remove_megas(pok_pre_filter)
+    pokemon_list = remove_battle_only(pokemon_list)
+    pokemon_team = [
+        {"value": pok.id, "label": pok.name.title()} for pok in pokemon_list
+    ]
+    return BlankPokemonTeam(pokemon_team).layout()
 
 
 @callback(

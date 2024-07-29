@@ -1,3 +1,5 @@
+from enum import Enum
+
 import numpy as np
 
 # Vectors of Attack Effectiveness against types
@@ -21,27 +23,48 @@ Steel = np.array((1, 0.5, 0.5, 0.5, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0.5, 2))
 Fairy = np.array((1, 0.5, 1, 1, 1, 1, 2, 0.5, 1, 1, 1, 1, 1, 1, 2, 2, 0.5, 1))
 
 
-typeOrder = [
-    "normal",
-    "fire",
-    "water",
-    "electric",
-    "grass",
-    "ice",
-    "fighting",
-    "poison",
-    "ground",
-    "flying",
-    "psychic",
-    "bug",
-    "rock",
-    "ghost",
-    "dragon",
-    "dark",
-    "steel",
-    "fairy",
+class PokemonType(Enum):
+    NORMAL = "normal"
+    FIRE = "fire"
+    WATER = "water"
+    ELECTRIC = "electric"
+    GRASS = "grass"
+    ICE = "ice"
+    FIGHTING = "fighting"
+    POISON = "poison"
+    GROUND = "ground"
+    FLYING = "flying"
+    PSYCHIC = "psychic"
+    BUG = "bug"
+    ROCK = "rock"
+    GHOST = "ghost"
+    DRAGON = "dragon"
+    DARK = "dark"
+    STEEL = "steel"
+    FAIRY = "fairy"
+
+
+type_order = [
+    PokemonType.NORMAL,
+    PokemonType.FIRE,
+    PokemonType.WATER,
+    PokemonType.ELECTRIC,
+    PokemonType.GRASS,
+    PokemonType.ICE,
+    PokemonType.FIGHTING,
+    PokemonType.POISON,
+    PokemonType.GROUND,
+    PokemonType.FLYING,
+    PokemonType.PSYCHIC,
+    PokemonType.BUG,
+    PokemonType.ROCK,
+    PokemonType.GHOST,
+    PokemonType.DRAGON,
+    PokemonType.DARK,
+    PokemonType.STEEL,
+    PokemonType.FAIRY,
 ]
-typeChart = np.stack(
+type_chart = np.stack(
     [
         Normal,
         Fire,
