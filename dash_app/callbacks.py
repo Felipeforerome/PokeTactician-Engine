@@ -69,7 +69,7 @@ def filter_pokemon_list(
 
 
 def define_objective_functions(
-    obj_funcs_param: list[int], strategy: str, roles: list[str], pok_list: list[Pokemon]
+    obj_funcs_param: list[int], strategy: str, pok_list: list[Pokemon]
 ):
     """
     Define the objective functions for team optimization.
@@ -89,6 +89,7 @@ def optimize_team_selection(
     pre_selected: list[int],
     pre_selected_moves_lists: list[list[int]],
     objective_funcs: list[tuple[callable, float, float]],
+    roles: list[str],
 ):
     """
     Optimize team selection using MOACO algorithm.
@@ -101,6 +102,7 @@ def optimize_team_selection(
         pre_selected_moves_lists,
         alpha,
         beta,
+        roles=roles,
     )
 
     m_col.optimize(iters=25, time_limit=None)

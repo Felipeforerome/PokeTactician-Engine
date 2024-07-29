@@ -74,6 +74,7 @@ class MOACO:
         alpha: float,
         beta: float,
         cooperation_strategy: Callable = CooperationStats.SELECTION_BY_DOMINANCE,
+        roles: list[str] = [],
     ):
         if total_population <= 0:
             raise ValueError("totalPopulation must be a positive integer")
@@ -88,6 +89,7 @@ class MOACO:
         self.preSelected_moves = preselected_moves
         self.alpha = alpha
         self.beta = beta
+        self.roles = roles
         self.colonies = self.initialize_colonies()
         self.prev_candidate_set = self.initialize_prev_cand_set()
         self.best_so_far = self.prev_candidate_set[0]
@@ -120,6 +122,7 @@ class MOACO:
                 self.beta,
                 Q,
                 rho,
+                self.roles,
             )
             for objFunc, Q, rho in self.objective_functions_Q_rho
         ]

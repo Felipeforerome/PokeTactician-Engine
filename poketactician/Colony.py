@@ -20,7 +20,7 @@ class Colony:
         beta: int,
         Q: int,
         rho: float,
-        roles: list[str] = [],
+        roles: list[str],
     ):
         self.pop_size = pop_size_param
         # objFunParam should be a lambda function
