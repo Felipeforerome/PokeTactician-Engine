@@ -30,6 +30,7 @@ from utils import generate_move_list_and_selector_status
 
 from poketactician.glob_var import Q, alpha, beta, pok_pre_filter, rho
 from poketactician.MOACO import MOACO
+from poketactician.models.Pokemon import Pokemon
 from poketactician.objectives import ObjectiveFunctions, StrategyFunctions
 
 
@@ -67,7 +68,9 @@ def filter_pokemon_list(
     return pre_selected + pok_list
 
 
-def define_objective_functions(obj_funcs_param: list[int], strategy, roles, pok_list):
+def define_objective_functions(
+    obj_funcs_param: list[int], strategy: str, roles: list[str], pok_list: list[Pokemon]
+):
     """
     Define the objective functions for team optimization.
     """
@@ -82,7 +85,10 @@ def define_objective_functions(obj_funcs_param: list[int], strategy, roles, pok_
 
 
 def optimize_team_selection(
-    pok_list, pre_selected, pre_selected_moves_lists, objective_funcs
+    pok_list: list[Pokemon],
+    pre_selected: list[int],
+    pre_selected_moves_lists: list[list[int]],
+    objective_funcs: list[tuple[callable, float, float]],
 ):
     """
     Optimize team selection using MOACO algorithm.

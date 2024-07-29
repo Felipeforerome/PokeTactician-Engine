@@ -104,7 +104,7 @@ class PokemonTeam:
 
 
 class BlankPokemonCard:
-    def __init__(self, pokemon_list: list, id: str):
+    def __init__(self, pokemon_list: list[dict], id: str):
         self.pokemon_list = pokemon_list
         self.id = id
 
@@ -178,7 +178,7 @@ class BlankPokemonCard:
 
 
 class BlankPokemonTeam:
-    def __init__(self, pokemon_list):
+    def __init__(self, pokemon_list: list[dict]):
         self.pokemon_cards = [
             dmc.Col(
                 BlankPokemonCard(pokemon_list, f"card{i}").layout(),
@@ -196,7 +196,7 @@ class BlankPokemonTeam:
         )
 
 
-def filter_components(suffix):
+def filter_components(suffix: str):
     games_dict = json.load(open("data/games.json", "r"))
     return [
         dmc.MultiSelect(

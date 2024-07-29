@@ -3,22 +3,24 @@ from math import ceil
 
 import numpy as np
 
+from .models.Pokemon import Pokemon
 from .models.Team import Team
 
 
 class Colony:
+
     def __init__(
         self,
-        pop_size_param,
-        objective_fun_param,
-        pokemons_param,
-        preselected_poks,
-        preselected_moves,
-        alpha,
-        beta,
-        Q,
-        rho,
-        roles=[],
+        pop_size_param: int,
+        objective_fun_param: function,
+        pokemons_param: list[Pokemon],
+        preselected_poks: list[0],
+        preselected_moves: list[list[int]],
+        alpha: int,
+        beta: int,
+        Q: int,
+        rho: float,
+        roles: list[str] = [],
     ):
         self.pop_size = pop_size_param
         # objFunParam should be a lambda function
