@@ -237,8 +237,7 @@ class MOACO:
         team = Team()
         if self.best_so_far is not None:
             for pok in self.best_so_far:
-                # TODO instead of this deepcopy, do the serialize to from_json trick
-                temp_pokemon = deepcopy(self.pokemon_pop[pok[0]])
+                temp_pokemon = Pokemon.from_json(self.pokemon_pop[pok[0]].serialize())
                 for move_index in pok[1:]:
                     temp_pokemon.teach_move(move_index)
                 team.add_pokemon(temp_pokemon)
