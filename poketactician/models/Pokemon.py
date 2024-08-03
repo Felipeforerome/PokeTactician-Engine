@@ -212,17 +212,15 @@ class Pokemon:
         if move_id == -1:
             return
         if len(self.learnt_moves) < 4:
-            if (
-                move_id != -1
-                and self.knowable_moves[move_id].id != "0"
-                and self.knowable_moves[move_id].id
-                in [learnt_move.id for learnt_move in self.learnt_moves]
-            ):
+            if self.knowable_moves[move_id].id in [
+                learnt_move.id for learnt_move in self.learnt_moves
+            ]:
                 raise ValueError("Can't teach the same move twice")
             self.learnt_moves += [self.knowable_moves[move_id]]
         else:
             raise ValueError("Can't teach more than 4 moves")
 
+    @property
     def overall_stats(self):
         """
         Calculates the sum of stats.
@@ -231,6 +229,7 @@ class Pokemon:
         """
         return self.hp + self.att + self.deff + self.spatt + self.spdeff + self.spe
 
+    @property
     def current_power(self):
         """
         Calculates the current power of the pokemon based on Stats, Attacks, and Type
