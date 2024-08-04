@@ -5,7 +5,7 @@ from .Pokemon import Pokemon
 
 @dataclass
 class Team:
-    pokemons: list = field(default_factory=list)
+    pokemons: list[Pokemon] = field(default_factory=list)
 
     def add_pokemon(self, pokemon: Pokemon) -> None:
         if len(self.pokemons) < 6:
@@ -18,10 +18,8 @@ class Team:
         team = cls()
         for pok in ant:
             temp_pok = Pokemon.from_json(pokemons_list[pok[0]].serialize())
-            temp_pok.teach_move(pok[1])
-            temp_pok.teach_move(pok[2])
-            temp_pok.teach_move(pok[3])
-            temp_pok.teach_move(pok[4])
+            for i in range(1, 5):
+                temp_pok.teach_move(pok[i])
             team.add_pokemon(temp_pok)
         return team
 
@@ -29,7 +27,7 @@ class Team:
         for role in roles:
             role_fulfilled = False
             for pokemon in self.pokemons:
-                if pokemon.isRole(role) > 0:
+                if pokemon.is_role(role) > 0:
                     role_fulfilled = True
                     break
             if not role_fulfilled:
