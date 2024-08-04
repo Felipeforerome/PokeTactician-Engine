@@ -57,7 +57,7 @@ class Pokemon:
     knowable_moves: list = field(default_factory=list)
     learnt_moves: list = field(default_factory=list)
 
-    def add_knowable_move(self, move):
+    def add_knowable_move(self, move: Move):
         """
         TODO This should be changed once more info about the moves is added, like effects or whatever. Right now it does reduce the decision space
         Adds move to list of knowable move if it has power greater to 0, its between the best 3 moves wtht that type and class
@@ -104,7 +104,7 @@ class Pokemon:
             self.knowable_moves.append(move)
 
     @classmethod
-    def from_json(cls, data):
+    def from_json(cls, data: dict):
         """
         Creates a Pokemon instance from JSON data.
 
@@ -203,7 +203,7 @@ class Pokemon:
             "games": self.games,
         }
 
-    def teach_move(self, int):
+    def teach_move(self, move_id: int):
         """
         Adds a knowable move to the learnt moves list.
 
@@ -241,7 +241,7 @@ class Pokemon:
             current_power += expected_power
         return current_power
 
-    def isRole(self, role_checker) -> bool:
+    def is_role(self, role_checker: callable) -> bool:
         """
         Checks if the Pokemon fulfills a specific role.
 
