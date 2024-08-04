@@ -209,8 +209,17 @@ class Pokemon:
 
         :param int: The index of the knowable move to teach.
         """
+        if move_id == -1:
+            return
         if len(self.learnt_moves) < 4:
-            self.learnt_moves += [self.knowable_moves[int]]
+            if (
+                move_id != -1
+                and self.knowable_moves[move_id].id != "0"
+                and self.knowable_moves[move_id].id
+                in [learnt_move.id for learnt_move in self.learnt_moves]
+            ):
+                raise ValueError("Can't teach the same move twice")
+            self.learnt_moves += [self.knowable_moves[move_id]]
         else:
             raise ValueError("Can't teach more than 4 moves")
 

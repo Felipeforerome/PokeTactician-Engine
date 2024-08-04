@@ -71,6 +71,10 @@ class PokemonCard:
                                     )
                                 )
                                 for move in pokemon["moves"]
+                            ]
+                            + [
+                                dmc.Center(html.P("------"))
+                                for _ in range(4 - len(pokemon["moves"]))
                             ],
                         ),
                     ],
