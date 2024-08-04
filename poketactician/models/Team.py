@@ -7,7 +7,7 @@ from .Pokemon import Pokemon
 class Team:
     pokemons: list = field(default_factory=list)
 
-    def add_pokemon(self, pokemon):
+    def add_pokemon(self, pokemon: Pokemon) -> None:
         if len(self.pokemons) < 6:
             self.pokemons += [pokemon]
         else:
@@ -25,7 +25,7 @@ class Team:
             team.add_pokemon(temp_pok)
         return team
 
-    def team_has_roles(self, roles):
+    def team_has_roles(self, roles: list[callable]) -> bool:
         for role in roles:
             role_fulfilled = False
             for pokemon in self.pokemons:
@@ -48,5 +48,5 @@ class Team:
         """
         return sum([pok.isRole(role) for pok in self.pokemons for role in roles])
 
-    def serialize(self):
+    def serialize(self) -> list:
         return [pokemon.serialize_instance() for pokemon in self.pokemons]
