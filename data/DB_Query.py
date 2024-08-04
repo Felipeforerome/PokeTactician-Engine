@@ -18,9 +18,9 @@ import time
 import pandas as pd
 from fuzzywuzzy import fuzz
 
-from poketactician.models.Move import Move
+from poketactician.models.Move import Move, DamageClass
 from poketactician.models.Pokemon import Pokemon
-
+from poketactician.models.Types import PokemonType
 
 def get_game_availability(pokemon_name, pokemon_id):
     """
@@ -102,10 +102,10 @@ def build_data(recalculateMoves):
                 tempMove = Move(
                     str(j),
                     moveJSON["name"],
-                    moveJSON["type"]["name"],
-                    moveJSON["damage_class"]["name"],
-                    moveJSON["power"],
-                    moveJSON["accuracy"],
+                    PokemonType(moveJSON["type"]["name"]),
+                    DamageClass(moveJSON["damage_class"]["name"]),
+                    moveJSON["power"] if moveJSON["power"] is not None else 0,
+                    moveJSON["accuracy"]/100 if moveJSON["accuracy"] is not None else 0,
                     moveJSON["pp"],
                     moveJSON["priority"],
                 )
@@ -151,11 +151,11 @@ def build_data(recalculateMoves):
                 pokemonJSON["stats"][3]["base_stat"],
                 pokemonJSON["stats"][4]["base_stat"],
                 pokemonJSON["stats"][5]["base_stat"],
-                pokemonJSON["types"][0]["type"].get("name"),
+                PokemonType(pokemonJSON["types"][0]["type"].get("name")),
                 (
                     None
                     if len(pokemonJSON["types"]) < 2
-                    else pokemonJSON["types"][1]["type"].get("name")
+                    else PokemonType(pokemonJSON["types"][1]["type"].get("name"))
                 ),
                 bool(pokemonJSON["legend"]["is_mythical"]),
                 bool(pokemonJSON["legend"]["is_legendary"]),
@@ -191,4 +191,4 @@ def build_data(recalculateMoves):
     print("Elapsed Time: {:.2f} seconds".format(elapsed_time))
 
 
-build_data(False)
+build_data(True)
