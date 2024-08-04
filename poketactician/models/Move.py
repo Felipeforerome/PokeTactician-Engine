@@ -31,7 +31,7 @@ class Move:
     type: PokemonType
     damage_class: DamageClass
     power: int = field(default=0)
-    accuracy: int = field(default=1)
+    accuracy: float = field(default=1)
     pp: int = field(default=0)
     priority: int = field(default=0)
 
