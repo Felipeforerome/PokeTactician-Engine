@@ -193,7 +193,6 @@ def is_offensive_pivot(pokemon: Pokemon) -> float:
             "parting-shot",
             "flip-turn",
             "chilly-reception",
-            "teleport",
         ],
     )
 
@@ -414,7 +413,7 @@ def is_suicide_lead(pokemon: Pokemon) -> float:
                 "taunt",
             ],
         )
-        * has_good_stat(pokemon, "spe")
+        * has_good_stat(pokemon, ["spe"])
     )
 
 
