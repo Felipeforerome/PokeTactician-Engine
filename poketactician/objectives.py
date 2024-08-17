@@ -18,11 +18,21 @@ from .utils import (
 
 
 def attack_obj_fun(ant: np.ndarray, pokemon_list: list[Pokemon]) -> float:
+    """
+    Calculates the total power of a team of Pokemon based on the given ant and Pokemon list.
+
+    Args:
+        ant (np.ndarray): The ant representing the team composition.
+        pokemon_list (list[Pokemon]): The list of available Pokemon.
+
+    Returns:
+        float: The total power of the team.
+    """
     temp_team = Team.ant_to_team(ant, pokemon_list)
     return sum(
         list(
             map(
-                lambda pokemon: pokemon.current_power(),
+                lambda pokemon: pokemon.current_power,
                 temp_team.pokemons,
             )
         )

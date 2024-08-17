@@ -234,13 +234,8 @@ class MOACO:
         Raises:
             Exception: If the optimization has not been run.
         """
-        team = Team()
         if self.best_so_far is not None:
-            for pok in self.best_so_far:
-                temp_pokemon = Pokemon.from_json(self.pokemon_pop[pok[0]].serialize())
-                for move_index in pok[1:]:
-                    temp_pokemon.teach_move(move_index)
-                team.add_pokemon(temp_pokemon)
+            team = Team.ant_to_team(self.best_so_far, self.pokemon_pop)
             return team
         else:
             raise Exception("Optimization has not been run.")

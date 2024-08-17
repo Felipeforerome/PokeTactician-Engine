@@ -102,7 +102,7 @@ def optimize_team_selection(
         pre_selected_moves_lists,
         alpha,
         beta,
-        roles=roles,
+        roles=roles if roles is not None else [],
     )
 
     m_col.optimize(iters=25, time_limit=None)

@@ -251,7 +251,7 @@ class Colony:
         return fitness_value
 
     def heuristic_pokemon_fun(self, pokemon, pokemon_index):
-        heuristic_value = pokemon[pokemon_index].overall_stats() / 500
+        heuristic_value = pokemon[pokemon_index].overall_stats / 500
         return heuristic_value
 
     def candidate_set(self):
