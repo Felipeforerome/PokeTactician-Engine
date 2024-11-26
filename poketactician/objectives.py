@@ -5,7 +5,15 @@ import numpy as np
 
 from .glob_var import Q, rho
 from .models.Pokemon import Pokemon
-from .models.Roles import *
+from .models.Roles import (
+    is_cleric,
+    is_hazard_setter,
+    is_phazer,
+    is_physical_sweeper,
+    is_special_sweeper,
+    is_spinner,
+    is_wall,
+)
 from .models.Team import Team
 from .models.Types import type_chart, type_order
 from .utils import (
