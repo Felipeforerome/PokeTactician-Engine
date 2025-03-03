@@ -46,7 +46,7 @@ class Team:
         Returns:
             float: The total number of Pokémon in the team that have the specified roles.
         """
-        return sum([pok.isRole(role) for pok in self.pokemons for role in roles])
+        return sum([pok.is_role(role) for pok in self.pokemons for role in roles])
 
     def serialize(self) -> list:
         return [pokemon.serialize_instance() for pokemon in self.pokemons]

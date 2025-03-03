@@ -1,7 +1,7 @@
 import time
 from copy import deepcopy
 from functools import reduce
-from typing import Any, Callable, List, Tuple
+from typing import Callable, Tuple
 
 import numpy as np
 import pandas as pd
@@ -37,7 +37,7 @@ class MOACO:
         objFuncs_Q_rho (List[Tuple[Callable, float, float]]): A list of tuples containing the objective functions,
             pheromone decay rate (Q), and pheromone evaporation rate (rho).
         cooperationID (int): The ID of the cooperation strategy used.
-        pokemonPop (List[Any]): A list of Pokemon objects representing the available Pokemon population.
+        pokemonPop (List[Any]): A list of Pokemon objects representing the available Pokemon population, with preselected pokemon at the top.
         preSelected (List[int]): A list of pre-selected Pokemon IDs.
         alpha (float): The alpha parameter for the ant colony optimization algorithm.
         beta (float): The beta parameter for the ant colony optimization algorithm.
@@ -181,7 +181,8 @@ class MOACO:
         """
         self.iteration_number += 1
         cooperation_function = self.cooperation_strategy
-        self.colonies = cooperation_function(self.colonies, self.prev_candidate_set)
+        self.colonies = cooperation_function(
+            self.colonies, self.prev_candidate_set)
         self.update_candidate_sets()
 
     def update_candidate_sets(self):
@@ -237,7 +238,8 @@ class MOACO:
         team = Team()
         if self.best_so_far is not None:
             for pok in self.best_so_far:
-                temp_pokemon = Pokemon.from_json(self.pokemon_pop[pok[0]].serialize())
+                temp_pokemon = Pokemon.from_json(
+                    self.pokemon_pop[pok[0]].serialize())
                 for move_index in pok[1:]:
                     temp_pokemon.teach_move(move_index)
                 team.add_pokemon(temp_pokemon)
@@ -349,7 +351,8 @@ class MOACO:
             labels={"y": "Average Y-axis Value"},
         )
 
-        fig.update_layout(xaxis_title="Iteration", yaxis_title="Average Y-axis Value")
+        fig.update_layout(xaxis_title="Iteration",
+                          yaxis_title="Average Y-axis Value")
 
         return fig
 
@@ -376,6 +379,7 @@ class MOACO:
             labels={"y": "Average Y-axis Value"},
         )
 
-        fig.update_layout(xaxis_title="Iteration", yaxis_title="Average Y-axis Value")
+        fig.update_layout(xaxis_title="Iteration",
+                          yaxis_title="Average Y-axis Value")
 
         return fig

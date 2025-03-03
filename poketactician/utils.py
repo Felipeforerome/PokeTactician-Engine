@@ -1,9 +1,9 @@
 import numpy as np
-
-from .glob_var import moves
+import json
+from .models.Move import Move
 from .models.Pokemon import Pokemon
-from .models.Team import Team
 from .models.Types import type_chart, type_order
+from .objectives import ObjectiveFunctions, StrategyFunctions
 
 
 def count_pokemon_with_exact_moves(PokemonsList):
@@ -71,18 +71,18 @@ def get_weakness(pok):
 
     return weakness
 
-
-def get_move_weakness(pok, pokMoves, pokList):
-    weakness = np.ones(18)
-    for move in pokMoves:
-        if move == -1:
-            pass
-        else:
-            moveType = moves.get(pokList[pok].knowable_moves[move].id).type
-            weakness = np.multiply(weakness, type_chart[:, type_order.index(moveType)])
-            weakness = np.multiply(weakness, get_weakness(pokList[pok]))
-            weakness = [weak if weak <= 256 else 512 for weak in weakness]
-    return weakness
+# TODO Delete this when pushing the app
+# def get_move_weakness(pok, pokMoves, pokList):
+#     weakness = np.ones(18)
+#     for move in pokMoves:
+#         if move == -1:
+#             pass
+#         else:
+#             moveType = moves.get(pokList[pok].knowable_moves[move].id).type
+#             weakness = np.multiply(weakness, type_chart[:, type_order.index(moveType)])
+#             weakness = np.multiply(weakness, get_weakness(pokList[pok]))
+#             weakness = [weak if weak <= 256 else 512 for weak in weakness]
+#     return weakness
 
 
 def hoyer_sparseness(x):
@@ -123,9 +123,11 @@ def dominated_candidate_set(candidate_sets, objective_functions):
         total_candidate_sets += i
 
     for j in objective_functions:
-        candidate_set_objectives_temp = np.array(list(map(j, total_candidate_sets)))
+        candidate_set_objectives_temp = np.array(
+            list(map(j, total_candidate_sets)))
         normalized_objectives += [
-            candidate_set_objectives_temp / (candidate_set_objectives_temp.max())
+            candidate_set_objectives_temp /
+            (candidate_set_objectives_temp.max())
         ]
 
     dominance_vector = np.ones(total_candidate_sets.__len__())
@@ -140,6 +142,51 @@ def dominated_candidate_set(candidate_sets, objective_functions):
             key=lambda pair: pair[0],
             reverse=True,
         )
-    ][0 : int(dominance_vector.__len__() / candidate_sets.__len__())]
+    ][0: int(dominance_vector.__len__() / candidate_sets.__len__())]
 
     return dominated_candidate_set
+
+
+def load_moves_from_json(file_name):
+    """
+    Load moves from a JSON file and return them as a dictionary of Move objects.
+    Args:
+        file_name (str): The path to the JSON file containing move data.
+    Returns:
+        dict: A dictionary where the keys are move names and the values are Move objects.
+    """
+
+    with open(file_name, "r") as json_file:
+        data = json.load(json_file)
+        return {key: Move.from_json(value) for key, value in data.items()}
+
+
+def load_pokemon_from_json(file_name):
+    """
+    Load a list of Pokemon objects from a JSON file.
+    Args:
+        file_name (str): The path to the JSON file containing Pokemon data.
+    Returns:
+        list: A list of Pokemon objects created from the JSON data.
+    """
+
+    with open(file_name, "r") as json_file:
+        data = json.load(json_file)
+        return [Pokemon.from_json(pokemon_data) for pokemon_data in data]
+
+
+def define_objective_functions(
+    obj_funcs_param: list[int], strategy: str, pok_list: list[Pokemon]
+):
+    """
+    Define the objective functions for team optimization.
+    """
+    objective_funcs = []
+    for objective_function in obj_funcs_param:
+        objective_funcs.append(
+            ObjectiveFunctions(objective_function).get_function(pok_list)
+        )
+    if strategy:
+        objective_funcs.append(StrategyFunctions(
+            strategy).get_function(pok_list))
+    return objective_funcs

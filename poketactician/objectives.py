@@ -5,16 +5,9 @@ import numpy as np
 
 from .glob_var import Q, rho
 from .models.Pokemon import Pokemon
-from .models.Roles import *
+from .models.Roles import is_hazard_setter, is_spinner, is_cleric, is_wall, is_phazer, is_special_sweeper, is_physical_sweeper
 from .models.Team import Team
 from .models.Types import type_chart, type_order
-from .utils import (
-    dominated_candidate_set,
-    get_learned_moves,
-    get_move_weakness,
-    get_weakness,
-    hoyer_sparseness,
-)
 
 
 def attack_obj_fun(ant: np.ndarray, pokemon_list: list[Pokemon]) -> float:
@@ -54,7 +47,8 @@ def attack_obj_fun(ant: np.ndarray, pokemon_list: list[Pokemon]) -> float:
 @lru_cache(maxsize=324)
 def defense(types):
     defense = np.product(
-        type_chart[:, np.array([type_order.index(type_) for type_ in types])], axis=1
+        type_chart[:, np.array([type_order.index(type_)
+                               for type_ in types])], axis=1
     )
     return defense
 
@@ -72,7 +66,8 @@ def flatten_comprehension(matrix):
 
 
 def CW(team_types):
-    omega = np.sum([bin_resistance(defense(types)) for types in team_types], axis=0)
+    omega = np.sum([bin_resistance(defense(types))
+                   for types in team_types], axis=0)
     return np.sum(
         [
             bin_weakness(defense(team_type))
@@ -145,22 +140,22 @@ def team_coverage_fun(team, pokemon_list):
 
 
 # TODO This function doesn't work, if used in MOACO the teams are definetly not good
-def self_coverage_fun(team):
-    return np.mean(
-        [
-            *map(
-                lambda x: 1
-                / (
-                    np.power(
-                        np.ones(18) * 2,
-                        get_move_weakness(x[0], x[1:5]),
-                        dtype=np.float64,
-                    ).mean()
-                ),
-                team,
-            )
-        ]
-    )
+# def self_coverage_fun(team):
+#     return np.mean(
+#         [
+#             *map(
+#                 lambda x: 1
+#                 / (
+#                     np.power(
+#                         np.ones(18) * 2,
+#                         get_move_weakness(x[0], x[1:5]),
+#                         dtype=np.float64,
+#                     ).mean()
+#                 ),
+#                 team,
+#             )
+#         ]
+#     )
 
 
 def generalist_team_fun(ant: np.ndarray, pokemon_list: list[Pokemon]):
