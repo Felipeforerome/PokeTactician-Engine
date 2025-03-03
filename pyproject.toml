@@ -1,0 +1,36 @@
+[project]
+name = "Poketactician"
+version = "1.0.0"
+description = "A Python package template."
+readme = "README.md"
+
+requires-python = ">=3.8"
+dependencies = [
+"numpy==1.26.4",
+"pandas==2.2.1",
+"plotly==5.19.0",
+]
+
+[project.optional-dependencies]
+dev-requirements = [
+"pytest",
+"setuptools",
+"wheel",
+"numpy==1.26.4",
+"pandas==2.2.1",
+"plotly==5.19.0",
+]
+
+[build-system]
+requires = ["setuptools", "wheel", "numpy==1.26.4"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]  # list of folders that contain the packages (["."] by default)
+include = ["poketactician"]  # package names should match these glob patterns (["*"] by default)
+exclude = ["dash_app", "data"]
+
+
+
+
+
