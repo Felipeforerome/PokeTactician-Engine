@@ -104,7 +104,7 @@ class MOACO:
             1,
         )
 
-    def initialize_colonies(self):
+    def initialize_colonies(self) -> list[Colony]:
         """
         Initializes the ant colonies.
 
@@ -127,7 +127,7 @@ class MOACO:
             for objFunc, Q, rho in self.objective_functions_Q_rho
         ]
 
-    def initialize_prev_cand_set(self):
+    def initialize_prev_cand_set(self) -> list:
         """
         Initializes the previous candidate set.
 
@@ -142,7 +142,7 @@ class MOACO:
         )
         return cooperative_candidate_set
 
-    def optimize(self, iters: int = None, time_limit: float = None):
+    def optimize(self, iters: int | None = None, time_limit: float| None = None) -> None:
         """
         Optimizes the team composition.
 
@@ -159,7 +159,7 @@ class MOACO:
         while self.should_continue(iters, time_limit, start_time):
             self.iteration_step()
 
-    def should_continue(self, iters, time_limit, start_time):
+    def should_continue(self, iters, time_limit, start_time) -> bool:
         """
         Checks if the optimization should continue.
 
@@ -175,7 +175,7 @@ class MOACO:
             time_limit is None or (time.time() - start_time) < time_limit
         )
 
-    def iteration_step(self):
+    def iteration_step(self) -> None:
         """
         Performs a single iteration step of the optimization.
         """
@@ -185,7 +185,7 @@ class MOACO:
             self.colonies, self.prev_candidate_set)
         self.update_candidate_sets()
 
-    def update_candidate_sets(self):
+    def update_candidate_sets(self) -> None:
         """
         Updates the candidate sets.
         """
@@ -207,7 +207,7 @@ class MOACO:
             [iteration_best, self.best_so_far], key=self.joint_function
         )
 
-    def get_solution_team_names(self):
+    def get_solution_team_names(self) -> list[str]:
         """
         Returns the names of the Pokemon in the best solution.
 
@@ -225,7 +225,7 @@ class MOACO:
         else:
             raise Exception("Optimization has not been run.")
 
-    def get_solution(self):
+    def get_solution(self) -> Team:
         """
         Returns the best solution as a Team object.
 
@@ -247,7 +247,7 @@ class MOACO:
         else:
             raise Exception("Optimization has not been run.")
 
-    def get_objective_value(self):
+    def get_objective_value(self) -> int:
         """
         Returns the objective value of the best solution.
 
@@ -262,7 +262,7 @@ class MOACO:
         else:
             raise Exception("Optimization has not been run.")
 
-    def plot_soln(self, sorted_iterations):
+    def plot_soln(self, sorted_iterations) -> go.Figure:
         """
         Plots the values of the last cooperation candidate set.
 
@@ -288,7 +288,7 @@ class MOACO:
         )
         return fig
 
-    def plot_iters(self, sorted_iterations):
+    def plot_iters(self, sorted_iterations) -> go.Figure:
         """
         Plots the values of the candidate sets for each iteration.
 
@@ -331,7 +331,7 @@ class MOACO:
 
         return fig
 
-    def plot_averages(self):
+    def plot_averages(self) -> go.Figure:
         """
         Plots the average values of the candidate sets for each iteration.
 
@@ -356,7 +356,7 @@ class MOACO:
 
         return fig
 
-    def plot_maxes(self, fig=None):
+    def plot_maxes(self, fig=None) -> go.Figure:
         """
         Plots the maximum values of the candidate sets for each iteration.
 

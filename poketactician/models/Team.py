@@ -5,7 +5,7 @@ from .Pokemon import Pokemon
 
 @dataclass
 class Team:
-    pokemons: list = field(default_factory=list)
+    pokemons: list[Pokemon] = field(default_factory=list)
 
     def add_pokemon(self, pokemon: Pokemon) -> None:
         if len(self.pokemons) < 6:
