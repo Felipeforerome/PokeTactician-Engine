@@ -1,56 +1,61 @@
-from datetime import datetime
+import argparse
+from poketactician.MOACO import MOACO
+from poketactician.glob_var import alpha, beta
+from poketactician.utils import load_pokemon_from_json, define_objective_functions
 
 
-class Developer:
-    valid_languages: list[str] = [
-        "Python",
-        "Java",
-        "JavaScript",
-        "C",
-        "C++",
-        "C#",
-        "PHP",
-        "Swift",
-        "Go",
-        "Kotlin",
-        "Ruby",
-        "Rust",
-        "TypeScript",
-        "Scala",
-        "Perl",
-        "Lua",
-        "Groovy",
-        "R",
-        "Shell",
-        "Objective-C",
-        "SQL",
-        "HTML/CSS",
-    ]
+def parse_arguments() -> argparse.Namespace:
 
-    def __init__(self, name, language) -> None:
-        if language not in self.valid_languages:
-            raise ValueError(f"{language} is not a valid language.")
-        self.name = name
-        self.language = language
+    parser = argparse.ArgumentParser(description='PokeTactician Engine')
 
-    def get_info(self) -> str:
-        return f"{self.name} is a developer who codes in {self.language}."
+    parser.register('type', 'split_numbers', lambda x: [
+                    int(a) for a in x.split(',')])
 
+    parser.add_argument('--objfun', type=str, nargs='*', default=["Attack",],
+                        help='Objective function')
+    parser.add_argument('--poklist', type=str, default="data/pokemon_data.json",
+                        help='Path to the list of Pokémon')
+    parser.add_argument('--preselected', type=int, default=0,
+                        help='Preselected Pokémon')
+    parser.add_argument('--preselected_moves', type='split_numbers', nargs='*', default=[[]],
+                        help='Preselected moves')
+    parser.add_argument('--roles', type=str, nargs='*', default=[],
+                        help='Roles')
+    parser.add_argument('--strategy', type=str, nargs=1, default="Generalist",
+                        help='Strategy')
 
-def start_coding() -> None:
-    print("Start coding in Python today!")
+    args = parser.parse_args()
 
+    if args.preselected > 0 and args.preselected_moves != [[]] and len(args.preselected_moves) > args.preselected:
+        parser.error(
+            "--preselected_moves cannot have a larger length than --preselected")
 
-def date() -> datetime:
-    current_datetime: datetime = datetime.now()
-    return current_datetime
+    return args
 
 
 def main() -> None:
-    start_coding()
-    print(date())
-    dev = Developer("Alice", "Python")
-    print(dev.get_info())
+    args = parse_arguments()
+
+    pok_list = load_pokemon_from_json(args.poklist)
+
+    objective_funcs = define_objective_functions(
+        args.objfun, args.strategy, pok_list)
+
+    # Create an instance of the MOACO class
+    m_col = MOACO(
+        400,
+        objective_funcs,
+        pok_list,
+        list(range(args.preselected)),
+        args.preselected_moves,
+        alpha,
+        beta,
+        roles=args.roles,
+    )
+    m_col.optimize(iters=25)
+    print({"team": m_col.get_solution(
+    ).serialize(), "objective_value": m_col.get_objective_value()})
 
 
-main()
+if __name__ == "__main__":
+    main()
