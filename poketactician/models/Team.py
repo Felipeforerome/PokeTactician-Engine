@@ -49,4 +49,4 @@ class Team:
         return sum([pok.is_role(role) for pok in self.pokemons for role in roles])
 
     def serialize(self) -> list:
-        return [pokemon.serialize_instance() for pokemon in self.pokemons]
+        return [{"pokemon": pokemon.id, "moves": [move.id for move in pokemon.learnt_moves]} for pokemon in self.pokemons]
