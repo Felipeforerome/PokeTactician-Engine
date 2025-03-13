@@ -1,7 +1,7 @@
 import argparse
 from poketactician.MOACO import MOACO
 from poketactician.glob_var import alpha, beta
-from poketactician.utils import load_pokemon_from_json, define_objective_functions
+from poketactician.utils import load_pokemon, define_objective_functions
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -13,8 +13,10 @@ def parse_arguments() -> argparse.Namespace:
 
     parser.add_argument('--objfun', type=str, nargs='*', default=["Attack",],
                         help='Objective function')
-    parser.add_argument('--poklist', type=str, default="data/pokemon_data.json",
+    parser.add_argument('--poklistFile', type=str, default="data/pokemon_data.json",
                         help='Path to the list of Pokémon')
+    parser.add_argument('--poklistUrl', type=str, default="/",
+                        help='URL to the list of Pokémon')
     parser.add_argument('--preselected', type=int, default=0,
                         help='Preselected Pokémon')
     parser.add_argument('--preselected_moves', type='split_numbers', nargs='*', default=[],
@@ -26,6 +28,9 @@ def parse_arguments() -> argparse.Namespace:
                         help='Strategy')
 
     args = parser.parse_args()
+
+    if not args.poklistFile and not args.poklistUrl:
+        parser.error("Either --poklistFile or --poklistUrl must be provided")
 
     if len(args.preselected_moves) > args.preselected:
         parser.error(
@@ -40,7 +45,7 @@ def parse_arguments() -> argparse.Namespace:
 def main() -> None:
     args = parse_arguments()
 
-    pok_list = load_pokemon_from_json(args.poklist)
+    pok_list = load_pokemon(args.poklistFile, args.poklistUrl)
 
     objective_funcs = define_objective_functions(
         args.objfun, args.strategy, pok_list)

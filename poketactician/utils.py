@@ -161,18 +161,29 @@ def load_moves_from_json(file_name):
         return {key: Move.from_json(value) for key, value in data.items()}
 
 
-def load_pokemon_from_json(file_name):
+def load_pokemon(file_name: str=None, url: str=None):
     """
-    Load a list of Pokemon objects from a JSON file.
+    Load a list of Pokemon objects from a JSON file or URL.
     Args:
         file_name (str): The path to the JSON file containing Pokemon data.
+        url (str): The url containing Pokemon data.
     Returns:
         list: A list of Pokemon objects created from the JSON data.
     """
+    pokemon_list = []
 
-    with open(file_name, "r") as json_file:
-        data = json.load(json_file)
-        return [Pokemon.from_json(pokemon_data) for pokemon_data in data]
+    if url:
+        import requests
+        response = requests.get(url)
+        data = response.json()
+        pokemon_list = [Pokemon.from_json(pokemon_data) for pokemon_data in
+                data]
+    else:
+        with open(file_name, "r") as json_file:
+            data = json.load(json_file)
+            pokemon_list = [Pokemon.from_json(pokemon_data) for pokemon_data in data]
+
+    return pokemon_list
 
 
 def define_objective_functions(
