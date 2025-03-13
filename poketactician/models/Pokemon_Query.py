@@ -22,6 +22,11 @@ class Pokemon:
         type2 (PokemonType): The secondary type of the Pokemon.
         knowable_moves (list): The list of moves that the Pokemon can potentially learn.
         learntMoves (list): The list of moves that the Pokemon has learned.
+        mythical (bool): Indicates if the Pokemon is mythical.
+        legendary (bool): Indicates if the Pokemon is legendary.
+        battleOnly (bool): Indicates if the Pokemon is only available in battles.
+        mega (bool): Indicates if the Pokemon has a mega evolution.
+        games (list): The list of games in which the Pokemon appears.
 
     Methods:
         addKnowableMove(move): Adds a move to the list of knowable moves.
@@ -44,6 +49,11 @@ class Pokemon:
     spe: int
     type1: PokemonType
     type2: PokemonType
+    mythical: bool
+    legendary: bool
+    battle_only: bool
+    mega: bool
+    games: list = field(default_factory=list)
     knowable_moves: list = field(default_factory=list)
     learnt_moves: list = field(default_factory=list)
 
@@ -71,8 +81,7 @@ class Pokemon:
 
                 if num_same_type_class_moves == 3:
                     same_type_class = True
-                    same_type_class_moves.sort(
-                        key=lambda x: x.power * x.accuracy)
+                    same_type_class_moves.sort(key=lambda x: x.power * x.accuracy)
                     for known_type_class in same_type_class_moves:
                         increased_power_accuracy = (
                             known_type_class.power * known_type_class.accuracy
@@ -113,9 +122,13 @@ class Pokemon:
             data["spe"],
             PokemonType(data["type1"]),
             PokemonType(data["type2"]) if data["type2"] else None,
+            data["mythical"],
+            data["legendary"],
+            data["battleOnly"],  # Include battleOnly attribute
+            data["mega"],  # Include mega attribute
+            data["games"],
         )
-        moves = [Move.from_json(move_data)
-                 for move_data in data["knowable_moves"]]
+        moves = [Move.from_json(move_data) for move_data in data["knowable_moves"]]
 
         for move in moves:
             pokemon.add_knowable_move(move)
@@ -156,7 +169,12 @@ class Pokemon:
             "spe": self.spe,
             "type1": self.type1.value,
             "type2": self.type2.value if self.type2 else None,
+            "mythical": self.mythical,
+            "legendary": self.legendary,
+            "battleOnly": self.battle_only,  # Include battleOnly attribute
+            "mega": self.mega,  # Include battleOnly attribute
             "knowable_moves": serialized_moves,
+            "games": self.games,  # Include games in serialized output
         }
 
     def serialize_instance(self):
@@ -181,7 +199,8 @@ class Pokemon:
             "legendary": self.legendary,
             "battleOnly": self.battle_only,  # Include battleOnly attribute
             "mega": self.mega,  # Include battleOnly attribute
-            "moves": serialized_moves
+            "moves": serialized_moves,
+            "games": self.games,
         }
 
     def teach_move(self, move_id: int):
@@ -223,11 +242,9 @@ class Pokemon:
             move_power = learned_move.power
             move_damage_class = learned_move.damage_class
             move_accuracy = learned_move.accuracy
-            stab = 1.5 if (
-                move_type == self.type1 or move_type == self.type2) else 1
+            stab = 1.5 if (move_type == self.type1 or move_type == self.type2) else 1
             split = (
-                self.att if (move_damage_class ==
-                             DamageClass.PHYSICAL) else self.spatt
+                self.att if (move_damage_class == DamageClass.PHYSICAL) else self.spatt
             )
             expected_power = (stab * move_power) * split * move_accuracy
             current_power += expected_power
