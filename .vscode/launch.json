@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "PokeTactician",
+            "type": "python",
+            "request": "launch",
+            "module": "poketactician",
+            "console": "integratedTerminal",
+            "args": [
+                "--objfun", "Attack",
+                "--poklist", "dash_app_old/data/filtered_pok.json",
+                "--preselected", "6"
+            ]
+        }
+    ]
+}
