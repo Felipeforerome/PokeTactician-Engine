@@ -108,14 +108,14 @@ class Pokemon:
             data["hp"],
             data["att"],
             data["deff"],
-            data["spatt"],
-            data["spdeff"],
+            data["spAtt"],
+            data["spDeff"],
             data["spe"],
-            PokemonType(data["type1"]),
-            PokemonType(data["type2"]) if data["type2"] else None,
+            PokemonType(data["type1"].lower()),
+            PokemonType(data["type2"].lower()) if data["type2"] else None,
         )
         moves = [Move.from_json(move_data)
-                 for move_data in data["knowable_moves"]]
+                 for move_data in data["knowableMoves"]]
 
         for move in moves:
             pokemon.add_knowable_move(move)
