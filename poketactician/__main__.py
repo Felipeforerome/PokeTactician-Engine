@@ -17,7 +17,7 @@ def parse_arguments() -> argparse.Namespace:
                         help='Path to the list of Pokémon')
     parser.add_argument('--preselected', type=int, default=0,
                         help='Preselected Pokémon')
-    parser.add_argument('--preselected_moves', type='split_numbers', nargs='*', default=[[]],
+    parser.add_argument('--preselected_moves', type='split_numbers', nargs='*', default=[],
                         help='Preselected moves')
     parser.add_argument('--roles', type=str, nargs='*', default=[],
                         help='Roles')
@@ -26,9 +26,12 @@ def parse_arguments() -> argparse.Namespace:
 
     args = parser.parse_args()
 
-    if args.preselected > 0 and args.preselected_moves != [[]] and len(args.preselected_moves) > args.preselected:
+    if len(args.preselected_moves) > args.preselected:
         parser.error(
             "--preselected_moves cannot have a larger length than --preselected")
+    elif len(args.preselected_moves) < args.preselected:
+        args.preselected_moves.extend([[]] * (args.preselected -
+                                              len(args.preselected_moves)))
 
     return args
 
