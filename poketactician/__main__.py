@@ -40,13 +40,7 @@ def parse_arguments() -> argparse.Namespace:
 def main() -> None:
     args = parse_arguments()
 
-    pokemon_pre_filter = load_pokemon_from_json(args.poklist)
-    pokemon_pre_filter = [
-        pok for pok in pokemon_pre_filter if not pok.battle_only]
-    pokemon_pre_filter = [pok for pok in pokemon_pre_filter if not pok.mega]
-    pokemon_pre_filter = [
-        pok for pok in pokemon_pre_filter if "totem" not in pok.name]
-    pok_list = pokemon_pre_filter
+    pok_list = load_pokemon_from_json(args.poklist)
 
     objective_funcs = define_objective_functions(
         args.objfun, args.strategy, pok_list)
