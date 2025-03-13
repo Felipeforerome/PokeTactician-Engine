@@ -21,7 +21,8 @@ def parse_arguments() -> argparse.Namespace:
                         help='Preselected moves')
     parser.add_argument('--roles', type=str, nargs='*', default=[],
                         help='Roles')
-    parser.add_argument('--strategy', type=str, nargs=1, default="Generalist",
+    # TODO Generalist Strategy is broken
+    parser.add_argument('--strategy', type=str, nargs=1, default=None,
                         help='Strategy')
 
     args = parser.parse_args()
@@ -39,7 +40,13 @@ def parse_arguments() -> argparse.Namespace:
 def main() -> None:
     args = parse_arguments()
 
-    pok_list = load_pokemon_from_json(args.poklist)
+    pokemon_pre_filter = load_pokemon_from_json(args.poklist)
+    pokemon_pre_filter = [
+        pok for pok in pokemon_pre_filter if not pok.battle_only]
+    pokemon_pre_filter = [pok for pok in pokemon_pre_filter if not pok.mega]
+    pokemon_pre_filter = [
+        pok for pok in pokemon_pre_filter if "totem" not in pok.name]
+    pok_list = pokemon_pre_filter
 
     objective_funcs = define_objective_functions(
         args.objfun, args.strategy, pok_list)
