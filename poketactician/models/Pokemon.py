@@ -156,7 +156,7 @@ class Pokemon:
             "spe": self.spe,
             "type1": self.type1.value,
             "type2": self.type2.value if self.type2 else None,
-            "knowable_moves": serialized_moves,
+            "knowableMoves": serialized_moves,
         }
 
     def serialize_instance(self):
