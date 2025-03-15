@@ -20,7 +20,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('--preselected', type=int, default=0,
                         help='Preselected Pokémon')
     parser.add_argument('--preselected_moves', type='split_numbers', nargs='*', default=[],
-                        help='Preselected moves')
+                        help='Preselected moves, separate same pokemon moves with "," and separate different pokemon moves with " ". Example: --preselected_moves 1,2 3,4 5,6 7,8')
     parser.add_argument('--roles', type=str, nargs='*', default=[],
                         help='Roles')
     # TODO Generalist Strategy is broken
@@ -48,6 +48,19 @@ def main() -> None:
 
     objective_funcs = define_objective_functions(
         args.objfun, args.strategy, pok_list)
+
+    for i in range(args.preselected):
+        moves = args.preselected_moves[i]
+        for j, move in enumerate(moves):
+            pokemon = pok_list[i]
+            move_index = next((index for index, m in enumerate(pokemon.knowable_moves) if int(m.id) == move), None)
+            if move_index is not None:
+                moves[j] = move_index
+            else:
+                raise ValueError(
+                    f"Move {move} not found in {pokemon.name} moves")
+            
+            
 
     # Create an instance of the MOACO class
     m_col = MOACO(
