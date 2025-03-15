@@ -15,8 +15,8 @@ def parse_arguments() -> argparse.Namespace:
                         help='Objective function')
     parser.add_argument('--poklistFile', type=str, default="data/pokemon_data.json",
                         help='Path to the list of Pokémon')
-    parser.add_argument('--poklistUrl', type=str, default="/",
-                        help='URL to the list of Pokémon')
+    parser.add_argument('--poklistUrl', type=str, default=None,
+                        help='URL to the list of Pokémon (wrap in quotes if it contains special characters)')
     parser.add_argument('--preselected', type=int, default=0,
                         help='Preselected Pokémon')
     parser.add_argument('--preselected_moves', type='split_numbers', nargs='*', default=[],
@@ -44,7 +44,6 @@ def parse_arguments() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_arguments()
-
     pok_list = load_pokemon(args.poklistFile, args.poklistUrl)
 
     objective_funcs = define_objective_functions(

@@ -161,7 +161,7 @@ def load_moves_from_json(file_name):
         return {key: Move.from_json(value) for key, value in data.items()}
 
 
-def load_pokemon(file_name: str=None, url: str=None):
+def load_pokemon(file_name: str = None, url: str = None):
     """
     Load a list of Pokemon objects from a JSON file or URL.
     Args:
@@ -174,14 +174,30 @@ def load_pokemon(file_name: str=None, url: str=None):
 
     if url:
         import requests
-        response = requests.get(url)
+        import urllib3
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        from requests.adapters import HTTPAdapter
+        from requests.packages.urllib3.util.retry import Retry
+
+        session = requests.Session()
+        retry = Retry(
+            total=5,
+            backoff_factor=1,
+            status_forcelist=[429, 500, 502, 503, 504]
+        )
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+
+        response = session.get(url, timeout=10, verify=False)
         data = response.json()
         pokemon_list = [Pokemon.from_json(pokemon_data) for pokemon_data in
-                data]
+                        data]
     else:
         with open(file_name, "r") as json_file:
             data = json.load(json_file)
-            pokemon_list = [Pokemon.from_json(pokemon_data) for pokemon_data in data]
+            pokemon_list = [Pokemon.from_json(
+                pokemon_data) for pokemon_data in data]
 
     return pokemon_list
 
