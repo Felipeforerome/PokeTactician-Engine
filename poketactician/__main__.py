@@ -9,7 +9,7 @@ def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='PokeTactician Engine')
 
     parser.register('type', 'split_numbers', lambda x: [
-                    int(a) for a in x.split(',')])
+                    int(a) for a in x.split(',')] if x != "." else [])
 
     parser.add_argument('--objfun', type=str, nargs='*', default=["Attack",],
                         help='Objective function')
@@ -32,6 +32,11 @@ def parse_arguments() -> argparse.Namespace:
     if not args.poklistFile and not args.poklistUrl:
         parser.error("Either --poklistFile or --poklistUrl must be provided")
 
+    for i in range(args.preselected):
+        if len(args.preselected_moves[i]) > 4:
+            parser.error(
+                f"Preselected moves for Pokémon {i} cannot be more than 4")
+            
     if len(args.preselected_moves) > args.preselected:
         parser.error(
             "--preselected_moves cannot have a larger length than --preselected")
