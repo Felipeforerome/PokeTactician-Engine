@@ -214,6 +214,8 @@ def define_objective_functions(
             ObjectiveFunctions(objective_function).get_function(pok_list)
         )
     if strategy:
+        if isinstance(strategy, list):
+            strategy = strategy[0]
         objective_funcs.append(StrategyFunctions(
             strategy).get_function(pok_list))
     return objective_funcs
