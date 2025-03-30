@@ -189,7 +189,7 @@ def load_pokemon(file_name: str = None, url: str = None):
         session.mount('http://', adapter)
         session.mount('https://', adapter)
         url = url.replace("'", "")
-        response = session.get(url, timeout=10, verify=False)
+        response = session.get(url, timeout=50, verify=False)
         data = response.json()
         pokemon_list = [Pokemon.from_json(pokemon_data) for pokemon_data in
                         data]
