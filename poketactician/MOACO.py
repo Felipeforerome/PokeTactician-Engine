@@ -12,6 +12,7 @@ from .Colony import Colony
 from .glob_var import CooperationStats, Q, alpha, beta, rho
 from .models.Pokemon import Pokemon
 from .models.Team import Team
+from .models import Roles
 from .utils import dominated_candidate_set
 
 
@@ -74,7 +75,7 @@ class MOACO:
         alpha: float,
         beta: float,
         cooperation_strategy: Callable = CooperationStats.SELECTION_BY_DOMINANCE,
-        roles: list[str] = [],
+        roles: list[callable] = [],
     ):
         if total_population <= 0:
             raise ValueError("totalPopulation must be a positive integer")
@@ -89,7 +90,8 @@ class MOACO:
         self.preSelected_moves = preselected_moves
         self.alpha = alpha
         self.beta = beta
-        self.roles = roles
+        self.roles = [getattr(Roles, role)
+                      for role in roles if hasattr(Roles, role)]
         self.colonies = self.initialize_colonies()
         self.prev_candidate_set = self.initialize_prev_cand_set()
         self.best_so_far = self.prev_candidate_set[0]
@@ -142,7 +144,7 @@ class MOACO:
         )
         return cooperative_candidate_set
 
-    def optimize(self, iters: int | None = None, time_limit: float| None = None) -> None:
+    def optimize(self, iters: int | None = None, time_limit: float | None = None) -> None:
         """
         Optimizes the team composition.
 
