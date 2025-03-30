@@ -29,7 +29,7 @@ class Team:
         for role in roles:
             role_fulfilled = False
             for pokemon in self.pokemons:
-                if pokemon.isRole(role) > 0:
+                if pokemon.is_role(role) > 0:
                     role_fulfilled = True
                     break
             if not role_fulfilled:
