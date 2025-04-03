@@ -1,7 +1,7 @@
 import time
+from collections.abc import Callable
 from copy import deepcopy
 from functools import reduce
-from typing import Callable, Tuple
 
 import numpy as np
 import pandas as pd
@@ -10,9 +10,9 @@ import plotly.graph_objects as go
 
 from .Colony import Colony
 from .glob_var import CooperationStats, Q, alpha, beta, rho
+from .models import Roles
 from .models.Pokemon import Pokemon
 from .models.Team import Team
-from .models import Roles
 from .utils import dominated_candidate_set
 
 
@@ -68,15 +68,15 @@ class MOACO:
     def __init__(
         self,
         total_population: int,
-        objective_functions_Q_rho: list[Tuple[Callable, float, float]],
+        objective_functions_Q_rho: list[tuple[Callable, float, float]],
         pokemon_pop: list[Pokemon],
         preselected_pokemons: list[int],
         preselected_moves: list[list[int]],
         alpha: float,
         beta: float,
         cooperation_strategy: Callable = CooperationStats.SELECTION_BY_DOMINANCE,
-        roles: list[callable] = [],
-    ):
+        roles: list[Callable] = [],
+    ) -> None:
         if total_population <= 0:
             raise ValueError("totalPopulation must be a positive integer")
         if alpha < 0 or beta < 0:
@@ -90,8 +90,7 @@ class MOACO:
         self.preSelected_moves = preselected_moves
         self.alpha = alpha
         self.beta = beta
-        self.roles = [getattr(Roles, role)
-                      for role in roles if hasattr(Roles, role)]
+        self.roles = [getattr(Roles, role) for role in roles if hasattr(Roles, role)]
         self.colonies = self.initialize_colonies()
         self.prev_candidate_set = self.initialize_prev_cand_set()
         self.best_so_far = self.prev_candidate_set[0]
@@ -144,7 +143,9 @@ class MOACO:
         )
         return cooperative_candidate_set
 
-    def optimize(self, iters: int | None = None, time_limit: float | None = None) -> None:
+    def optimize(
+        self, iters: int | None = None, time_limit: float | None = None
+    ) -> None:
         """
         Optimizes the team composition.
 
@@ -161,7 +162,7 @@ class MOACO:
         while self.should_continue(iters, time_limit, start_time):
             self.iteration_step()
 
-    def should_continue(self, iters, time_limit, start_time) -> bool:
+    def should_continue(self, iters: int, time_limit: float, start_time: float) -> bool:
         """
         Checks if the optimization should continue.
 
@@ -183,8 +184,7 @@ class MOACO:
         """
         self.iteration_number += 1
         cooperation_function = self.cooperation_strategy
-        self.colonies = cooperation_function(
-            self.colonies, self.prev_candidate_set)
+        self.colonies = cooperation_function(self.colonies, self.prev_candidate_set)
         self.update_candidate_sets()
 
     def update_candidate_sets(self) -> None:
@@ -240,8 +240,7 @@ class MOACO:
         team = Team()
         if self.best_so_far is not None:
             for pok in self.best_so_far:
-                temp_pokemon = Pokemon.from_json(
-                    self.pokemon_pop[pok[0]].serialize())
+                temp_pokemon = Pokemon.from_json(self.pokemon_pop[pok[0]].serialize())
                 for move_index in pok[1:]:
                     temp_pokemon.teach_move(move_index)
                 team.add_pokemon(temp_pokemon)
@@ -264,7 +263,7 @@ class MOACO:
         else:
             raise Exception("Optimization has not been run.")
 
-    def plot_soln(self, sorted_iterations) -> go.Figure:
+    def plot_soln(self, sorted_iterations: bool) -> go.Figure:
         """
         Plots the values of the last cooperation candidate set.
 
@@ -285,12 +284,15 @@ class MOACO:
                 x=range(0, b.size),
                 y=b,
                 mode="lines",
-                name=f"Last Cand Set Team Values: Iter: {str(self.iteration_number)} - rho: {str(self.rho)} - Q: {str(self.Q)}",
+                name=(
+                    f"Last Cand Set Team Values: Iter: {str(self.iteration_number)} - "
+                    f"rho: {str(self.rho)} - Q: {str(self.Q)}"
+                ),
             )
         )
         return fig
 
-    def plot_iters(self, sorted_iterations) -> go.Figure:
+    def plot_iters(self, sorted_iterations: bool) -> go.Figure:
         """
         Plots the values of the candidate sets for each iteration.
 
@@ -328,7 +330,10 @@ class MOACO:
         fig.update_layout(
             xaxis_title="Element Number",
             yaxis_title="Value",
-            title=f"Line Plot for Each Iteration. Params alpha:{alpha}, beta: {beta}, Q: {Q}, rho: {rho}",
+            title=(
+                f"Line Plot for Each Iteration. Params alpha:{alpha}, "
+                f"beta: {beta}, Q: {Q}, rho: {rho}"
+            ),
         )
 
         return fig
@@ -353,12 +358,11 @@ class MOACO:
             labels={"y": "Average Y-axis Value"},
         )
 
-        fig.update_layout(xaxis_title="Iteration",
-                          yaxis_title="Average Y-axis Value")
+        fig.update_layout(xaxis_title="Iteration", yaxis_title="Average Y-axis Value")
 
         return fig
 
-    def plot_maxes(self, fig=None) -> go.Figure:
+    def plot_maxes(self, fig: go.Figure | None = None) -> go.Figure:
         """
         Plots the maximum values of the candidate sets for each iteration.
 
@@ -381,7 +385,6 @@ class MOACO:
             labels={"y": "Average Y-axis Value"},
         )
 
-        fig.update_layout(xaxis_title="Iteration",
-                          yaxis_title="Average Y-axis Value")
+        fig.update_layout(xaxis_title="Iteration", yaxis_title="Average Y-axis Value")
 
         return fig

@@ -1,5 +1,7 @@
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 
+from .hinting_types import Ant
 from .Pokemon import Pokemon
 
 
@@ -14,7 +16,7 @@ class Team:
             raise Exception("Team is full")
 
     @classmethod
-    def ant_to_team(cls, ant, pokemons_list: list):
+    def ant_to_team(cls, ant: Ant, pokemons_list: list) -> "Team":
         team = cls()
         for pok in ant:
             temp_pok = Pokemon.from_json(pokemons_list[pok[0]].serialize())
@@ -25,7 +27,7 @@ class Team:
             team.add_pokemon(temp_pok)
         return team
 
-    def team_has_roles(self, roles: list[callable]) -> bool:
+    def team_has_roles(self, roles: Iterable[Callable]) -> bool:
         for role in roles:
             role_fulfilled = False
             for pokemon in self.pokemons:
@@ -49,4 +51,7 @@ class Team:
         return sum([pok.is_role(role) for pok in self.pokemons for role in roles])
 
     def serialize(self) -> list:
-        return [{"pokemon": pokemon.id, "moves": [move.id for move in pokemon.learnt_moves]} for pokemon in self.pokemons]
+        return [
+            {"pokemon": pokemon.id, "moves": [move.id for move in pokemon.learnt_moves]}
+            for pokemon in self.pokemons
+        ]

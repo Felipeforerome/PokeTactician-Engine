@@ -1,4 +1,6 @@
+from collections.abc import Callable
 from dataclasses import dataclass, field
+from typing import Any
 
 from .Move import DamageClass, Move
 from .Types import PokemonType
@@ -31,7 +33,7 @@ class Pokemon:
         teachMove(index): Adds a knowable move to the learnt moves list.
         overall_stats(): Calculates the sum of stats.
         current_power(): Calculates the current power of the Pokemon based on stats, attacks, and type.
-        isRole(role_checker): Checks if the Pokemon fulfills a specific role.
+        is_role(role_checker): Checks if the Pokemon fulfills a specific role.
     """
 
     id: int
@@ -47,7 +49,7 @@ class Pokemon:
     knowable_moves: list = field(default_factory=list)
     learnt_moves: list = field(default_factory=list)
 
-    def add_knowable_move(self, move: Move):
+    def add_knowable_move(self, move: Move) -> None:
         """
         TODO This should be changed once more info about the moves is added, like effects or whatever. Right now it does reduce the decision space
         Adds move to list of knowable move if it has power greater to 0, its between the best 3 moves wtht that type and class
@@ -71,8 +73,7 @@ class Pokemon:
 
                 if num_same_type_class_moves == 3:
                     same_type_class = True
-                    same_type_class_moves.sort(
-                        key=lambda x: x.power * x.accuracy)
+                    same_type_class_moves.sort(key=lambda x: x.power * x.accuracy)
                     for known_type_class in same_type_class_moves:
                         increased_power_accuracy = (
                             known_type_class.power * known_type_class.accuracy
@@ -95,7 +96,7 @@ class Pokemon:
             self.knowable_moves.append(move)
 
     @classmethod
-    def from_json(cls, data: dict):
+    def from_json(cls, data: dict[str, int | str]) -> "Pokemon":
         """
         Creates a Pokemon instance from JSON data.
 
@@ -114,14 +115,13 @@ class Pokemon:
             PokemonType(data["type1"].lower()),
             PokemonType(data["type2"].lower()) if data["type2"] else None,
         )
-        moves = [Move.from_json(move_data)
-                 for move_data in data["knowableMoves"]]
+        moves = [Move.from_json(move_data) for move_data in data["knowableMoves"]]
 
         for move in moves:
             pokemon.add_knowable_move(move)
         return pokemon
 
-    def serialize(self):
+    def serialize(self) -> dict[str, str | int | dict[str, str | int] | None]:
         """
         Serializes the Pokemon instance into a dictionary.
 
@@ -159,7 +159,7 @@ class Pokemon:
             "knowableMoves": serialized_moves,
         }
 
-    def serialize_instance(self):
+    def serialize_instance(self) -> dict[str, Any]:
         """
         Serializes the Pokemon instance into a dictionary.
 
@@ -181,10 +181,10 @@ class Pokemon:
             "legendary": self.legendary,
             "battleOnly": self.battle_only,  # Include battleOnly attribute
             "mega": self.mega,  # Include battleOnly attribute
-            "moves": serialized_moves
+            "moves": serialized_moves,
         }
 
-    def teach_move(self, move_id: int):
+    def teach_move(self, move_id: int) -> None:
         """
         Adds a knowable move to the learnt moves list.
 
@@ -204,7 +204,7 @@ class Pokemon:
         else:
             raise ValueError("Can't teach more than 4 moves")
 
-    def overall_stats(self):
+    def overall_stats(self) -> int:
         """
         Calculates the sum of stats.
 
@@ -212,7 +212,7 @@ class Pokemon:
         """
         return self.hp + self.att + self.deff + self.spatt + self.spdeff + self.spe
 
-    def current_power(self):
+    def current_power(self) -> int:
         """
         Calculates the current power of the pokemon based on Stats, Attacks, and Type
         :return: Returns total power of the learned moves
@@ -223,17 +223,15 @@ class Pokemon:
             move_power = learned_move.power
             move_damage_class = learned_move.damage_class
             move_accuracy = learned_move.accuracy
-            stab = 1.5 if (
-                move_type == self.type1 or move_type == self.type2) else 1
+            stab = 1.5 if (move_type == self.type1 or move_type == self.type2) else 1
             split = (
-                self.att if (move_damage_class ==
-                             DamageClass.PHYSICAL) else self.spatt
+                self.att if (move_damage_class == DamageClass.PHYSICAL) else self.spatt
             )
             expected_power = (stab * move_power) * split * move_accuracy
             current_power += expected_power
         return current_power
 
-    def is_role(self, role_checker: callable) -> bool:
+    def is_role(self, role_checker: Callable) -> bool:
         """
         Checks if the Pokemon fulfills a specific role.
 

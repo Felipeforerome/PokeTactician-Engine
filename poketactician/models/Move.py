@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any
 
 from .Types import PokemonType
 
@@ -35,16 +36,16 @@ class Move:
     pp: int = field(default=0)
     priority: int = field(default=0)
 
-    def post_init(self):
+    def post_init(self) -> None:
         self.power = self.power if self.power is not None else 0
         self.accuracy = self.accuracy if self.accuracy is not None else 1
 
     @property
-    def expected_power(self):
+    def expected_power(self) -> float:
         return self.power * self.accuracy
 
     @classmethod
-    def from_json(cls, move_json):
+    def from_json(cls, move_json: dict[str, any]) -> "Move":
         return cls(
             move_json["id"],
             move_json["name"],
@@ -56,7 +57,7 @@ class Move:
             move_json["priority"],
         )
 
-    def serialize(self):
+    def serialize(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "name": self.name,

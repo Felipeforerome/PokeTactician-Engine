@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-
+from collections.abc import Callable, Any
 from .Move import DamageClass, Move
 from .Types import PokemonType
 
@@ -57,7 +57,7 @@ class Pokemon:
     knowable_moves: list = field(default_factory=list)
     learnt_moves: list = field(default_factory=list)
 
-    def add_knowable_move(self, move: Move):
+    def add_knowable_move(self, move: Move) -> None:
         """
         TODO This should be changed once more info about the moves is added, like effects or whatever. Right now it does reduce the decision space
         Adds move to list of knowable move if it has power greater to 0, its between the best 3 moves wtht that type and class
@@ -104,7 +104,7 @@ class Pokemon:
             self.knowable_moves.append(move)
 
     @classmethod
-    def from_json(cls, data: dict):
+    def from_json(cls, data: dict) -> "Pokemon":
         """
         Creates a Pokemon instance from JSON data.
 
@@ -134,7 +134,7 @@ class Pokemon:
             pokemon.add_knowable_move(move)
         return pokemon
 
-    def serialize(self):
+    def serialize(self) -> dict[str, Any]:
         """
         Serializes the Pokemon instance into a dictionary.
 
@@ -177,7 +177,7 @@ class Pokemon:
             "games": self.games,  # Include games in serialized output
         }
 
-    def serialize_instance(self):
+    def serialize_instance(self) -> dict[str, Any]:
         """
         Serializes the Pokemon instance into a dictionary.
 
@@ -203,7 +203,7 @@ class Pokemon:
             "games": self.games,
         }
 
-    def teach_move(self, move_id: int):
+    def teach_move(self, move_id: int) -> None:
         """
         Adds a knowable move to the learnt moves list.
 
@@ -223,7 +223,7 @@ class Pokemon:
         else:
             raise ValueError("Can't teach more than 4 moves")
 
-    def overall_stats(self):
+    def overall_stats(self) -> int:
         """
         Calculates the sum of stats.
 
@@ -231,7 +231,7 @@ class Pokemon:
         """
         return self.hp + self.att + self.deff + self.spatt + self.spdeff + self.spe
 
-    def current_power(self):
+    def current_power(self) -> int:
         """
         Calculates the current power of the pokemon based on Stats, Attacks, and Type
         :return: Returns total power of the learned moves
@@ -250,7 +250,7 @@ class Pokemon:
             current_power += expected_power
         return current_power
 
-    def is_role(self, role_checker: callable) -> bool:
+    def is_role(self, role_checker: Callable) -> bool:
         """
         Checks if the Pokemon fulfills a specific role.
 

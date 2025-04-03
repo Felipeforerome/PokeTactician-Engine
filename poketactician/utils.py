@@ -1,12 +1,15 @@
-import numpy as np
 import json
+from collections.abc import Callable, Iterable
+
+import numpy as np
+
+from .models.hinting_types import Ant
 from .models.Move import Move
 from .models.Pokemon import Pokemon
-from .models.Types import type_chart, type_order
 from .objectives import ObjectiveFunctions, StrategyFunctions
 
 
-def count_pokemon_with_exact_moves(PokemonsList):
+def count_pokemon_with_exact_moves(PokemonsList: Iterable[Pokemon]) -> list:
     """
     Count the number of pokemon that have X number of knowable attacks (until 36)
     :param PokemonsList: List of Pokemon to run through
@@ -28,7 +31,7 @@ def count_pokemon_with_exact_moves(PokemonsList):
     return numberofmoves
 
 
-def count_pokemon_with_min_moves(PokemonsList):
+def count_pokemon_with_min_moves(PokemonsList: Iterable[Pokemon]) -> list:
     """
     Count the number of pokemon that have at least X number of knowable attacks (until 36)
     :param PokemonsList: List of Pokemon to run through
@@ -52,24 +55,25 @@ def count_pokemon_with_min_moves(PokemonsList):
     return numberofmoves
 
 
-def get_learned_moves(pokemonList, pok, ids):
-    # TODO Handle -1 in ids because it has no attack (Like Ditto)
-    temp = []
-    for id in ids:
-        if id != -1:
-            temp.append(pokemonList[pok[0]].knowable_moves[id])
-    return temp
+# def get_learned_moves(pokemonList: Iterable[Pokemon], pok, ids) -> list[Move]:
+#     # TODO Handle -1 in ids because it has no attack (Like Ditto)
+#     temp = []
+#     for id in ids:
+#         if id != -1:
+#             temp.append(pokemonList[pok[0]].knowable_moves[id])
+#     return temp
 
 
-def get_weakness(pok):
-    weakness = type_chart[:, type_order.index(pok.type1)]
-    try:
-        weakness2 = type_chart[:, type_order.index(pok.type2)]
-        weakness = np.multiply(weakness, weakness2)
-    except:
-        pass
+# def get_weakness(pok):
+#     weakness = type_chart[:, type_order.index(pok.type1)]
+#     try:
+#         weakness2 = type_chart[:, type_order.index(pok.type2)]
+#         weakness = np.multiply(weakness, weakness2)
+#     except Exception:
+#         pass
 
-    return weakness
+#     return weakness
+
 
 # TODO Delete this when pushing the app
 # def get_move_weakness(pok, pokMoves, pokList):
@@ -85,21 +89,23 @@ def get_weakness(pok):
 #     return weakness
 
 
-def hoyer_sparseness(x):
-    k = x.__len__()
-    value = (np.sqrt(k) - ((np.linalg.norm(x, 1)) / (np.linalg.norm(x, 2)))) / (
-        np.sqrt(k) - 1
-    )
-    return value
+# def hoyer_sparseness(x):
+#     k = x.__len__()
+#     value = (np.sqrt(k) - ((np.linalg.norm(x, 1)) / (np.linalg.norm(x, 2)))) / (
+#         np.sqrt(k) - 1
+#     )
+#     return value
 
 
-def get_team_names(team, pokList):
-    for pok in team:
-        print(pokList[pok[0]].name)
+# def get_team_names(team, pokList):
+#     for pok in team:
+#         print(pokList[pok[0]].name)
 
 
 # Add feature to choose cooperation algorithms
-def dominated_candidate_set(candidate_sets, objective_functions):
+def dominated_candidate_set(
+    candidate_sets: Iterable[Iterable[Ant]], objective_functions: Iterable[Callable]
+) -> Iterable[Iterable[Ant]]:
     """
     Performs multi-objective optimization using a cooperative colony approach.
     The function operates as follows:
@@ -123,11 +129,9 @@ def dominated_candidate_set(candidate_sets, objective_functions):
         total_candidate_sets += i
 
     for j in objective_functions:
-        candidate_set_objectives_temp = np.array(
-            list(map(j, total_candidate_sets)))
+        candidate_set_objectives_temp = np.array(list(map(j, total_candidate_sets)))
         normalized_objectives += [
-            candidate_set_objectives_temp /
-            (candidate_set_objectives_temp.max())
+            candidate_set_objectives_temp / (candidate_set_objectives_temp.max())
         ]
 
     dominance_vector = np.ones(total_candidate_sets.__len__())
@@ -142,12 +146,12 @@ def dominated_candidate_set(candidate_sets, objective_functions):
             key=lambda pair: pair[0],
             reverse=True,
         )
-    ][0: int(dominance_vector.__len__() / candidate_sets.__len__())]
+    ][0 : int(dominance_vector.__len__() / candidate_sets.__len__())]
 
     return dominated_candidate_set
 
 
-def load_moves_from_json(file_name):
+def load_moves_from_json(file_name: str) -> dict[str, Move]:
     """
     Load moves from a JSON file and return them as a dictionary of Move objects.
     Args:
@@ -161,7 +165,7 @@ def load_moves_from_json(file_name):
         return {key: Move.from_json(value) for key, value in data.items()}
 
 
-def load_pokemon(file_name: str = None, url: str = None):
+def load_pokemon(file_name: str = None, url: str = None) -> list[Pokemon]:
     """
     Load a list of Pokemon objects from a JSON file or URL.
     Args:
@@ -175,36 +179,33 @@ def load_pokemon(file_name: str = None, url: str = None):
     if url:
         import requests
         import urllib3
+
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         from requests.adapters import HTTPAdapter
-        from requests.packages.urllib3.util.retry import Retry
+        from urllib3.util.retry import Retry
 
         session = requests.Session()
         retry = Retry(
-            total=5,
-            backoff_factor=1,
-            status_forcelist=[429, 500, 502, 503, 504]
+            total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504]
         )
         adapter = HTTPAdapter(max_retries=retry)
-        session.mount('http://', adapter)
-        session.mount('https://', adapter)
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
         url = url.replace("'", "")
         response = session.get(url, timeout=50, verify=False)
         data = response.json()
-        pokemon_list = [Pokemon.from_json(pokemon_data) for pokemon_data in
-                        data]
+        pokemon_list = [Pokemon.from_json(pokemon_data) for pokemon_data in data]
     else:
         with open(file_name, "r") as json_file:
             data = json.load(json_file)
-            pokemon_list = [Pokemon.from_json(
-                pokemon_data) for pokemon_data in data]
+            pokemon_list = [Pokemon.from_json(pokemon_data) for pokemon_data in data]
 
     return pokemon_list
 
 
 def define_objective_functions(
     obj_funcs_param: list[int], strategy: str, pok_list: list[Pokemon]
-):
+) -> list:
     """
     Define the objective functions for team optimization.
     """
@@ -216,6 +217,5 @@ def define_objective_functions(
     if strategy:
         if isinstance(strategy, list):
             strategy = strategy[0]
-        objective_funcs.append(StrategyFunctions(
-            strategy).get_function(pok_list))
+        objective_funcs.append(StrategyFunctions(strategy).get_function(pok_list))
     return objective_funcs

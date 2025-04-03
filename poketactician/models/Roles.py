@@ -1,6 +1,4 @@
 # https://www.smogon.com/dp/articles/pokemon_dictionary
-from poketactician.models import Move
-from poketactician.models.model_utils import process_items
 from poketactician.models.Move import DamageClass
 from poketactician.models.Types import PokemonType
 

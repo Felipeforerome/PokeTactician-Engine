@@ -1,25 +1,18 @@
 [project]
 name = "Poketactician"
-version = "1.0.0"
-description = "A Python package template."
-readme = "README.md"
-
-requires-python = ">=3.8"
+version = "0.1.0"
+requires-python = ">=3.12.1"
 dependencies = [
-"numpy==1.26.4",
-"pandas==2.2.1",
-"plotly==5.19.0",
+    "numpy>=2.2.4",
+    "pandas>=2.2.3",
+    "plotly>=6.0.1",
+    "requests>=2.32.3",
+    "urllib3>=2.3.0",
 ]
 
-[project.optional-dependencies]
-dev-requirements = [
-"pytest",
-"setuptools",
-"wheel",
-"numpy==1.26.4",
-"pandas==2.2.1",
-"plotly==5.19.0",
-"requests==2.32.3",
+[dependency-groups]
+dev = [
+    "ruff>=0.11.3",
 ]
 
 [build-system]
@@ -31,7 +24,7 @@ where = ["."]  # list of folders that contain the packages (["."] by default)
 include = ["poketactician", "poketactician.models"]  # package names should match these glob patterns (["*"] by default)
 exclude = ["dash_app", "data"]
 
-
-
-
-
+[tool.ruff.lint]
+exclude = [".venv", "pokemon.ipynb"]
+select = ["F", "E", "ANN"]
+ignore = ["E501"]

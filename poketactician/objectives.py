@@ -1,13 +1,24 @@
+from collections.abc import Callable, Iterable
 from enum import Enum
 from functools import lru_cache
+from typing import Any, Literal
 
 import numpy as np
 
 from .glob_var import Q, rho
+from .models.hinting_types import Ant
 from .models.Pokemon import Pokemon
-from .models.Roles import is_hazard_setter, is_spinner, is_cleric, is_wall, is_phazer, is_special_sweeper, is_physical_sweeper
+from .models.Roles import (
+    is_cleric,
+    is_hazard_setter,
+    is_phazer,
+    is_physical_sweeper,
+    is_special_sweeper,
+    is_spinner,
+    is_wall,
+)
 from .models.Team import Team
-from .models.Types import type_chart, type_order
+from .models.Types import PokemonType, type_chart, type_order
 
 
 def attack_obj_fun(ant: np.ndarray, pokemon_list: list[Pokemon]) -> float:
@@ -45,29 +56,27 @@ def attack_obj_fun(ant: np.ndarray, pokemon_list: list[Pokemon]) -> float:
 
 
 @lru_cache(maxsize=324)
-def defense(types):
-    defense = np.product(
-        type_chart[:, np.array([type_order.index(type_)
-                               for type_ in types])], axis=1
+def defense(types: tuple[PokemonType]) -> Iterable[float]:
+    defense = np.prod(
+        type_chart[:, np.array([type_order.index(type_) for type_ in types])], axis=1
     )
     return defense
 
 
-def bin_weakness(vector):
+def bin_weakness(vector: Iterable[float]) -> list[Literal[0] | Literal[1]]:
     return (vector > 1).astype(int)
 
 
-def bin_resistance(vector):
+def bin_resistance(vector: Iterable[float]) -> list[Literal[0] | Literal[1]]:
     return (vector < 1).astype(int)
 
 
-def flatten_comprehension(matrix):
+def flatten_comprehension(matrix: Iterable[Iterable[Any]]) -> list[int]:
     return [item for row in matrix for item in row]
 
 
-def CW(team_types):
-    omega = np.sum([bin_resistance(defense(types))
-                   for types in team_types], axis=0)
+def CW(team_types: Iterable[tuple[PokemonType, ...]]) -> int:
+    omega = np.sum([bin_resistance(defense(types)) for types in team_types], axis=0)
     return np.sum(
         [
             bin_weakness(defense(team_type))
@@ -77,7 +86,7 @@ def CW(team_types):
     )
 
 
-def team_coverage_fun(team, pokemon_list):
+def team_coverage_fun(team: Ant, pokemon_list: Iterable[Pokemon]) -> int:
     team_types = [
         tuple(
             pok_type
@@ -158,7 +167,7 @@ def team_coverage_fun(team, pokemon_list):
 #     )
 
 
-def generalist_team_fun(ant: np.ndarray, pokemon_list: list[Pokemon]):
+def generalist_team_fun(ant: Ant, pokemon_list: list[Pokemon]) -> float:
     """
     Evaluates the given team based on their roles as a hazard setter, spinner, and cleric.
 
@@ -173,7 +182,7 @@ def generalist_team_fun(ant: np.ndarray, pokemon_list: list[Pokemon]):
     return team.team_roles_fun(roles)
 
 
-def defensive_team_fun(ant: np.ndarray, pokemon_list: list[Pokemon]):
+def defensive_team_fun(ant: Ant, pokemon_list: list[Pokemon]) -> float:
     """
     Evaluates the given team based on their roles as a cleric, status_move, and Phazer.
 
@@ -189,7 +198,7 @@ def defensive_team_fun(ant: np.ndarray, pokemon_list: list[Pokemon]):
     return team.team_roles_fun(roles)
 
 
-def offensive_team_fun(ant: np.ndarray, pokemon_list: list[Pokemon]):
+def offensive_team_fun(ant: Ant, pokemon_list: list[Pokemon]) -> float:
     """
     Evaluates the given team based on their roles as a Special Sweeper, Physical Sweeper, Choice Item, Boosting Move, and Volt-Switch.
 
@@ -212,10 +221,10 @@ class ObjectiveFunctions(Enum):
 
     ATTACK = "Attack"
     # DEFENSE = "Defense"
-    TEAM_COVERAGE = "Team Coverage"
+    TEAM_COVERAGE = "TeamCoverage"
     # SELF_COVERAGE = "Self Coverage"
 
-    def get_function(self, pok_list: list[Pokemon]):
+    def get_function(self, pok_list: list[Pokemon]) -> Callable:
         """
         Returns the corresponding function for the objective function.
 
@@ -247,7 +256,9 @@ class StrategyFunctions(Enum):
     DEFENSIVE_TEAM = "Defensive"
     OFFENSIVE_TEAM = "Offensive"
 
-    def get_function(self, pok_list: list[Pokemon]):
+    def get_function(
+        self, pok_list: list[Pokemon]
+    ) -> tuple[Callable[..., float], int, float]:
         """
         Returns the corresponding function for the objective function.
 

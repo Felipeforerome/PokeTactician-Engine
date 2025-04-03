@@ -1,18 +1,20 @@
 import random
+from collections.abc import Callable, Iterable
 from math import ceil
+from typing import Literal
 
 import numpy as np
 
+from .models.hinting_types import Ant
 from .models.Pokemon import Pokemon
 from .models.Team import Team
 
 
 class Colony:
-
     def __init__(
         self,
         pop_size_param: int,
-        objective_fun_param: callable,
+        objective_fun_param: Callable,
         pokemons_param: list[Pokemon],
         preselected_poks: list[0],
         preselected_moves: list[list[int]],
@@ -20,8 +22,16 @@ class Colony:
         beta: int,
         Q: int,
         rho: float,
-        roles: list[str],
-    ):
+        roles: list[Callable],
+        random_seed: int = None,
+        # random_seed: int = 257581674,
+    ) -> None:
+        self.random_seed = (
+            random_seed if random_seed is not None else np.random.randint(0, 2**32 - 1)
+        )
+        self.rng = np.random.RandomState(self.random_seed)
+        print(f"DEBUG: Colony initialized with random seed: {self.random_seed}")
+
         self.pop_size = pop_size_param
         # objFunParam should be a lambda function
         self.objective_function = objective_fun_param
@@ -98,33 +108,41 @@ class Colony:
         # Initial Run of the Meta-Heuristic
         self.ACO()
 
-    def role_constraint(self, ant):
+    def set_debug_seed(self, seed: int = None) -> int:
+        if seed is None:
+            seed = np.random.randint(0, 2**32 - 1)
+
+        self.random_seed = seed
+        self.rng = np.random.RandomState(self.random_seed)
+        print(f"DEBUG: Colony using random seed: {self.random_seed}")
+        return self.random_seed
+
+    def role_constraint(self, ant: Ant) -> Literal[True]:
         team = Team.ant_to_team(ant, self.pokemons)
         team.team_has_roles(self.roles)
         return True
 
-    def create_ant(self):
+    def create_ant(self) -> np.ndarray:
         # TODO Run more tests vectorized and non-vectorized versions they tend to give different results
         # TODO Allow Repeating even if not all pokemon have been used
 
-        ######### Vectorized
+        # Vectorized
         ant = np.ones([min(6, len(self.pokemons)), 5], dtype=int) * (-1)
         team_size = min(len(self.pokemons), 6)
         preselected_size = len(self.preselected_pok)
         ant[0:preselected_size, 0] = self.preselected_pok
         if preselected_size < team_size:
-
             # Renormalize Probabilities
             self.pokemon_probabilities[self.preselected_pok] = 0
             self.pokemon_probabilities /= self.pokemon_probabilities.sum()
-            ant[preselected_size:, 0] = np.random.choice(
+            ant[preselected_size:, 0] = self.rng.choice(
                 len(self.pokemon_probabilities),
                 size=team_size - preselected_size,
                 replace=False,
                 p=self.pokemon_probabilities,
             )
         # if replacePok:
-        #     ant[len(self.poks) :, 0] = np.random.choice(
+        #     ant[len(self.poks) :, 0] = self.rng.choice(
         #         len(self.Prob_Poks),
         #         size=6 - team_size,
         #         p=self.Prob_Poks,
@@ -132,7 +150,7 @@ class Colony:
         for ant_i in range(ant.shape[0]):
             pokemon = ant[ant_i]
             selected_pokemon_id = pokemon[0]
-            ######### NonVectorized
+            # NonVectorized
             prob_att_temp = self.move_probabilities[selected_pokemon_id].copy()
             for i in range(1, 5):
                 if ant_i < len(self.preselected_moves) and i - 1 < len(
@@ -149,7 +167,7 @@ class Colony:
                     prob_att_temp[selected_attack_id] = 0
                 else:
                     pokemon[i] = -1
-            ######### Vectorized
+            # Vectorized
             # Get Knowable Moves
             # prob_att_temp = self.Prob_Att[selected_pokemon_id]
             # # TODO Ensure no repeated attacks and if the pokemon has less than 4 attacks, fill with -1 the remaining
@@ -164,7 +182,7 @@ class Colony:
             # pokemon[1:5] = selected_attack_ids
         return ant
 
-    def ACO(self):
+    def ACO(self) -> None:
         # Assign Population
         for i in range(self.pop_size):
             temp_ant = self.create_ant()
@@ -172,7 +190,7 @@ class Colony:
                 temp_ant = self.create_ant()
             self.population[i] = temp_ant
 
-    def update_ph_concentration(self, candidate_set):
+    def update_ph_concentration(self, candidate_set: Iterable[Ant]) -> None:
         # User Defined Variables
         Q = self.Q
         rho = self.rho
@@ -213,7 +231,7 @@ class Colony:
                         + delta_concentration
                     )
 
-    def update_pokemon_prob(self):
+    def update_pokemon_prob(self) -> None:
         # Update Pokemon Probabilities
         pokemon_numerators = self.numerator_fun(
             self.pokemon_pheromones, self.pokemon_heuritics
@@ -225,6 +243,9 @@ class Colony:
             pokemon_denominators = 1
         for i in range(0, self.pokemon_probabilities.__len__()):
             self.pokemon_probabilities[i] = pokemon_numerators[i] / pokemon_denominators
+
+        if self.pokemon_probabilities.sum() == 0:
+            print("DEBUG: Pokemon Probabilities are 0")
 
         # Update Attack Probabilities
         move_numerators = []
@@ -246,17 +267,19 @@ class Colony:
                         move_numerators[i][j] / move_denominators[i]
                     )
 
-    def fitness(self, ant):
+    def fitness(self, ant: Ant) -> float:
         fitness_value = self.objective_function(ant)
         return fitness_value
 
-    def heuristic_pokemon_fun(self, pokemon, pokemon_index):
+    def heuristic_pokemon_fun(
+        self, pokemon: Iterable[Pokemon], pokemon_index: int
+    ) -> float:
         heuristic_value = pokemon[pokemon_index].overall_stats() / 500
         return heuristic_value
 
-    def candidate_set(self):
+    def candidate_set(self) -> list[Ant]:
         sorted_population = sorted(self.population, key=self.fitness)
         return list(sorted_population[ceil(self.pop_size * 0.90) : self.pop_size])
 
-    def numerator_fun(self, c, n):
+    def numerator_fun(self, c: float, n: float) -> float:
         return (c**self.alpha) * (n**self.beta)
