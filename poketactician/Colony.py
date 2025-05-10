@@ -30,7 +30,7 @@ class Colony:
             random_seed if random_seed is not None else np.random.randint(0, 2**32 - 1)
         )
         self.rng = np.random.RandomState(self.random_seed)
-        print(f"DEBUG: Colony initialized with random seed: {self.random_seed}")
+        # print(f"DEBUG: Colony initialized with random seed: {self.random_seed}")
 
         self.pop_size = pop_size_param
         # objFunParam should be a lambda function
@@ -114,7 +114,7 @@ class Colony:
 
         self.random_seed = seed
         self.rng = np.random.RandomState(self.random_seed)
-        print(f"DEBUG: Colony using random seed: {self.random_seed}")
+        # print(f"DEBUG: Colony using random seed: {self.random_seed}")
         return self.random_seed
 
     def role_constraint(self, ant: Ant) -> Literal[True]:
