@@ -1,7 +1,8 @@
 import argparse
-from poketactician.MOACO import MOACO
+
 from poketactician.glob_var import alpha, beta
-from poketactician.utils import load_pokemon, define_objective_functions
+from poketactician.MOACO import MOACO
+from poketactician.utils import define_objective_functions, load_pokemon
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -18,7 +19,7 @@ def parse_arguments() -> argparse.Namespace:
         type=str,
         nargs="*",
         default=[
-            "Attack",
+            "attack",
         ],
         help="Objective function",
     )
