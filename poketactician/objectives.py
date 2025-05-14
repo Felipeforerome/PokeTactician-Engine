@@ -219,9 +219,9 @@ class ObjectiveFunctions(Enum):
     Enum class that represents the different objective functions available for team evaluation.
     """
 
-    ATTACK = "Attack"
+    ATTACK = "attack"
     # DEFENSE = "Defense"
-    TEAM_COVERAGE = "TeamCoverage"
+    TEAM_COVERAGE = "team_coverage"
     # SELF_COVERAGE = "Self Coverage"
 
     def get_function(self, pok_list: list[Pokemon]) -> Callable:
