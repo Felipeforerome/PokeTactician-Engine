@@ -31,6 +31,7 @@ MANIFEST
 
 
 .pytest_cache/
-/dash_app_old/
+dash_app_old/
 /data/
 .DS_Store
+poketactician_old/
