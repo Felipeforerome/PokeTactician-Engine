@@ -75,6 +75,8 @@ class PokeTactician:
         if self.results is None:
             raise ValueError("No results available. Run optimize() first.")
         F = self.results.F
+        if F.shape[1] != 2:
+            raise ValueError("This method only supports 2 objectives for plotting.")
         plt.figure(figsize=(7, 5))
         plt.scatter(F[:, 0], F[:, 1], s=30, facecolors="none", edgecolors="blue")
         plt.title("Objective Space")
@@ -85,6 +87,10 @@ class PokeTactician:
 
         if self.results is None:
             raise ValueError("No results available. Run optimize() first.")
+
+        if not self.results.algorithm.save_history:
+            raise ValueError("History is not saved. Set save_history=True in optimize().")
+
         n_evals = np.array([e.evaluator.n_eval for e in self.results.history])
 
         opt = np.array([e.opt[0].F for e in self.results.history])
