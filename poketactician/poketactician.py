@@ -69,11 +69,34 @@ class PokeTactician:
         self.results = res
         return res
 
+    def has_been_optimized() -> Callable[..., Any]:
+        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+            @wraps(func)
+            def wrapper(self: "PokeTactician", *args, **kwargs) -> Callable[..., Any]:
+                if self.results is None:
+                    raise ValueError("No results available. Run optimize() first.")
+                return func(self, *args, **kwargs)
+
+            return wrapper
+
+        return decorator
+
+    def with_history() -> Callable[..., Any]:
+        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+            @wraps(func)
+            def wrapper(self: "PokeTactician", *args, **kwargs) -> Callable[..., Any]:
+                if not self.results.algorithm.save_history:
+                    raise ValueError("History is not saved. Set save_history=True in optimize().")
+                return func(self, *args, **kwargs)
+
+            return wrapper
+
+        return decorator
+
+    @has_been_optimized()
     def solutions_plot(self) -> None:
         import matplotlib.pyplot as plt
 
-        if self.results is None:
-            raise ValueError("No results available. Run optimize() first.")
         F = self.results.F
         if F.shape[1] != 2:
             raise ValueError("This method only supports 2 objectives for plotting.")
@@ -82,14 +105,10 @@ class PokeTactician:
         plt.title("Objective Space")
         plt.show()
 
+    @has_been_optimized()
+    @with_history()
     def convergence_plot(self) -> None:
         import matplotlib.pyplot as plt
-
-        if self.results is None:
-            raise ValueError("No results available. Run optimize() first.")
-
-        if not self.results.algorithm.save_history:
-            raise ValueError("History is not saved. Set save_history=True in optimize().")
 
         n_evals = np.array([e.evaluator.n_eval for e in self.results.history])
 
