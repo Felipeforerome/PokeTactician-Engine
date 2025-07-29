@@ -1,4 +1,5 @@
-from typing import Iterator
+from functools import wraps
+from typing import Any, Callable, Iterator
 
 import numpy as np
 from numpy.typing import NDArray
