@@ -117,3 +117,12 @@ class PokeTactician:
         plt.title("Convergence")
         plt.plot(n_evals, abs(opt), "--")
         plt.show()
+
+    @has_been_optimized()
+    @with_history()
+    def running_metric_plot(self) -> None:
+        from pymoo.util.running_metric import RunningMetricAnimation
+
+        running = RunningMetricAnimation(delta_gen=10, n_plots=10, key_press=False, do_show=True)
+        for algorithm in self.results.history:
+            running.update(algorithm)
