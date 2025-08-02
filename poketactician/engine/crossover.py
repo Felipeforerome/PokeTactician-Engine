@@ -11,7 +11,7 @@ class PokemonCrossover(Crossover):
         self.prob_pokemon = prob_pokemon
         self.random_state = random_state
 
-    def _do(self, problem: PokemonProblem, X: NDArray[np.uint16], **kwargs) -> NDArray[np.uint16]:  # noqa: N803
+    def _do(self, problem: PokemonProblem, X: NDArray[np.int16], **kwargs) -> NDArray[np.int16]:  # noqa: N803
         _, n_matings, _ = X.shape
         pokemon_in_team = problem.pokemon_in_team
 

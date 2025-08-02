@@ -13,7 +13,7 @@ class PokemonMutation(Mutation):
         self.prob_pokemon = prob_pokemon
         self.prob_move = prob_move
 
-    def pokemon_mutation(self, x: NDArray[np.uint16], y: NDArray[np.int16], lm: NDArray[np.bool_]) -> tuple[NDArray[np.uint16], NDArray[np.int16]]:
+    def pokemon_mutation(self, x: NDArray[np.int16], y: NDArray[np.int16], lm: NDArray[np.bool_]) -> tuple[NDArray[np.int16], NDArray[np.int16]]:
         not_chosen_pokemon = [i for i in range(lm.shape[0]) if i not in x]
         possible_new_pokemon = self.random_state.choice(not_chosen_pokemon, size=x.shape[0], replace=False)
 
@@ -30,7 +30,7 @@ class PokemonMutation(Mutation):
                 mutated_moves[j] = get_random_moves(lm, i, self.random_state)
         return mutated_team, mutated_moves
 
-    def move_mutation(self, x: NDArray[np.uint16], y: NDArray[np.int16], lm: NDArray[np.bool_]) -> NDArray[np.int16]:
+    def move_mutation(self, x: NDArray[np.int16], y: NDArray[np.int16], lm: NDArray[np.bool_]) -> NDArray[np.int16]:
         pokemon_in_team = x.shape[0]
         mutated_moves_mask = self.random_state.random((y.shape[0], y.shape[1])) < self.prob_move
         rows_with_mutations = np.any(mutated_moves_mask, axis=1)
@@ -46,7 +46,7 @@ class PokemonMutation(Mutation):
         )
         return mutated_moves
 
-    def modify_lm(self, x: NDArray[np.uint16], y: NDArray[np.int16], lm: NDArray[np.bool_]) -> NDArray[np.bool_]:
+    def modify_lm(self, x: NDArray[np.int16], y: NDArray[np.int16], lm: NDArray[np.bool_]) -> NDArray[np.bool_]:
         modified_LM = lm.copy()
         num_moves_available = modified_LM.sum(axis=1)[x]
         for x_i, x_val in enumerate(x):
@@ -59,7 +59,7 @@ class PokemonMutation(Mutation):
                     break
         return modified_LM
 
-    def _do(self, problem: PokemonProblem, X: NDArray[np.uint16], **kwargs) -> NDArray[np.uint16]:  # noqa: N803
+    def _do(self, problem: PokemonProblem, X: NDArray[np.int16], **kwargs) -> NDArray[np.int16]:  # noqa: N803
         for ind in X:
             x = ind[: problem.pokemon_in_team]
             y = ind[problem.pokemon_in_team :].reshape(problem.pokemon_in_team, 4)

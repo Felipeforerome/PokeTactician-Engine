@@ -32,10 +32,10 @@ class PokemonProblem(ElementwiseProblem):
             + 1 * self.repeat_pokemon,  # The 4 moves of each 6 pokemon must be learnable. Each pokemon has 4 different moves
             xl=0,
             xu=n_pokemon,
-            type_var=np.uint16,
+            type_var=np.int16,
         )
 
-    def _evaluate(self, x: NDArray[np.uint16], out: dict, *args, **kwargs) -> None:  # noqa: N803
+    def _evaluate(self, x: NDArray[np.int16], out: dict, *args, **kwargs) -> None:  # noqa: N803
         F = []
         G = []
         ind = x.copy()
@@ -66,7 +66,7 @@ class PokemonProblem(ElementwiseProblem):
 
         # no repeated Pokemon: len(x) - len(set(x)) ≤ 0
         if self.repeat_pokemon:
-            constraints += list((len(set(x)) - len(x)).flatten())
+            constraints.append(len(x) - len(set(x)))
 
         G.append(constraints)
 

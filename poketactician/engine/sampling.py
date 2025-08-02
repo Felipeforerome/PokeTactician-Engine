@@ -10,7 +10,7 @@ class PokemonTeamSampling(Sampling):
         super().__init__()
         self.random_state = random_state
 
-    def _do(self, problem: PokemonProblem, n_samples: int, **kwargs) -> NDArray[np.uint16]:
+    def _do(self, problem: PokemonProblem, n_samples: int, **kwargs) -> NDArray[np.int16]:
         individuals = []
 
         for _ in range(n_samples):
