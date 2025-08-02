@@ -13,7 +13,7 @@ from poketactician.engine.mutation import PokemonMutation
 from poketactician.engine.problem import PokemonProblem
 from poketactician.engine.sampling import PokemonTeamSampling
 from poketactician.engine.selector import ObjectiveSelector
-from poketactician.objectives.test_objectives import test_objective, test_objective2  # noqa: F401
+from poketactician.objectives.dummy_objectives import test_objective, test_objective2  # noqa: F401
 from poketactician.registry import register_objective_data
 
 
@@ -57,7 +57,7 @@ class PokeTactician:
             eliminate_duplicates=True,
         )
 
-        problem = PokemonProblem(objectives=self.objectives, lm=self.lm, n_pokemon=self.n_pokemon, n_moves=self.n_moves)
+        problem = PokemonProblem(objectives=self.objectives, lm=self.lm, n_pokemon=self.n_pokemon, n_moves=self.n_moves, pokemon_in_team=min(self.n_pokemon, 6))
         termination = get_termination("n_gen", n_gen)
         res = minimize(
             problem=problem,
