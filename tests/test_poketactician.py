@@ -6,6 +6,8 @@ import numpy as np
 import pytest
 from matplotlib import pyplot as plt
 
+from poketactician.engine.mutation import PokemonMutation
+from poketactician.engine.sampling import PokemonTeamSampling
 from poketactician.poketactician import PokeTactician
 
 
@@ -227,3 +229,80 @@ class TestPokeTacticianDecorators:
             plt.close("all")  # Close any created figures
         except ValueError:
             assert False, "Should not have raised ValueError"
+
+
+class TestPreSelected:
+    """Tests for the PokeTactician class."""
+
+    def test_pre_selected_poketactician(self, test_data: Dict[str, Any]) -> None:
+        """Test that pre-selected Pokémon are handled correctly."""
+        pre_selected = [1, 3, 5]
+
+        poke_tactician = PokeTactician(
+            objectives=["test_objective", "test_objective2"],
+            seed=test_data["seed"],
+            lm=test_data["lm"],
+            me=test_data["me"],
+            pt=test_data["pt"],
+            mt=test_data["mt"],
+            ps=test_data["ps"],
+            pre_selected=pre_selected,
+        )
+
+        poke_tactician.optimize(pop_size=10, n_gen=10, verbose=False)
+
+        res = poke_tactician.results
+        pokemon = res.X[0][:6]
+        assert all(item in pokemon for item in pre_selected), "Pre-selected Pokémon should be in the optimized team."
+
+    def test_pre_selected_sampling(self, test_data: Dict[str, Any]) -> None:
+        """Test that pre-selected Pokémon are handled correctly in sampling."""
+        pre_selected = [1, 3, 5]
+
+        poke_tactician = PokeTactician(
+            objectives=["test_objective", "test_objective2"],
+            seed=test_data["seed"],
+            lm=test_data["lm"],
+            me=test_data["me"],
+            pt=test_data["pt"],
+            mt=test_data["mt"],
+            ps=test_data["ps"],
+            pre_selected=pre_selected,
+        )
+        sampling = PokemonTeamSampling(random_state=poke_tactician.random_state, pre_selected=pre_selected)
+        # Sample a team
+        sampled_team = sampling._do(problem=poke_tactician.problem, n_samples=1)
+        sampled_pokemon = sampled_team[0][:6]
+        assert all(item in sampled_pokemon for item in pre_selected), "Pre-selected Pokémon should be in the sampled team."
+
+    def test_pre_selected_mutation(self, test_data: Dict[str, Any]) -> None:
+        """Test that pre-selected Pokémon are handled correctly in mutation."""
+        pre_selected = [1, 3, 5]
+
+        poke_tactician = PokeTactician(
+            objectives=["test_objective", "test_objective2"],
+            seed=test_data["seed"],
+            lm=test_data["lm"],
+            me=test_data["me"],
+            pt=test_data["pt"],
+            mt=test_data["mt"],
+            ps=test_data["ps"],
+            pre_selected=pre_selected,
+        )
+
+        # Create a sample team to pass to the mutation
+        sampling = PokemonTeamSampling(random_state=poke_tactician.random_state, pre_selected=pre_selected)
+
+        sampled_team = sampling._do(problem=poke_tactician.problem, n_samples=1)
+
+        mutation = PokemonMutation(
+            random_state=poke_tactician.random_state,
+            prob_pokemon=0.5,
+            prob_move=0.5,
+            pre_selected=np.array(pre_selected, dtype=np.int16),
+        )
+
+        mutated_team = mutation._do(problem=poke_tactician.problem, X=sampled_team)[0]
+
+        mutated_pokemon = mutated_team[:6]
+        assert all(item in mutated_pokemon for item in pre_selected), "Pre-selected Pokémon should be in the mutated team."
