@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -20,7 +20,7 @@ from poketactician.registry import register_objective_data
 class PokeTactician:
     def __init__(
         self,
-        objectives: Iterator[str],
+        objectives: Iterable[str],
         seed: int | None,
         lm: NDArray[np.bool_],
         me: NDArray[np.int16],
@@ -47,8 +47,11 @@ class PokeTactician:
         )
         self.objectives = ObjectiveSelector(objectives)
         self.random_state = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
+        self.problem = PokemonProblem(
+            objectives=self.objectives, lm=self.lm, n_pokemon=self.n_pokemon, n_moves=self.n_moves, pokemon_in_team=min(self.n_pokemon, 6)
+        )
 
-    def optimize(self, pop_size: int, n_gen: int, verbose: bool, history: bool) -> None:
+    def optimize(self, pop_size: int, n_gen: int, verbose: bool, history: bool = False) -> None:
         algorithm = NSGA2(
             pop_size=pop_size,
             sampling=PokemonTeamSampling(random_state=self.random_state),
@@ -57,10 +60,9 @@ class PokeTactician:
             eliminate_duplicates=True,
         )
 
-        problem = PokemonProblem(objectives=self.objectives, lm=self.lm, n_pokemon=self.n_pokemon, n_moves=self.n_moves, pokemon_in_team=min(self.n_pokemon, 6))
         termination = get_termination("n_gen", n_gen)
         res = minimize(
-            problem=problem,
+            problem=self.problem,
             algorithm=algorithm,
             termination=termination,
             seed=self.seed,
