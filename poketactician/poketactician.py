@@ -27,6 +27,7 @@ class PokeTactician:
         pt: NDArray[np.bool_],
         mt: NDArray[np.bool_],
         ps: NDArray[np.int16],
+        pre_selected: Iterable[int] | NDArray[np.int16] | None = None,
         n_pokemon: int = 6,
     ) -> None:
         self.lm = lm
@@ -38,6 +39,12 @@ class PokeTactician:
         self.n_pokemon = n_pokemon
         self.n_moves = lm.shape[1]
         self.n_types = pt.shape[1]
+        if pre_selected is None:
+            self.pre_selected = None
+        elif isinstance(pre_selected, np.ndarray):
+            self.pre_selected = pre_selected.astype(np.int16)
+        else:
+            self.pre_selected = np.array(list(pre_selected), dtype=np.int16)
         self.results: Result | None = None
         register_objective_data(
             {
@@ -54,9 +61,9 @@ class PokeTactician:
     def optimize(self, pop_size: int, n_gen: int, verbose: bool, history: bool = False) -> None:
         algorithm = NSGA2(
             pop_size=pop_size,
-            sampling=PokemonTeamSampling(random_state=self.random_state),
+            sampling=PokemonTeamSampling(random_state=self.random_state, pre_selected=self.pre_selected),
             crossover=PokemonCrossover(prob_pokemon=0.5, random_state=self.random_state),
-            mutation=PokemonMutation(prob_pokemon=0.5, prob_move=0.5, random_state=self.random_state),
+            mutation=PokemonMutation(prob_pokemon=0.5, prob_move=0.5, random_state=self.random_state, pre_selected=self.pre_selected),
             eliminate_duplicates=True,
         )
 

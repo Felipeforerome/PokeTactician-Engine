@@ -6,16 +6,25 @@ from poketactician.engine.problem import PokemonProblem
 
 
 class PokemonTeamSampling(Sampling):
-    def __init__(self, random_state: np.random.Generator) -> None:
+    def __init__(self, random_state: np.random.Generator, pre_selected: NDArray[np.int16] | None = None) -> None:
         super().__init__()
         self.random_state = random_state
+        self.pre_selected = pre_selected
 
     def _do(self, problem: PokemonProblem, n_samples: int, **kwargs) -> NDArray[np.int16]:
         individuals = []
 
         for _ in range(n_samples):
-            # (1) Select 6 unique Pokémon
-            team = self.random_state.choice(problem.n_pokemon, problem.pokemon_in_team, replace=False)
+            team = []
+            # If pre-selected Pokémon are provided, use them
+            if self.pre_selected is not None:
+                team.extend(self.pre_selected)
+
+            # (1) Select remaining unique Pokémon
+            remaining_team = self.random_state.choice(
+                [i for i in range(problem.n_pokemon) if i not in team], problem.pokemon_in_team - len(team), replace=False
+            )
+            team.extend(remaining_team)
 
             # (2) Assign 4 legal moves to each selected Pokémon
             moves = np.zeros((problem.pokemon_in_team, 4), dtype=np.int16)
