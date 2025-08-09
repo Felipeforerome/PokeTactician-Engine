@@ -59,7 +59,7 @@ class TestObjectiveFunction:
         PENDING_OBJECTIVES.clear()
         PENDING_OBJECTIVES.update(old_pending)
 
-    def test_register_objective_with_data() -> None:
+    def test_register_objective_with_data(self) -> None:
         """Test that register_objective_data works correctly."""
         # Clear any existing objectives for this test
         old_pending = PENDING_OBJECTIVES.copy()
