@@ -1,5 +1,4 @@
-from functools import wraps
-from typing import Any, Callable, Iterable
+from typing import Iterable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -41,8 +40,8 @@ class PokeTactician:
         self.n_types = pt.shape[1]
         if pre_selected is None:
             self.pre_selected = None
-        elif isinstance(pre_selected, np.ndarray):
-            self.pre_selected = pre_selected.astype(np.int16)
+        # elif isinstance(pre_selected, np.ndarray):
+        #     self.pre_selected = pre_selected.astype(np.int16)
         else:
             self.pre_selected = np.array(list(pre_selected), dtype=np.int16)
         self.results: Result | None = None
@@ -58,7 +57,7 @@ class PokeTactician:
             objectives=self.objectives, lm=self.lm, n_pokemon=self.n_pokemon, n_moves=self.n_moves, pokemon_in_team=min(self.n_pokemon, 6)
         )
 
-    def optimize(self, pop_size: int, n_gen: int, verbose: bool, history: bool = False) -> None:
+    def optimize(self, pop_size: int, n_gen: int, verbose: bool, history: bool = False) -> Result:
         algorithm = NSGA2(
             pop_size=pop_size,
             sampling=PokemonTeamSampling(random_state=self.random_state, pre_selected=self.pre_selected),
@@ -79,35 +78,36 @@ class PokeTactician:
         self.results = res
         return res
 
-    def has_been_optimized() -> Callable[..., Any]:
-        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-            @wraps(func)
-            def wrapper(self: "PokeTactician", *args, **kwargs) -> Callable[..., Any]:
-                if self.results is None:
-                    raise ValueError("No results available. Run optimize() first.")
-                return func(self, *args, **kwargs)
+    @property
+    def _safe_results(self) -> Result:
+        if self.results is None:
+            raise ValueError("No results available. Run optimize() first.")
+        return self.results
 
-            return wrapper
+    @property
+    def _history_results(self) -> Result:
+        res = self._safe_results
+        # Note: Depending on your library, ensure 'algorithm' and 'save_history' are typed correctly
+        if hasattr(res.algorithm, "save_history") and not res.algorithm.save_history:
+            raise ValueError("History is not saved. Set save_history=True in optimize().")
+        return res
 
-        return decorator
+    @property
+    def _safe_F(self) -> NDArray[np.float64]:  # noqa: N802 It's called F in pymoo
+        # 1. Get the safe results
+        res = self._safe_results
 
-    def with_history() -> Callable[..., Any]:
-        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-            @wraps(func)
-            def wrapper(self: "PokeTactician", *args, **kwargs) -> Callable[..., Any]:
-                if not self.results.algorithm.save_history:
-                    raise ValueError("History is not saved. Set save_history=True in optimize().")
-                return func(self, *args, **kwargs)
+        # 2. Check if F exists (pymoo types F as optional)
+        if res.F is None:
+            raise ValueError("Optimization finished, but no solution (F) was found.")
 
-            return wrapper
+        # 3. Return it (Pyright now knows this is definitely an Array)
+        return res.F
 
-        return decorator
-
-    @has_been_optimized()
     def solutions_plot(self) -> None:
         import matplotlib.pyplot as plt
 
-        F = self.results.F
+        F = self._safe_F
         if F.shape[1] != 2:
             raise ValueError("This method only supports 2 objectives for plotting.")
         plt.figure(figsize=(7, 5))
@@ -115,24 +115,22 @@ class PokeTactician:
         plt.title("Objective Space")
         plt.show()
 
-    @has_been_optimized()
-    @with_history()
     def convergence_plot(self) -> None:
         import matplotlib.pyplot as plt
 
-        n_evals = np.array([e.evaluator.n_eval for e in self.results.history])
+        result = self._history_results
 
-        opt = np.array([e.opt[0].F for e in self.results.history])
+        n_evals = np.array([e.evaluator.n_eval for e in result.history])
 
+        opt = np.array([e.opt[0].F for e in result.history])
         plt.title("Convergence")
         plt.plot(n_evals, abs(opt), "--")
         plt.show()
 
-    @has_been_optimized()
-    @with_history()
     def running_metric_plot(self) -> None:
         from pymoo.util.running_metric import RunningMetricAnimation
 
+        result = self._history_results
         running = RunningMetricAnimation(delta_gen=10, n_plots=10, key_press=False, do_show=True)
-        for algorithm in self.results.history:
+        for algorithm in result.history:
             running.update(algorithm)
