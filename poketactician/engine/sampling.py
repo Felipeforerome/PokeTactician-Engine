@@ -6,7 +6,7 @@ from poketactician.engine.problem import PokemonProblem
 
 
 class PokemonTeamSampling(Sampling):
-    def __init__(self, random_state: np.random.Generator, pre_selected: NDArray[np.int16] | None = None) -> None:
+    def __init__(self, random_state: np.random.Generator, pre_selected: NDArray[np.int16] | list[int] | None = None) -> None:
         super().__init__()
         self.random_state = random_state
         self.pre_selected = pre_selected

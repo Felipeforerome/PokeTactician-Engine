@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -14,6 +14,7 @@ from poketactician.engine.sampling import PokemonTeamSampling
 from poketactician.engine.selector import ObjectiveSelector
 from poketactician.objectives.dummy_objectives import test_objective, test_objective2  # noqa: F401
 from poketactician.registry import register_objective_data
+from poketactician.utils import ResultsWithHistory, StrictResults
 
 
 class PokeTactician:
@@ -57,7 +58,7 @@ class PokeTactician:
             objectives=self.objectives, lm=self.lm, n_pokemon=self.n_pokemon, n_moves=self.n_moves, pokemon_in_team=min(self.n_pokemon, 6)
         )
 
-    def optimize(self, pop_size: int, n_gen: int, verbose: bool, history: bool = False) -> Result:
+    def optimize(self, pop_size: int, n_gen: int, verbose: bool, history: bool = False) -> StrictResults:
         algorithm = NSGA2(
             pop_size=pop_size,
             sampling=PokemonTeamSampling(random_state=self.random_state, pre_selected=self.pre_selected),
@@ -76,38 +77,26 @@ class PokeTactician:
             save_history=history,
         )
         self.results = res
-        return res
+        return cast(StrictResults, res)
 
     @property
-    def _safe_results(self) -> Result:
+    def _safe_results(self) -> StrictResults:
         if self.results is None:
             raise ValueError("No results available. Run optimize() first.")
-        return self.results
+        return cast(StrictResults, self.results)
 
     @property
-    def _history_results(self) -> Result:
+    def _history_results(self) -> ResultsWithHistory:
         res = self._safe_results
         # Note: Depending on your library, ensure 'algorithm' and 'save_history' are typed correctly
         if hasattr(res.algorithm, "save_history") and not res.algorithm.save_history:
             raise ValueError("History is not saved. Set save_history=True in optimize().")
-        return res
-
-    @property
-    def _safe_F(self) -> NDArray[np.float64]:  # noqa: N802 It's called F in pymoo
-        # 1. Get the safe results
-        res = self._safe_results
-
-        # 2. Check if F exists (pymoo types F as optional)
-        if res.F is None:
-            raise ValueError("Optimization finished, but no solution (F) was found.")
-
-        # 3. Return it (Pyright now knows this is definitely an Array)
-        return res.F
+        return cast(ResultsWithHistory, res)
 
     def solutions_plot(self) -> None:
         import matplotlib.pyplot as plt
 
-        F = self._safe_F
+        F = self._safe_results.F
         if F.shape[1] != 2:
             raise ValueError("This method only supports 2 objectives for plotting.")
         plt.figure(figsize=(7, 5))

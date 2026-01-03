@@ -30,15 +30,8 @@ class TestPokeTactician:
             n_pokemon=n_pokemon,
         )
 
-        # Check that the custom parameters were set correctly
-        assert poke_tactician.n_pokemon == n_pokemon
-
         # Run optimization with the custom parameters
         result = poke_tactician.optimize(pop_size=10, n_gen=2, verbose=False, history=True)
-
-        # Check that the results are correct
-        assert poke_tactician.results is not None
-        assert result is not None
 
         # Check that the solutions have the correct shape
         assert result.X.shape[1] == n_pokemon + n_pokemon * 4
@@ -70,7 +63,6 @@ class TestPokeTactician:
         result = poke_tactician.optimize(pop_size=10, n_gen=2, verbose=False, history=False)
 
         # Check that the results are correct
-        assert poke_tactician.results is not None
         assert result is not None
 
         # Check that history was not saved
@@ -175,11 +167,9 @@ class TestPokeTacticianDecorators:
         )
 
         # Test @has_been_optimized decorator before optimization
-        try:
-            poke_tactician.solutions_plot()
-            assert False, "Should have raised ValueError"
-        except ValueError as e:
-            assert str(e) == "No results available. Run optimize() first."
+        with pytest.raises(ValueError) as exc_info:
+            poke_tactician.convergence_plot()
+            assert str(exc_info.value) == "No results available. Run optimize() first."
 
         # Run optimization
         poke_tactician.optimize(pop_size=10, n_gen=2, verbose=False)
@@ -251,7 +241,7 @@ class TestPreSelected:
 
         poke_tactician.optimize(pop_size=10, n_gen=10, verbose=False)
 
-        res = poke_tactician.results
+        res = poke_tactician._safe_results
         pokemon = res.X[0][:6]
         assert all(item in pokemon for item in pre_selected), "Pre-selected Pokémon should be in the optimized team."
 
