@@ -22,11 +22,12 @@ class TestPokeTactician:
         poke_tactician = PokeTactician(
             objectives=["test_objective", "test_objective2"],
             seed=test_data["seed"],
-            lm=test_data["lm"],
-            me=test_data["me"],
-            pt=test_data["pt"],
-            mt=test_data["mt"],
-            ps=test_data["ps"],
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+            natures=test_data["natures"],
             n_pokemon=n_pokemon,
         )
 
@@ -52,11 +53,12 @@ class TestPokeTactician:
         poke_tactician = PokeTactician(
             objectives=["test_objective", "test_objective2"],
             seed=test_data["seed"],
-            lm=test_data["lm"],
-            me=test_data["me"],
-            pt=test_data["pt"],
-            mt=test_data["mt"],
-            ps=test_data["ps"],
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+            natures=test_data["natures"],
         )
 
         # Run optimization without saving history
@@ -89,22 +91,24 @@ class TestPokeTactician:
         seed = 42
         poke_tactician1 = PokeTactician(
             objectives=["test_objective", "test_objective2"],
-            seed=seed,
-            lm=test_data["lm"],
-            me=test_data["me"],
-            pt=test_data["pt"],
-            mt=test_data["mt"],
-            ps=test_data["ps"],
+            seed=test_data["seed"],
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+            natures=test_data["natures"],
         )
 
         poke_tactician2 = PokeTactician(
             objectives=["test_objective", "test_objective2"],
-            seed=seed,
-            lm=test_data["lm"],
-            me=test_data["me"],
-            pt=test_data["pt"],
-            mt=test_data["mt"],
-            ps=test_data["ps"],
+            seed=test_data["seed"],
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+            natures=test_data["natures"],
         )
 
         # Run optimization with both instances
@@ -119,11 +123,12 @@ class TestPokeTactician:
         poke_tactician3 = PokeTactician(
             objectives=["test_objective", "test_objective2"],
             seed=seed + 1,  # Different seed
-            lm=test_data["lm"],
-            me=test_data["me"],
-            pt=test_data["pt"],
-            mt=test_data["mt"],
-            ps=test_data["ps"],
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+            natures=test_data["natures"],
         )
 
         # Run optimization with the different seed
@@ -136,11 +141,12 @@ class TestPokeTactician:
         poke_tactician4 = PokeTactician(
             objectives=["test_objective", "test_objective2"],
             seed=None,  # No seed
-            lm=test_data["lm"],
-            me=test_data["me"],
-            pt=test_data["pt"],
-            mt=test_data["mt"],
-            ps=test_data["ps"],
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+            natures=test_data["natures"],
         )
 
         # Run optimization with no seed
@@ -159,11 +165,12 @@ class TestPokeTacticianDecorators:
         poke_tactician = PokeTactician(
             objectives=["test_objective", "test_objective2"],
             seed=test_data["seed"],
-            lm=test_data["lm"],
-            me=test_data["me"],
-            pt=test_data["pt"],
-            mt=test_data["mt"],
-            ps=test_data["ps"],
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+            natures=test_data["natures"],
         )
 
         # Test @has_been_optimized decorator before optimization
@@ -190,11 +197,12 @@ class TestPokeTacticianDecorators:
         poke_tactician = PokeTactician(
             objectives=["test_objective", "test_objective2"],
             seed=test_data["seed"],
-            lm=test_data["lm"],
-            me=test_data["me"],
-            pt=test_data["pt"],
-            mt=test_data["mt"],
-            ps=test_data["ps"],
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+            natures=test_data["natures"],
         )
 
         # Run optimization without history
@@ -231,17 +239,18 @@ class TestPreSelected:
         poke_tactician = PokeTactician(
             objectives=["test_objective", "test_objective2"],
             seed=test_data["seed"],
-            lm=test_data["lm"],
-            me=test_data["me"],
-            pt=test_data["pt"],
-            mt=test_data["mt"],
-            ps=test_data["ps"],
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+            natures=test_data["natures"],
             pre_selected=pre_selected,
         )
 
         poke_tactician.optimize(pop_size=10, n_gen=10, verbose=False)
 
-        res = poke_tactician._safe_results
+        res = poke_tactician.results
         pokemon = res.X[0][:6]
         assert all(item in pokemon for item in pre_selected), "Pre-selected Pokémon should be in the optimized team."
 
@@ -252,11 +261,12 @@ class TestPreSelected:
         poke_tactician = PokeTactician(
             objectives=["test_objective", "test_objective2"],
             seed=test_data["seed"],
-            lm=test_data["lm"],
-            me=test_data["me"],
-            pt=test_data["pt"],
-            mt=test_data["mt"],
-            ps=test_data["ps"],
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+            natures=test_data["natures"],
             pre_selected=pre_selected,
         )
         sampling = PokemonTeamSampling(random_state=poke_tactician.random_state, pre_selected=pre_selected)
@@ -272,11 +282,12 @@ class TestPreSelected:
         poke_tactician = PokeTactician(
             objectives=["test_objective", "test_objective2"],
             seed=test_data["seed"],
-            lm=test_data["lm"],
-            me=test_data["me"],
-            pt=test_data["pt"],
-            mt=test_data["mt"],
-            ps=test_data["ps"],
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+            natures=test_data["natures"],
             pre_selected=pre_selected,
         )
 

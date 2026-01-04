@@ -13,6 +13,7 @@ def test_data() -> Dict[str, Any]:
     n_moves = 20
     n_types = 18
     n_stats = 6
+    n_natures = 25
 
     # Set a fixed seed for reproducibility
     seed = 42
@@ -43,6 +44,9 @@ def test_data() -> Dict[str, Any]:
     # Pokemon Stats matrix
     ps = rng.integers(20, 110, size=(n_pokemon, n_stats), dtype=np.int16, endpoint=True)
 
+    # Natures
+    natures = rng.integers(-1, 1, size=(n_natures, n_stats), dtype=np.int16, endpoint=True)
+
     return {
         "n_pokemon": n_pokemon,
         "n_moves": n_moves,
@@ -54,4 +58,5 @@ def test_data() -> Dict[str, Any]:
         "pt": pt,
         "mt": mt,
         "ps": ps,
+        "natures": natures,
     }

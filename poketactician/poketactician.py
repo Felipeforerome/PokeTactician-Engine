@@ -22,40 +22,42 @@ class PokeTactician:
         self,
         objectives: Iterable[str],
         seed: int | None,
-        lm: NDArray[np.bool_],
-        me: NDArray[np.int16],
-        pt: NDArray[np.bool_],
-        mt: NDArray[np.bool_],
-        ps: NDArray[np.int16],
+        learnable_moves: NDArray[np.bool_],
+        moves_category: NDArray[np.int16],
+        pokemon_types: NDArray[np.bool_],
+        move_types: NDArray[np.bool_],
+        pokemon_stats: NDArray[np.int16],
+        natures: NDArray[np.int16],
         pre_selected: Iterable[int] | NDArray[np.int16] | None = None,
         n_pokemon: int = 6,
     ) -> None:
-        self.lm = lm
+        self.learnable_moves = learnable_moves
         self.seed = seed
-        self.me = me
-        self.pt = pt
-        self.mt = mt
-        self.ps = ps
+        self.moves_category = moves_category
+        self.pokemon_types = pokemon_types
+        self.move_types = move_types
+        self.pokemon_stats = pokemon_stats
         self.n_pokemon = n_pokemon
-        self.n_moves = lm.shape[1]
-        self.n_types = pt.shape[1]
+        self.natures = natures
+        self.n_moves = learnable_moves.shape[1]
+        self.n_types = pokemon_types.shape[1]
         if pre_selected is None:
             self.pre_selected = None
         # elif isinstance(pre_selected, np.ndarray):
         #     self.pre_selected = pre_selected.astype(np.int16)
         else:
             self.pre_selected = np.array(list(pre_selected), dtype=np.int16)
-        self.results: Result | None = None
+        self._results: Result | None = None
         register_objective_data(
-            {
-                "test_objective": {"me": self.me},
-                "test_objective2": {"me": self.me},
+            data_dict={
+                "test_objective": {"me": self.moves_category},
+                "test_objective2": {"me": self.moves_category},
             }
         )
-        self.objectives = ObjectiveSelector(objectives)
+        self.objectives = ObjectiveSelector(objective_names=objectives)
         self.random_state = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
         self.problem = PokemonProblem(
-            objectives=self.objectives, lm=self.lm, n_pokemon=self.n_pokemon, n_moves=self.n_moves, pokemon_in_team=min(self.n_pokemon, 6)
+            objectives=self.objectives, lm=self.learnable_moves, n_pokemon=self.n_pokemon, n_moves=self.n_moves, pokemon_in_team=min(self.n_pokemon, 6)
         )
 
     def optimize(self, pop_size: int, n_gen: int, verbose: bool, history: bool = False) -> StrictResults:
@@ -76,18 +78,18 @@ class PokeTactician:
             verbose=verbose,
             save_history=history,
         )
-        self.results = res
+        self._results = res
         return cast(StrictResults, res)
 
     @property
-    def _safe_results(self) -> StrictResults:
-        if self.results is None:
+    def results(self) -> StrictResults:
+        if self._results is None:
             raise ValueError("No results available. Run optimize() first.")
-        return cast(StrictResults, self.results)
+        return cast(StrictResults, self._results)
 
     @property
     def _history_results(self) -> ResultsWithHistory:
-        res = self._safe_results
+        res = self.results
         # Note: Depending on your library, ensure 'algorithm' and 'save_history' are typed correctly
         if hasattr(res.algorithm, "save_history") and not res.algorithm.save_history:
             raise ValueError("History is not saved. Set save_history=True in optimize().")
@@ -96,8 +98,8 @@ class PokeTactician:
     def solutions_plot(self) -> None:
         import matplotlib.pyplot as plt
 
-        F = self._safe_results.F
-        if F.shape[1] != 2:
+        F = self.results.F
+        if len(F.shape) < 2 or F.shape[1] != 2:
             raise ValueError("This method only supports 2 objectives for plotting.")
         plt.figure(figsize=(7, 5))
         plt.scatter(F[:, 0], F[:, 1], s=30, facecolors="none", edgecolors="blue")
@@ -107,7 +109,7 @@ class PokeTactician:
     def convergence_plot(self) -> None:
         import matplotlib.pyplot as plt
 
-        result = self._history_results
+        result: ResultsWithHistory = self._history_results
 
         n_evals = np.array([e.evaluator.n_eval for e in result.history])
 
@@ -119,7 +121,7 @@ class PokeTactician:
     def running_metric_plot(self) -> None:
         from pymoo.util.running_metric import RunningMetricAnimation
 
-        result = self._history_results
+        result: ResultsWithHistory = self._history_results
         running = RunningMetricAnimation(delta_gen=10, n_plots=10, key_press=False, do_show=True)
         for algorithm in result.history:
             running.update(algorithm)
