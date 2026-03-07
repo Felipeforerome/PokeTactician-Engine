@@ -1,5 +1,6 @@
 import inspect
 from functools import wraps
+from types import FunctionType
 from typing import Any, Callable
 
 import numpy as np
@@ -49,7 +50,7 @@ class ObjectiveFunction:
 #     return decorator
 
 
-def register_objective(name: str = None) -> Callable[..., Any]:
+def register_objective(name: str | None = None) -> Callable[..., Any]:
     """Create a decorator to register an objective function.
 
     If no name is provided, the decorated function’s __name__ is used.
@@ -61,7 +62,7 @@ def register_objective(name: str = None) -> Callable[..., Any]:
         A decorator that stores the function in PENDING_OBJECTIVES under the resolved name and returns a metadata-preserving wrapper.
     """
 
-    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+    def decorator(func: FunctionType) -> Callable[..., Any]:
         func_name = name or func.__name__
         PENDING_OBJECTIVES[func_name] = func  # store raw function
         return wraps(func)
