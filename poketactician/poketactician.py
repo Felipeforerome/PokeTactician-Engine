@@ -27,7 +27,7 @@ class PokeTactician:
         pokemon_types: NDArray[np.bool_],
         move_types: NDArray[np.bool_],
         pokemon_stats: NDArray[np.int16],
-        natures: NDArray[np.int16],
+        natures: NDArray[np.int16] | None = None,
         pre_selected: Iterable[int] | NDArray[np.int16] | None = None,
         n_pokemon: int = 6,
     ) -> None:
@@ -57,15 +57,24 @@ class PokeTactician:
         self.objectives = ObjectiveSelector(objective_names=objectives)
         self.random_state = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
         self.problem = PokemonProblem(
-            objectives=self.objectives, lm=self.learnable_moves, n_pokemon=self.n_pokemon, n_moves=self.n_moves, pokemon_in_team=min(self.n_pokemon, 6)
+            objectives=self.objectives,
+            lm=self.learnable_moves,
+            n_pokemon=self.n_pokemon,
+            n_moves=self.n_moves,
+            pokemon_in_team=min(self.n_pokemon, 6),
         )
 
     def optimize(self, pop_size: int, n_gen: int, verbose: bool, history: bool = False) -> StrictResults:
         algorithm = NSGA2(
             pop_size=pop_size,
-            sampling=PokemonTeamSampling(random_state=self.random_state, pre_selected=self.pre_selected),
-            crossover=PokemonCrossover(prob_pokemon=0.5, random_state=self.random_state),
-            mutation=PokemonMutation(prob_pokemon=0.5, prob_move=0.5, random_state=self.random_state, pre_selected=self.pre_selected),
+            sampling=PokemonTeamSampling(random_state=self.random_state, pre_selected=self.pre_selected),  # type: ignore
+            crossover=PokemonCrossover(prob_pokemon=0.5, random_state=self.random_state),  # type: ignore
+            mutation=PokemonMutation(
+                prob_pokemon=0.5,
+                prob_move=0.5,
+                random_state=self.random_state,
+                pre_selected=self.pre_selected,
+            ),  # type: ignore
             eliminate_duplicates=True,
         )
 
