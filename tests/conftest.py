@@ -5,6 +5,13 @@ from typing import Any, Dict
 import numpy as np
 import pytest
 
+from poketactician.engine.problem import PokemonProblem
+from poketactician.engine.selector import ObjectiveSelector
+
+# Import objectives to ensure they're registered
+from poketactician.objectives.dummy_objectives import test_objective, test_objective2  # noqa: F401
+from poketactician.registry import register_objective_data
+
 
 @pytest.fixture
 def test_data() -> Dict[str, Any]:
@@ -60,3 +67,16 @@ def test_data() -> Dict[str, Any]:
         "ps": ps,
         "natures": natures,
     }
+
+
+@pytest.fixture
+def problem(test_data: Dict[str, Any]) -> PokemonProblem:
+    """Create a PokemonProblem instance for testing."""
+    objectives = ObjectiveSelector(objective_names=["test_objective", "test_objective2"])
+    return PokemonProblem(
+        objectives=objectives,
+        lm=test_data["lm"],
+        n_pokemon=test_data["n_pokemon"],
+        n_moves=test_data["n_moves"],
+        pokemon_in_team=6,
+    )

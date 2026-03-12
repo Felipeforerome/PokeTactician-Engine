@@ -14,18 +14,6 @@ class TestPokemonTeamSampling:
     """Tests for the PokemonTeamSampling class."""
 
     @pytest.fixture
-    def problem(self, test_data: Dict[str, Any]) -> PokemonProblem:
-        """Create a PokemonProblem instance for testing."""
-        objectives = ObjectiveSelector(objective_names=["test_objective", "test_objective2"])
-        return PokemonProblem(
-            objectives=objectives,
-            lm=test_data["lm"],
-            n_pokemon=test_data["n_pokemon"],
-            n_moves=test_data["n_moves"],
-            pokemon_in_team=6,
-        )
-
-    @pytest.fixture
     def sampling(self, test_data: Dict[str, Any]) -> PokemonTeamSampling:
         """Create a PokemonTeamSampling instance for testing."""
         rng = np.random.default_rng(test_data["seed"])
