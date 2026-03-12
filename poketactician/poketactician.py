@@ -1,4 +1,4 @@
-from typing import Iterable, cast
+from typing import Collection, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -20,7 +20,7 @@ from poketactician.utils import ResultsWithHistory, StrictResults
 class PokeTactician:
     def __init__(
         self,
-        objectives: Iterable[str],
+        objectives: Collection[str],
         seed: int | None,
         learnable_moves: NDArray[np.bool_],
         moves_category: NDArray[np.int16],
@@ -28,7 +28,7 @@ class PokeTactician:
         move_types: NDArray[np.bool_],
         pokemon_stats: NDArray[np.int16],
         natures: NDArray[np.int16] | None = None,
-        pre_selected: Iterable[int] | NDArray[np.int16] | None = None,
+        pre_selected: Collection[int] | NDArray[np.int16] | None = None,
         n_pokemon: int = 6,
     ) -> None:
         self.learnable_moves = learnable_moves
