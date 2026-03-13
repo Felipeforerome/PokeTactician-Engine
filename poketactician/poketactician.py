@@ -73,7 +73,7 @@ class PokeTactician:
                 prob_pokemon=0.5,
                 prob_move=0.5,
                 random_state=self.random_state,
-                pre_selected_size=self.pre_selected.shape[0] if self.pre_selected else None,
+                pre_selected_size=self.pre_selected.shape[0] if self.pre_selected is not None else None,
             ),  # type: ignore
             eliminate_duplicates=True,
         )
