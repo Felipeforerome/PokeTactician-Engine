@@ -7,14 +7,12 @@ from poketactician.utils import get_random_moves
 
 
 class PokemonMutation(Mutation):
-    def __init__(
-        self, random_state: np.random.Generator, prob_pokemon: float = 0.01, prob_move: float = 0.001, pre_selected: NDArray[np.int16] | None = None
-    ) -> None:
+    def __init__(self, random_state: np.random.Generator, prob_pokemon: float = 0.01, prob_move: float = 0.001, pre_selected_size: int | None = None) -> None:
         super().__init__()
         self.random_state = random_state
         self.prob_pokemon = prob_pokemon
         self.prob_move = prob_move
-        self.pre_selected_size = pre_selected.shape[0] if pre_selected is not None else 0
+        self.pre_selected_size = pre_selected_size if pre_selected_size is not None else 0
 
     def pokemon_mutation(self, x: NDArray[np.int16], y: NDArray[np.int16], lm: NDArray[np.bool_]) -> tuple[NDArray[np.int16], NDArray[np.int16]]:
         not_chosen_pokemon = [i for i in range(lm.shape[0]) if i not in x]

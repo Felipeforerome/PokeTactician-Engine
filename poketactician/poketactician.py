@@ -43,8 +43,8 @@ class PokeTactician:
         self.n_types = pokemon_types.shape[1]
         if pre_selected is None:
             self.pre_selected = None
-        # elif isinstance(pre_selected, np.ndarray):
-        #     self.pre_selected = pre_selected.astype(np.int16)
+        elif isinstance(pre_selected, np.ndarray):
+            self.pre_selected = pre_selected.astype(np.int16)
         else:
             self.pre_selected = np.array(list(pre_selected), dtype=np.int16)
         self._results: Result | None = None
@@ -73,7 +73,7 @@ class PokeTactician:
                 prob_pokemon=0.5,
                 prob_move=0.5,
                 random_state=self.random_state,
-                pre_selected=self.pre_selected,
+                pre_selected_size=self.pre_selected.shape[0] if self.pre_selected else None,
             ),  # type: ignore
             eliminate_duplicates=True,
         )
