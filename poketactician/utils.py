@@ -25,3 +25,7 @@ class StrictResults(Protocol):
 
 class ResultsWithHistory(StrictResults, Protocol):
     history: list[Any]
+
+
+class DecisionFunction(Protocol):
+    def __call__(self, x: NDArray[np.int16]) -> NDArray[np.int16]: ...

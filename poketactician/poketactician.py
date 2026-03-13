@@ -14,7 +14,7 @@ from poketactician.engine.sampling import PokemonTeamSampling
 from poketactician.engine.selector import ObjectiveSelector
 from poketactician.objectives.dummy_objectives import test_objective, test_objective2  # noqa: F401
 from poketactician.registry import register_objective_data
-from poketactician.utils import ResultsWithHistory, StrictResults
+from poketactician.utils import DecisionFunction, ResultsWithHistory, StrictResults
 
 
 class PokeTactician:
@@ -30,6 +30,7 @@ class PokeTactician:
         natures: NDArray[np.int16] | None = None,
         pre_selected: Collection[int] | NDArray[np.int16] | None = None,
         n_pokemon: int = 6,
+        decision_function: DecisionFunction | None = None,
     ) -> None:
         self.learnable_moves = learnable_moves
         self.seed = seed
@@ -41,6 +42,7 @@ class PokeTactician:
         self.natures = natures
         self.n_moves = learnable_moves.shape[1]
         self.n_types = pokemon_types.shape[1]
+        self._decision_function = decision_function if decision_function is not None else None
         if pre_selected is None:
             self.pre_selected = None
         elif isinstance(pre_selected, np.ndarray):
@@ -95,6 +97,25 @@ class PokeTactician:
         if self._results is None:
             raise ValueError("No results available. Run optimize() first.")
         return cast(StrictResults, self._results)
+
+    def decision_functions(self) -> NDArray[np.int16]:
+        """
+        Computes and returns the decision function values as a NumPy array of type int16 on the Pareto Set.
+        If a custom decision function is defined (`self._decision_function`), it is applied to the input data (`self.results.X`).
+        Otherwise, the input data is converted to at least 2D and the first row is returned.
+        Returns:
+            NDArray[np.int16]: The computed decision function values.
+        """
+
+        if self._decision_function is not None:
+            result = self._decision_function(self.results.X)
+        else:
+            result = np.atleast_2d(self.results.X)[0]
+        return result
+
+    @property
+    def best_result(self) -> NDArray[np.int16]:
+        return self.decision_functions()
 
     @property
     def _history_results(self) -> ResultsWithHistory:
