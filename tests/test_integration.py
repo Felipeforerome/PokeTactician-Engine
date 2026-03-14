@@ -101,26 +101,26 @@ class TestIntegration:
         assert isinstance(first_gen_best[0], (int, float, np.number))
         assert isinstance(last_gen_best[0], (int, float, np.number))
 
-    # def test_multiple_objectives_pareto_front(self, test_data: Dict[str, Any]) -> None:
-    #     """Test multi-objective optimization produces Pareto front."""
-    #     poke_tactician = PokeTactician(
-    #         objectives=["test_objective", "test_objective2"],
-    #         seed=42,
-    #         learnable_moves=test_data["lm"],
-    #         moves_category=test_data["me"],
-    #         pokemon_types=test_data["pt"],
-    #         move_types=test_data["mt"],
-    #         pokemon_stats=test_data["ps"],
-    #     )
+    def test_multiple_objectives_pareto_front(self, test_data: Dict[str, Any]) -> None:
+        """Test multi-objective optimization produces Pareto front."""
+        poke_tactician = PokeTactician(
+            objectives=["test_objective", "test_objective3"],
+            seed=42,
+            learnable_moves=test_data["lm"],
+            moves_category=test_data["me"],
+            pokemon_types=test_data["pt"],
+            move_types=test_data["mt"],
+            pokemon_stats=test_data["ps"],
+        )
 
-    #     result = poke_tactician.optimize(pop_size=30, n_gen=5, verbose=False)
+        result = poke_tactician.optimize(pop_size=30, n_gen=5, verbose=False)
 
-    #     # Should have multiple solutions on Pareto front
-    #     assert len(result.X) > 1
+        # Should have multiple solutions on Pareto front
+        assert len(result.X) > 1
 
-    #     # Each solution should have 2 objective values
-    #     for obj_values in result.F:
-    #         assert len(obj_values) == 2
+        # Each solution should have 2 objective values
+        for obj_values in result.F:
+            assert len(obj_values) == 2
 
     def test_different_team_sizes(self, test_data: Dict[str, Any]) -> None:
         """Test optimization with different team sizes."""
