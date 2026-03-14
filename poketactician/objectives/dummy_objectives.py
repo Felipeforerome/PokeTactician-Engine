@@ -19,3 +19,12 @@ def test_objective2(x: np.ndarray, y: np.ndarray, me: np.ndarray) -> int:
     valid_mask = prefilter_move_columns != -1
     move_columns = prefilter_move_columns[valid_mask]
     return me[:, move_columns].max()
+
+
+@register_objective()
+def test_objective3(x: np.ndarray, y: np.ndarray, me: np.ndarray) -> int:
+    """Objective function that returns the negative sum of effectiveness of moves selected by y."""
+    prefilter_move_columns = y.flatten()
+    valid_mask = prefilter_move_columns != -1
+    move_columns = prefilter_move_columns[valid_mask]
+    return -me[:, move_columns].sum()

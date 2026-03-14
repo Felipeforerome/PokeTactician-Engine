@@ -9,7 +9,7 @@ from poketactician.engine.problem import PokemonProblem
 from poketactician.engine.selector import ObjectiveSelector
 
 # Import objectives to ensure they're registered
-from poketactician.objectives.dummy_objectives import test_objective, test_objective2  # noqa: F401
+from poketactician.objectives.dummy_objectives import test_objective, test_objective3  # noqa: F401
 from poketactician.registry import register_objective_data
 
 
@@ -53,6 +53,15 @@ def test_data() -> Dict[str, Any]:
 
     # Natures
     natures = rng.integers(-1, 1, size=(n_natures, n_stats), dtype=np.int16, endpoint=True)
+
+    # Register objectives with data
+    register_objective_data(
+        {
+            "test_objective": {"me": me},
+            "test_objective2": {"me": me},
+            "test_objective3": {"me": me},
+        }
+    )
 
     return {
         "n_pokemon": n_pokemon,
