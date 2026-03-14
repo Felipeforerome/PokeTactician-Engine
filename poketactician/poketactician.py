@@ -31,6 +31,7 @@ class PokeTactician:
         pre_selected: Collection[int] | NDArray[np.int16] | None = None,
         n_pokemon: int = 6,
         decision_function: DecisionFunction | None = None,
+        decision_function_kwargs: dict | None = None,
     ) -> None:
         self.learnable_moves = learnable_moves
         self.seed = seed
@@ -43,6 +44,7 @@ class PokeTactician:
         self.n_moves = learnable_moves.shape[1]
         self.n_types = pokemon_types.shape[1]
         self._decision_function = decision_function if decision_function is not None else None
+        self._decision_function_kwargs = decision_function_kwargs if decision_function_kwargs is not None else {}
         if pre_selected is None:
             self.pre_selected = None
         elif isinstance(pre_selected, np.ndarray):
@@ -114,7 +116,7 @@ class PokeTactician:
         """
 
         if self._decision_function is not None:
-            result = self._decision_function(self.results.X)
+            result = self._decision_function(self.results.X, **self._decision_function_kwargs)
         else:
             result = np.atleast_2d(self.results.X)[0]
         return result
