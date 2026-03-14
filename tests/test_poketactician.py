@@ -300,7 +300,7 @@ class TestPreSelected:
             random_state=poke_tactician.random_state,
             prob_pokemon=0.5,
             prob_move=0.5,
-            pre_selected=np.array(pre_selected, dtype=np.int16),
+            pre_selected_size=len(pre_selected),
         )
 
         mutated_team = mutation._do(problem=poke_tactician.problem, X=sampled_team)[0]
