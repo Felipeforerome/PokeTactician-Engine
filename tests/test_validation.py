@@ -151,7 +151,7 @@ class TestDataValidation:
         )
 
         with pytest.raises(ZeroDivisionError):
-            result = poke_tactician.optimize(pop_size=10, n_gen=0, verbose=False)
+            poke_tactician.optimize(pop_size=10, n_gen=0, verbose=False)
             # If it works, check that we got some result
 
     def test_optimize_with_zero_population(self, test_data: Dict[str, Any]) -> None:
