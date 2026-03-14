@@ -14,7 +14,7 @@ class PokemonProblem(ElementwiseProblem):
         lm: NDArray[np.bool_],
         n_pokemon: int,
         n_moves: int,
-        repeat_pokemon: bool = False,
+        unique_pokemon_only: bool = False,
         pokemon_in_team: int = 6,
         **kwargs: Any,  # noqa: ANN401
     ) -> None:
@@ -22,14 +22,14 @@ class PokemonProblem(ElementwiseProblem):
         self.n_moves = n_moves
         self.objectives = objectives
         self.LM = lm.astype(bool)
-        self.repeat_pokemon = repeat_pokemon
+        self.unique_pokemon_only = unique_pokemon_only
         self.pokemon_in_team = pokemon_in_team
         super().__init__(
             n_var=self.pokemon_in_team + self.pokemon_in_team * 4,  # Num pokemon + Num Pokemon * 4 moves
             n_obj=self.objectives.n_obj,
             n_ieq_constr=self.pokemon_in_team * 4
             + self.pokemon_in_team
-            + 1 * self.repeat_pokemon,  # The 4 moves of each 6 pokemon must be learnable. Each pokemon has 4 different moves
+            + 1 * (self.unique_pokemon_only),  # The 4 moves of each 6 pokemon must be learnable. Each pokemon has 4 different moves
             xl=0,
             xu=n_pokemon,
             type_var=np.int16,
@@ -65,7 +65,7 @@ class PokemonProblem(ElementwiseProblem):
         constraints += list((np.apply_along_axis(lambda row: len(row[row >= 0]) - len(set(row[row >= 0])), 1, y)))
 
         # no repeated Pokemon: len(x) - len(set(x)) ≤ 0
-        if self.repeat_pokemon:
+        if self.unique_pokemon_only:
             constraints.append(len(x) - len(set(x)))
 
         G.append(constraints)
