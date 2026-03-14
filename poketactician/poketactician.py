@@ -49,7 +49,7 @@ class PokeTactician:
             self.pre_selected = pre_selected.astype(np.int16)
         else:
             self.pre_selected = np.array(list(pre_selected), dtype=np.int16)
-        self._results: Result | None = None
+        self._results: Result | StrictResults | None = None
         register_objective_data(
             data_dict={
                 "test_objective": {"me": self.moves_category},
@@ -81,14 +81,20 @@ class PokeTactician:
         )
 
         termination = get_termination("n_gen", n_gen)
-        res = minimize(
-            problem=self.problem,
-            algorithm=algorithm,
-            termination=termination,
-            seed=self.seed,
-            verbose=verbose,
-            save_history=history,
+        res = cast(
+            StrictResults,
+            minimize(
+                problem=self.problem,
+                algorithm=algorithm,
+                termination=termination,
+                seed=self.seed,
+                verbose=verbose,
+                save_history=history,
+            ),
         )
+        if len(res.X.shape) == 1:
+            res.X = np.atleast_2d(res.X)
+            res.F = np.atleast_2d(res.F)
         self._results = res
         return cast(StrictResults, res)
 
@@ -98,7 +104,7 @@ class PokeTactician:
             raise ValueError("No results available. Run optimize() first.")
         return cast(StrictResults, self._results)
 
-    def decision_functions(self) -> NDArray[np.int16]:
+    def decision_function(self) -> NDArray[np.int16]:
         """
         Computes and returns the decision function values as a NumPy array of type int16 on the Pareto Set.
         If a custom decision function is defined (`self._decision_function`), it is applied to the input data (`self.results.X`).
@@ -114,8 +120,8 @@ class PokeTactician:
         return result
 
     @property
-    def best_result(self) -> NDArray[np.int16]:
-        return self.decision_functions()
+    def best_solution(self) -> NDArray[np.int16]:
+        return self.decision_function()
 
     @property
     def _history_results(self) -> ResultsWithHistory:
