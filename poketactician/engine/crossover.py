@@ -52,7 +52,7 @@ class PokemonCrossover(Crossover):
             )
 
             # --- Perform crossover on x (pokémon IDs) ---
-            n_crossovers_max = self.random_state.integers(1, pokemon_in_team - 1)
+            n_crossovers_max = self.random_state.integers(1, pokemon_in_team - 1) if pokemon_in_team > 2 else 1
             common = set(x1) & set(x2)
             indexes_from1 = x2 if parent1_src1 else x1
             indexes_from2 = x2 if parent1_src2 else x1
