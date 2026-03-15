@@ -28,7 +28,7 @@ class PokeTactician:
         move_types: NDArray[np.bool_],
         pokemon_stats: NDArray[np.int16],
         natures: NDArray[np.int16] | None = None,
-        pre_selected: Collection[int] | NDArray[np.int16] | None = None,
+        pre_selected: dict | None = None,
         n_pokemon: int = 6,
         decision_function: DecisionFunction | None = None,
         decision_function_kwargs: dict | None = None,
@@ -45,12 +45,7 @@ class PokeTactician:
         self.n_types = pokemon_types.shape[1]
         self._decision_function = decision_function if decision_function is not None else None
         self._decision_function_kwargs = decision_function_kwargs if decision_function_kwargs is not None else {}
-        if pre_selected is None:
-            self.pre_selected = None
-        elif isinstance(pre_selected, np.ndarray):
-            self.pre_selected = pre_selected.astype(np.int16)
-        else:
-            self.pre_selected = np.array(list(pre_selected), dtype=np.int16)
+        self.pre_selected = pre_selected if pre_selected else None
         self._results: Result | StrictResults | None = None
         register_objective_data(
             data_dict={
@@ -77,7 +72,7 @@ class PokeTactician:
                 prob_pokemon=0.5,
                 prob_move=0.5,
                 random_state=self.random_state,
-                pre_selected_size=self.pre_selected.shape[0] if self.pre_selected is not None else None,
+                pre_selected=self.pre_selected if self.pre_selected is not None else None,
             ),  # type: ignore
             eliminate_duplicates=True,
         )
