@@ -42,17 +42,16 @@ class TestPokemonMutation:
         # Check shape is preserved
         assert mutated.shape == original_shape
 
-    def test_pokemon_mutation_respects_preselected(self, test_data: Dict[str, Any]) -> None:
+    def test_pokemon_mutation_respects_preselected(self, test_data: Dict[str, Any], pre_selected: Dict[int, list]) -> None:
         """Test that pokemon_mutation does not mutate pre-selected pokemon."""
         rng = np.random.default_rng(42)
-        pre_selected_size = 2
-        first_pre_selected = 10
-        second_pre_selected = 11
+        first_pre_selected = list(pre_selected.keys())[0]
+        second_pre_selected = list(pre_selected.keys())[1]
         mutation = PokemonMutation(
             random_state=rng,
             prob_pokemon=1.0,  # 100% mutation probability
             prob_move=0.0,
-            pre_selected_size=pre_selected_size,
+            pre_selected=pre_selected,
         )
 
         x = np.array([first_pre_selected, second_pre_selected, 2, 3, 4, 5], dtype=np.int16)
@@ -61,8 +60,8 @@ class TestPokemonMutation:
         mutated_team, mutated_moves = mutation.pokemon_mutation(x, y, test_data["lm"])
 
         # First two pokemon should remain unchanged (pre-selected)
-        assert mutated_team[0] == 10
-        assert mutated_team[1] == 11
+        assert mutated_team[0] == first_pre_selected
+        assert mutated_team[1] == second_pre_selected
 
         # Other pokemon might have changed
         # (but we can't assert they did change due to randomness at low counts)
@@ -145,8 +144,6 @@ class TestPokemonMutation:
                 for move_id in mutated_moves[i]:
                     if move_id >= 0:
                         assert test_data["lm"][pokemon_id, move_id], f"Pokemon {pokemon_id} cannot learn move {move_id}"
-
-    ##################### TODO REVIEWED UP TO HERE #####################
 
     def test_modify_lm_reduces_available_moves(self, mutation: PokemonMutation, test_data: Dict[str, Any]) -> None:
         """Test that modify_lm correctly reduces available moves."""

@@ -72,10 +72,9 @@ class TestPokemonTeamSampling:
                     if move_id >= 0:  # -1 means no move
                         assert test_data["lm"][pokemon_id, move_id], f"Pokemon {pokemon_id} cannot learn move {move_id}"
 
-    def test_sampling_with_preselected(self, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
+    def test_sampling_with_preselected(self, problem: PokemonProblem, test_data: Dict[str, Any], pre_selected: Dict[int, list]) -> None:
         """Test that sampling respects pre-selected pokemon."""
         rng = np.random.default_rng(42)
-        pre_selected = np.array([1, 2, 3], dtype=np.int16)
 
         sampling = PokemonTeamSampling(random_state=rng, pre_selected=pre_selected)
 

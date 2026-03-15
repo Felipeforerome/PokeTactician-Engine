@@ -89,3 +89,14 @@ def problem(test_data: Dict[str, Any]) -> PokemonProblem:
         n_moves=test_data["n_moves"],
         pokemon_in_team=6,
     )
+
+
+@pytest.fixture
+def pre_selected(test_data: Dict[str, Any]) -> Dict[int, list]:
+    """Create a pre_selected dictionary for testing."""
+    pre_selected = {1: [], 2: [], 3: []}
+    for i in pre_selected.keys():
+        learnable = np.where(test_data["lm"][i])[0]
+        if len(learnable) >= 2:
+            pre_selected[i] = list(learnable[:2])
+    return pre_selected
