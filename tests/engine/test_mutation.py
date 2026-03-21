@@ -7,6 +7,7 @@ import pytest
 
 from poketactician.engine.mutation import PokemonMutation
 from poketactician.engine.problem import PokemonProblem
+from tests.utils import assert_preselected_in_solution
 
 
 class TestPokemonMutation:
@@ -42,26 +43,27 @@ class TestPokemonMutation:
         # Check shape is preserved
         assert mutated.shape == original_shape
 
-    def test_pokemon_mutation_respects_preselected(self, test_data: Dict[str, Any], pre_selected: Dict[int, list]) -> None:
+    def test_pokemon_mutation_respects_preselected(self, problem: PokemonProblem, test_data: Dict[str, Any], pre_selected: Dict[int, list]) -> None:
         """Test that pokemon_mutation does not mutate pre-selected pokemon."""
         rng = np.random.default_rng(42)
-        first_pre_selected = list(pre_selected.keys())[0]
-        second_pre_selected = list(pre_selected.keys())[1]
         mutation = PokemonMutation(
             random_state=rng,
             prob_pokemon=1.0,  # 100% mutation probability
-            prob_move=0.0,
+            prob_move=1.0,  # 100% move mutation probability
             pre_selected=pre_selected,
         )
 
-        x = np.array([first_pre_selected, second_pre_selected, 2, 3, 4, 5], dtype=np.int16)
+        x = np.array(list(pre_selected.keys()) + [3, 4, 5], dtype=np.int16)
         y = np.zeros((6, 4), dtype=np.int16)
 
-        mutated_team, mutated_moves = mutation.pokemon_mutation(x, y, test_data["lm"])
+        for pos, pre_selected_moves in enumerate(pre_selected.values()):
+            for move_pos, move_id in enumerate(pre_selected_moves):
+                y[pos, move_pos] = move_id
+
+        mutated_team = mutation._do(problem, np.append(x, y.flatten().astype(np.int16)).reshape(1, -1))[0]
 
         # First two pokemon should remain unchanged (pre-selected)
-        assert mutated_team[0] == first_pre_selected
-        assert mutated_team[1] == second_pre_selected
+        assert_preselected_in_solution(mutated_team, pre_selected)
 
         # Other pokemon might have changed
         # (but we can't assert they did change due to randomness at low counts)
