@@ -53,7 +53,7 @@ class TestPokemonMutation:
             pre_selected=pre_selected,
         )
 
-        x = np.array(list(pre_selected.keys()) + [3, 4, 5], dtype=np.int16)
+        x = np.array(list(pre_selected.keys()) + [4, 5, 6], dtype=np.int16)
         y = np.zeros((6, 4), dtype=np.int16)
 
         for pos, pre_selected_moves in enumerate(pre_selected.values()):
