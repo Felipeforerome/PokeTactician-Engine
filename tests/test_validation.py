@@ -104,7 +104,7 @@ class TestDataValidation:
     def test_poketactician_with_preselected_out_of_range(self, test_data: Dict[str, Any]) -> None:
         """Test PokeTactician with pre_selected pokemon IDs out of range."""
         # Pre-select pokemon that don't exist
-        pre_selected = np.array([100, 200], dtype=np.int16)
+        pre_selected = {100: [], 200: []}
 
         poke_tactician = PokeTactician(
             objectives=["test_objective"],
@@ -118,22 +118,6 @@ class TestDataValidation:
         )
 
         assert poke_tactician is not None
-
-    @pytest.mark.skip(reason="Not implemented yet")
-    def test_poketactician_with_duplicate_preselected(self, test_data: Dict[str, Any]) -> None:
-        """Test PokeTactician with duplicate pre_selected pokemon."""
-        pre_selected = np.array([0, 0, 1], dtype=np.int16)
-
-        poke_tactician = PokeTactician(
-            objectives=["test_objective"],
-            seed=42,
-            learnable_moves=test_data["lm"],
-            moves_category=test_data["me"],
-            pokemon_types=test_data["pt"],
-            move_types=test_data["mt"],
-            pokemon_stats=test_data["ps"],
-            pre_selected=pre_selected,
-        )
 
         # Should create, behavior during optimization is undefined
         assert poke_tactician is not None

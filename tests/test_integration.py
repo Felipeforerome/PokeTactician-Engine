@@ -7,6 +7,7 @@ import pytest
 from matplotlib import pyplot as plt
 
 from poketactician.poketactician import PokeTactician
+from tests.utils import assert_preselected_in_solution
 
 
 class TestIntegration:
@@ -52,9 +53,8 @@ class TestIntegration:
                     if move_id >= 0:
                         assert test_data["lm"][pokemon_id, move_id]
 
-    def test_optimization_with_preselected_pokemon(self, test_data: Dict[str, Any]) -> None:
+    def test_optimization_with_preselected_pokemon(self, test_data: Dict[str, Any], pre_selected: Dict[int, list]) -> None:
         """Test optimization workflow with pre-selected pokemon."""
-        pre_selected = np.array([0, 1], dtype=np.int16)
 
         poke_tactician = PokeTactician(
             objectives=["test_objective"],
@@ -69,9 +69,9 @@ class TestIntegration:
 
         result = poke_tactician.optimize(pop_size=10, n_gen=3, verbose=False)
 
-        x = result.X[0][:6]
-        assert x[0] == 0
-        assert x[1] == 1
+        # Validate all solutions have preselected pokemon and moves
+        for solution in result.X:
+            assert_preselected_in_solution(solution, pre_selected)
 
     def test_optimization_convergence(self, test_data: Dict[str, Any]) -> None:
         """Test that optimization shows improvement over generations."""

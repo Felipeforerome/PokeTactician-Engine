@@ -72,10 +72,9 @@ class TestPokemonTeamSampling:
                     if move_id >= 0:  # -1 means no move
                         assert test_data["lm"][pokemon_id, move_id], f"Pokemon {pokemon_id} cannot learn move {move_id}"
 
-    def test_sampling_with_preselected(self, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
+    def test_sampling_with_preselected(self, problem: PokemonProblem, test_data: Dict[str, Any], pre_selected: Dict[int, list]) -> None:
         """Test that sampling respects pre-selected pokemon."""
         rng = np.random.default_rng(42)
-        pre_selected = np.array([1, 2, 3], dtype=np.int16)
 
         sampling = PokemonTeamSampling(random_state=rng, pre_selected=pre_selected)
 
@@ -87,9 +86,14 @@ class TestPokemonTeamSampling:
         for sample in samples:
             pokemon_ids = sample[:pokemon_in_team]
             # First three pokemon should be the pre-selected ones
-            assert pokemon_ids[0] == 1
-            assert pokemon_ids[1] == 2
-            assert pokemon_ids[2] == 3
+            moves = sample[pokemon_in_team:].reshape(pokemon_in_team, 4)
+            # First N pokemon should be the pre-selected ones at their expected positions
+            for i, expected_pokemon_id in enumerate(pre_selected.keys()):
+                assert pokemon_ids[i] == expected_pokemon_id, f"Pre-selected Pokemon {expected_pokemon_id} should be at position {i}"
+                # Moves for pre-selected pokemon should include all pre-selected moves
+                assert np.isin(pre_selected[expected_pokemon_id], moves[i]).all(), (
+                    f"Pre-selected Pokemon {expected_pokemon_id} should have moves {pre_selected[expected_pokemon_id]}"
+                )
 
             # Rest should be different
             # All should still be unique
