@@ -86,13 +86,13 @@ class TestPokemonTeamSampling:
         for sample in samples:
             pokemon_ids = sample[:pokemon_in_team]
             # First three pokemon should be the pre-selected ones
-            for i in range(len(pre_selected)):
-                assert list(pre_selected.keys())[i] in pokemon_ids, f"Pre-selected Pokemon {list(pre_selected.keys())[i]} should be in the team"
-
-                # Moves for pre-selected pokemon should be from pre_selected dict
-                moves = sample[pokemon_in_team:].reshape(pokemon_in_team, 4)
-                assert np.isin(pre_selected[pokemon_ids[i]], moves[i]).all(), (
-                    f"Pre-selected Pokemon {pokemon_ids[i]} should have moves {pre_selected[pokemon_ids[i]]} from pre_selected dict"
+            moves = sample[pokemon_in_team:].reshape(pokemon_in_team, 4)
+            # First N pokemon should be the pre-selected ones at their expected positions
+            for i, expected_pokemon_id in enumerate(pre_selected.keys()):
+                assert pokemon_ids[i] == expected_pokemon_id, f"Pre-selected Pokemon {expected_pokemon_id} should be at position {i}"
+                # Moves for pre-selected pokemon should include all pre-selected moves
+                assert np.isin(pre_selected[expected_pokemon_id], moves[i]).all(), (
+                    f"Pre-selected Pokemon {expected_pokemon_id} should have moves {pre_selected[expected_pokemon_id]}"
                 )
 
             # Rest should be different
