@@ -92,6 +92,10 @@ class PokemonMutation(Mutation):
         # Determine which moves to mutate based on probability
         mutated_moves_mask = self.random_state.random((y.shape[0], y.shape[1])) < self.prob_move
 
+        # Protect pre-selected moves from mutation
+        for pos, pre_selected_moves in enumerate(self.pre_selected.values()):
+            mutated_moves_mask[pos] &= ~np.isin(y[pos], pre_selected_moves)
+
         # Find which Pokemon have at least one move being mutated
         rows_with_mutations = np.any(mutated_moves_mask, axis=1)
         pokemon_with_mutations = x[rows_with_mutations]
