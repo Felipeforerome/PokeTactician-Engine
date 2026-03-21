@@ -81,12 +81,15 @@ class PokemonTeamSampling(Sampling):
             selected = self.pre_selected_moves[j] if self.pre_selected_moves is not None and j < len(self.pre_selected_moves) else []
             num_random_moves = 4 - len(selected)
 
-            # Sample remaining moves randomly from legal moves
-            if len(legal_moves) >= num_random_moves:
-                random_moves = self.random_state.choice(legal_moves, size=num_random_moves, replace=False)
+            # Exclude already selected moves from legal moves pool
+            available_moves = np.array([move for move in legal_moves if move not in selected])
+
+            # Sample remaining moves randomly from available legal moves
+            if len(available_moves) >= num_random_moves:
+                random_moves = self.random_state.choice(available_moves, size=num_random_moves, replace=False)
             else:
                 # Fallback: use all available legal moves if less than needed
-                random_moves = self.random_state.choice(legal_moves, size=len(legal_moves), replace=False)
+                random_moves = self.random_state.choice(available_moves, size=len(available_moves), replace=False)
 
             selected = np.append(selected, random_moves)
             chosen[: selected.shape[0]] = selected
