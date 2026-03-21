@@ -36,3 +36,5 @@ dash_app_old/
 .DS_Store
 poketactician_old/
 .DS_Store
+/notebooks/*
+.DS_Store
