@@ -9,7 +9,11 @@ from poketactician.engine.problem import PokemonProblem
 from poketactician.engine.selector import ObjectiveSelector
 
 # Import objectives to ensure they're registered
-from poketactician.objectives.dummy_objectives import test_objective, test_objective3  # noqa: F401
+from poketactician.objectives.dummy_objectives import (  # noqa: F401
+    test_objective,
+    test_objective2,
+    test_objective3,
+)
 from poketactician.registry import register_objective_data
 
 
