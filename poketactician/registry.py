@@ -1,5 +1,5 @@
 import inspect
-from functools import wraps
+from collections.abc import Collection
 from types import FunctionType
 from typing import Any, Callable
 
@@ -31,69 +31,92 @@ class ObjectiveFunction:
         return self.func(x, y, **self.data)
 
 
-# def register_objective(name: str | None = None, **data) -> Callable[..., Any]:
-#     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-#         sig = inspect.signature(func)
-#         params = list(sig.parameters.keys())[2:]  # skip X and Y
-#         func_name = name or func.__name__
-
-#         @wraps(func)
-#         def factory(*args, **kwargs) -> ObjectiveFunction:
-#             missing = [k for k in params if k not in data and k not in kwargs]
-#             if missing:
-#                 raise ValueError(f"Missing keys for '{name}': {missing}")
-#             return ObjectiveFunction(func_name, func, {**data, **kwargs})
-
-#         OBJECTIVE_REGISTRY[func_name] = factory
-#         return func
-
-#     return decorator
-
-
-def register_objective(name: str | None = None) -> Callable[..., Any]:
+def register_objective(
+    name: str | None = None,
+    data_mapping: dict[str, str] | None = None,
+) -> Callable[..., Any]:
     """Create a decorator to register an objective function.
 
-    If no name is provided, the decorated function’s __name__ is used.
+    If no name is provided, the decorated function's __name__ is used.
 
     Args:
         name: Optional registry key for the objective.
+        data_mapping: Optional mapping from function parameter names to data
+            context keys.  When omitted, parameter names are looked up directly
+            in the data context (auto-wiring).
 
     Returns:
-        A decorator that stores the function in PENDING_OBJECTIVES under the resolved name and returns a metadata-preserving wrapper.
+        A decorator that stores the function (and its mapping) in
+        PENDING_OBJECTIVES under the resolved name and returns a
+        metadata-preserving wrapper.
     """
 
     def decorator(func: FunctionType) -> Callable[..., Any]:
         func_name = name or func.__name__
-        PENDING_OBJECTIVES[func_name] = func  # store raw function
-        return wraps(func)
+        PENDING_OBJECTIVES[func_name] = (func, data_mapping)
+        return func
 
     return decorator
 
 
-def register_objective_data(data_dict: dict[str, dict]) -> None:
+def register_objective_data(
+    data_context: dict[str, Any],
+    objective_names: Collection[str] | None = None,
+) -> None:
     """Validate and register objective functions with their parameter data.
-    For each function in PENDING_OBJECTIVES whose name is present in `data_dict`,
-    this inspects the function signature, requiring keys for all parameters after
-    the first two (X and Y). If all required keys are provided, it stores a factory
-    callable in OBJECTIVE_REGISTRY that builds an ObjectiveFunction with the given
-    name, function, and data.
-    Args:
-        data_dict: Mapping from objective name to a dict of parameter values.
-    Raises:
-        ValueError: If any required parameter keys are missing for a given objective.
-    Side Effects:
-        Mutates OBJECTIVE_REGISTRY by (over)writing entries for registered objectives.
-    """
 
-    for name, func in PENDING_OBJECTIVES.items():
-        if name not in data_dict:
-            continue
+    For each pending objective whose name is in *objective_names* (or all
+    pending objectives when *objective_names* is ``None``), this inspects the
+    function signature and resolves every parameter after the first two (X and
+    Y) from *data_context*.
+
+    Resolution order per parameter:
+      1. If the objective was decorated with a ``data_mapping``, use it to
+         translate the parameter name to a data-context key.
+      2. Otherwise, look up the parameter name directly in *data_context*
+         (auto-wiring).
+
+    Args:
+        data_context: Flat dict of available data keyed by attribute /
+            variable name (e.g. ``{"moves_category": arr, ...}``).
+        objective_names: If provided, only wire these objectives.  Any name
+            not found in PENDING_OBJECTIVES raises ``ValueError``.
+
+    Raises:
+        ValueError: If a requested objective is unknown, or if required
+            parameter keys cannot be resolved from *data_context*.
+
+    Side Effects:
+        Mutates OBJECTIVE_REGISTRY by (over)writing entries for registered
+        objectives.
+    """
+    factories: dict[str, Callable[[], Any]] = {}
+    names_to_wire: Collection[str]
+    if objective_names is not None:
+        unknown = set(objective_names) - set(PENDING_OBJECTIVES.keys())
+        if unknown:
+            raise ValueError(f"Unknown objective(s): {unknown}. Available: {set(PENDING_OBJECTIVES.keys())}")
+        names_to_wire = objective_names
+    else:
+        names_to_wire = list(PENDING_OBJECTIVES.keys())
+
+    for obj_name in names_to_wire:
+        func, mapping = PENDING_OBJECTIVES[obj_name]
 
         sig = inspect.signature(func)
         params = list(sig.parameters.keys())[2:]  # skip X and Y
-        missing = [k for k in params if k not in data_dict[name]]
-        if missing:
-            raise ValueError(f"Missing keys for '{name}': {missing}")
 
-        data = data_dict[name]
-        OBJECTIVE_REGISTRY[name] = lambda f=func, d=data, n=name: ObjectiveFunction(n, f, d)
+        bound: dict[str, Any] = {}
+        missing: list[str] = []
+        for param in params:
+            context_key = mapping[param] if mapping and param in mapping else param
+            if context_key in data_context:
+                bound[param] = data_context[context_key]
+            else:
+                missing.append(f"{param} (looked up as '{context_key}')")
+        if missing:
+            raise ValueError(f"Missing data for objective '{obj_name}': {missing}")
+
+        factories[obj_name] = lambda f=func, d=bound, n=obj_name: ObjectiveFunction(n, f, d)
+
+    OBJECTIVE_REGISTRY.update(factories)
