@@ -5,15 +5,10 @@ from typing import Any, Dict
 import numpy as np
 import pytest
 
+# Import objectives to ensure they're registered
+import poketactician.objectives  # noqa: F401
 from poketactician.engine.problem import PokemonProblem
 from poketactician.engine.selector import ObjectiveSelector
-
-# Import objectives to ensure they're registered
-from poketactician.objectives.dummy_objectives import (  # noqa: F401
-    test_objective,
-    test_objective2,
-    test_objective3,
-)
 from poketactician.registry import register_objective_data
 
 
@@ -60,11 +55,8 @@ def test_data() -> Dict[str, Any]:
 
     # Register objectives with data
     register_objective_data(
-        {
-            "test_objective": {"me": me},
-            "test_objective2": {"me": me},
-            "test_objective3": {"me": me},
-        }
+        {"moves_category": me},
+        objective_names=["test_objective", "test_objective2", "test_objective3"],
     )
 
     return {

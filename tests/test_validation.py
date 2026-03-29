@@ -89,7 +89,7 @@ class TestDataValidation:
 
     def test_poketactician_with_invalid_objective(self, test_data: Dict[str, Any]) -> None:
         """Test that PokeTactician raises error for invalid objective."""
-        with pytest.raises(AssertionError, match="Some objectives are not registered: {'nonexistent_objective'}"):
+        with pytest.raises(ValueError, match="Unknown objective"):
             PokeTactician(
                 objectives=["nonexistent_objective"],
                 seed=42,

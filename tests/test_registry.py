@@ -55,6 +55,16 @@ class TestObjectiveFunction:
 
         assert "incorrect_name" not in PENDING_OBJECTIVES
 
+        # Define a test objective function with data_mapping
+        @register_objective(data_mapping={"val": "my_val"})
+        def mapped_test_func(x: np.ndarray, y: np.ndarray, val: int) -> int:
+            return val
+
+        # Check that the mapping is stored
+        assert "mapped_test_func" in PENDING_OBJECTIVES
+        _, mapping = PENDING_OBJECTIVES["mapped_test_func"]
+        assert mapping == {"val": "my_val"}
+
         # Restore the original PENDING_OBJECTIVES
         PENDING_OBJECTIVES.clear()
         PENDING_OBJECTIVES.update(old_pending)
@@ -67,13 +77,13 @@ class TestObjectiveFunction:
         PENDING_OBJECTIVES.clear()
         OBJECTIVE_REGISTRY.clear()
 
-        # Define a test objective function
+        # Define a test objective function (auto-wire: param name matches context key)
         @register_objective()
         def test_objective_func(x: np.ndarray, y: np.ndarray, val: int) -> int:
             return val
 
-        # Register the objective data
-        register_objective_data({"test_objective_func": {"val": 42}})
+        # Register the objective data with flat context
+        register_objective_data({"val": 42}, objective_names=["test_objective_func"])
 
         # Check that the objective is in OBJECTIVE_REGISTRY
         assert "test_objective_func" in OBJECTIVE_REGISTRY
@@ -89,7 +99,16 @@ class TestObjectiveFunction:
         y = np.array([[0, 1, -1, -1], [2, -1, -1, -1]], dtype=np.int16)
         assert obj_func(x, y) == 42
 
-        # Test with missing data
+        # Test with data_mapping
+        @register_objective(data_mapping={"val": "my_value"})
+        def mapped_objective(x: np.ndarray, y: np.ndarray, val: int) -> int:
+            return val
+
+        register_objective_data({"my_value": 99}, objective_names=["mapped_objective"])
+        obj_func_mapped = OBJECTIVE_REGISTRY["mapped_objective"]()
+        assert obj_func_mapped(x, y) == 99
+
+        # Test with missing data - should raise ValueError
         @register_objective()
         def test_objective_missing(x: np.ndarray, y: np.ndarray, val1: int, val2: int) -> int:
             return val1 + val2
@@ -97,10 +116,13 @@ class TestObjectiveFunction:
         # Register with missing data - should raise ValueError
         with pytest.raises(ValueError):
             register_objective_data(
-                {
-                    "test_objective_missing": {"val1": 10}  # Missing val2
-                }
+                {"val1": 10},  # Missing val2
+                objective_names=["test_objective_missing"],
             )
+
+        # Test with unknown objective name
+        with pytest.raises(ValueError, match="Unknown objective"):
+            register_objective_data({"val": 1}, objective_names=["nonexistent"])
 
         # Restore the original PENDING_OBJECTIVES and OBJECTIVE_REGISTRY
         PENDING_OBJECTIVES.clear()

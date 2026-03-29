@@ -7,12 +7,12 @@ from pymoo.core.result import Result
 from pymoo.optimize import minimize
 from pymoo.termination import get_termination
 
+import poketactician.objectives  # noqa: F401 — triggers objective registration
 from poketactician.engine.crossover import PokemonCrossover
 from poketactician.engine.mutation import PokemonMutation
 from poketactician.engine.problem import PokemonProblem
 from poketactician.engine.sampling import PokemonTeamSampling
 from poketactician.engine.selector import ObjectiveSelector
-from poketactician.objectives.dummy_objectives import test_objective, test_objective2  # noqa: F401
 from poketactician.registry import register_objective_data
 from poketactician.utils import DecisionFunction, ResultsWithHistory, StrictResults
 
@@ -40,19 +40,22 @@ class PokeTactician:
         self.move_types = move_types
         self.pokemon_stats = pokemon_stats
         self.n_pokemon = n_pokemon
-        self.natures = natures
+        self.natures = natures if natures is not None else np.ones((25, 6), dtype=np.int16)
         self.n_moves = learnable_moves.shape[1]
         self.n_types = pokemon_types.shape[1]
         self._decision_function = decision_function if decision_function is not None else None
         self._decision_function_kwargs = decision_function_kwargs if decision_function_kwargs is not None else {}
         self.pre_selected = pre_selected if pre_selected else None
         self._results: Result | StrictResults | None = None
-        register_objective_data(
-            data_dict={
-                "test_objective": {"me": self.moves_category},
-                "test_objective2": {"me": self.moves_category},
-            }
-        )
+        data_context = {
+            "learnable_moves": self.learnable_moves,
+            "moves_category": self.moves_category,
+            "pokemon_types": self.pokemon_types,
+            "move_types": self.move_types,
+            "pokemon_stats": self.pokemon_stats,
+            "natures": self.natures,
+        }
+        register_objective_data(data_context, objective_names=objectives)
         self.objectives = ObjectiveSelector(objective_names=objectives)
         self.random_state = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
         self.problem = PokemonProblem(
