@@ -41,11 +41,18 @@ def test_data() -> Dict[str, Any]:
             to_set = rng.choice(indices, size=4 - np.sum(lm[i]), replace=False)
             lm[i, to_set] = True
 
-    # Pokemon Types matrix
-    pt = rng.integers(0, 2, size=(n_pokemon, n_types), dtype=bool)
+    # Pokemon Types matrix (each Pokemon has 1-2 types)
+    pokemon_types = np.zeros((n_pokemon, n_types), dtype=bool)
+    for i in range(n_pokemon):
+        num_types = rng.choice([1, 2])
+        selected = rng.choice(n_types, size=num_types, replace=False)
+        pokemon_types[i, selected] = True
 
     # Move Types matrix
-    mt = rng.integers(0, 2, size=(n_moves, n_types), dtype=bool)
+    move_types = np.zeros((n_moves, n_types), dtype=bool)
+    for i in range(n_moves):
+        selected = rng.integers(0, n_types, size=1)[0]
+        move_types[i, selected] = True
 
     # Pokemon Stats matrix
     ps = rng.integers(20, 110, size=(n_pokemon, n_stats), dtype=np.int16, endpoint=True)
@@ -67,8 +74,8 @@ def test_data() -> Dict[str, Any]:
         "seed": seed,
         "me": me,
         "lm": lm,
-        "pt": pt,
-        "mt": mt,
+        "pt": pokemon_types,
+        "mt": move_types,
         "ps": ps,
         "natures": natures,
     }
