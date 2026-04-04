@@ -16,7 +16,7 @@ class TestIntegration:
     def test_full_optimization_workflow(self, test_data: Dict[str, Any]) -> None:
         """Test complete optimization workflow from initialization to results."""
         poke_tactician = PokeTactician(
-            objectives=["test_objective", "test_objective3"],
+            objectives=["test_objective", "test_objective3", "expected_damage"],
             seed=42,
             learnable_moves=test_data["lm"],
             moves_category=test_data["me"],
