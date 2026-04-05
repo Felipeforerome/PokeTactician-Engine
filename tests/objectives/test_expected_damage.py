@@ -131,7 +131,7 @@ class TestExpectedDamage:
         """Doubling the Attack stat should double physical damage."""
         pokemon_types = np.array([[True]], dtype=bool)
         move_types = np.array([[True]], dtype=bool)
-        moves_category = np.array([[1]], dtype=np.int16)
+        moves_category = np.array([[1], [0]], dtype=np.int16)
 
         stats_low = np.array([[0, 50, 0, 0, 0, 0]], dtype=np.int16)
         stats_high = np.array([[0, 100, 0, 0, 0, 0]], dtype=np.int16)
@@ -141,4 +141,24 @@ class TestExpectedDamage:
 
         dmg_low = expected_damage(x, y, stats_low, moves_category, move_types, pokemon_types)
         dmg_high = expected_damage(x, y, stats_high, moves_category, move_types, pokemon_types)
-        assert dmg_high == 2 * dmg_low
+        assert dmg_low == 75  # 1.5 × 1 × 50
+        assert dmg_high == 150  # 1.5 × 1 × 100
+
+    # ── Special Attack stat scaling test ─────────────────────────────────────
+
+    def test_higher_special_attack_stat_increases_damage(self) -> None:
+        """Doubling the Special Attack stat should double special damage."""
+        pokemon_types = np.array([[True]], dtype=bool)
+        move_types = np.array([[True]], dtype=bool)
+        moves_category = np.array([[0], [1]], dtype=np.int16)  # special class
+
+        stats_low = np.array([[0, 0, 0, 50, 0, 0]], dtype=np.int16)  # SPA = 50
+        stats_high = np.array([[0, 0, 0, 100, 0, 0]], dtype=np.int16)  # SPA = 100
+
+        x = np.array([0], dtype=np.int16)
+        y = np.array([[0, -1, -1, -1]], dtype=np.int16)
+
+        dmg_low = expected_damage(x, y, stats_low, moves_category, move_types, pokemon_types)
+        dmg_high = expected_damage(x, y, stats_high, moves_category, move_types, pokemon_types)
+        assert dmg_low == 75  # 1.5 × 1 × 50
+        assert dmg_high == 150  # 1.5 × 1 × 100
