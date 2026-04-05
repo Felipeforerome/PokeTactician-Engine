@@ -5,6 +5,7 @@ from typing import Any, Dict
 import numpy as np
 import pytest
 
+from poketactician.config import MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS
 from poketactician.engine.mutation import PokemonMutation
 from poketactician.engine.problem import PokemonProblem
 from tests.utils import assert_preselected_in_solution
@@ -26,14 +27,14 @@ class TestPokemonMutation:
     def test_mutation_output_shape(self, mutation: PokemonMutation, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test that mutation preserves the shape of the input."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
         n_individuals = 5
 
         # Create population
         X = np.zeros((n_individuals, var_size), dtype=np.int16)
         for i in range(n_individuals):
             X[i, :pokemon_in_team] = np.arange(pokemon_in_team)
-            X[i, pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * 4)
+            X[i, pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
 
         original_shape = X.shape
 
@@ -54,7 +55,7 @@ class TestPokemonMutation:
         )
 
         x = np.array(list(pre_selected.keys()) + [4, 5, 6], dtype=np.int16)
-        y = np.zeros((6, 4), dtype=np.int16)
+        y = np.zeros((MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS), dtype=np.int16)
 
         for pos, pre_selected_moves in enumerate(pre_selected.values()):
             for move_pos, move_id in enumerate(pre_selected_moves):
@@ -71,7 +72,7 @@ class TestPokemonMutation:
     def test_pokemon_mutation_maintains_uniqueness(self, mutation: PokemonMutation, test_data: Dict[str, Any]) -> None:
         """Test that pokemon_mutation maintains unique pokemon in team."""
         x = np.array([0, 1, 2, 3, 4, 5], dtype=np.int16)
-        y = np.zeros((6, 4), dtype=np.int16)
+        y = np.zeros((MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS), dtype=np.int16)
 
         # Run mutation multiple times
         for _ in range(10):
@@ -83,11 +84,11 @@ class TestPokemonMutation:
         """Test that pokemon_mutation assigns learnable moves to new pokemon."""
         x = np.array([0, 1, 2, 3, 4, 5], dtype=np.int16)
         # Initialize with learnable moves
-        y = np.zeros((6, 4), dtype=np.int16)
-        for i in range(6):
+        y = np.zeros((MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS), dtype=np.int16)
+        for i in range(MAX_NUMBER_OF_POKEMON):
             learnable = np.where(test_data["lm"][i])[0]
-            if len(learnable) >= 4:
-                y[i] = learnable[:4]
+            if len(learnable) >= NUMBER_OF_MOVES_SLOTS:
+                y[i] = learnable[:NUMBER_OF_MOVES_SLOTS]
 
         mutated_team, mutated_moves = mutation.pokemon_mutation(x, y, test_data["lm"])
 
@@ -109,11 +110,11 @@ class TestPokemonMutation:
 
         x = np.array([0, 1, 2, 3, 4, 5], dtype=np.int16)
         # Set initial moves
-        y = np.zeros((6, 4), dtype=np.int16)
-        for i in range(6):
+        y = np.zeros((MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS), dtype=np.int16)
+        for i in range(MAX_NUMBER_OF_POKEMON):
             learnable = np.where(test_data["lm"][x[i]])[0]
-            if len(learnable) >= 4:
-                y[i] = learnable[:4]
+            if len(learnable) >= NUMBER_OF_MOVES_SLOTS:
+                y[i] = learnable[:NUMBER_OF_MOVES_SLOTS]
 
         rolling_truth = False
 
@@ -131,11 +132,11 @@ class TestPokemonMutation:
         """Test that move_mutation only assigns learnable moves."""
         x = np.array([0, 1, 2, 3, 4, 5], dtype=np.int16)
         # Initialize with learnable moves
-        y = np.zeros((6, 4), dtype=np.int16)
-        for i in range(6):
+        y = np.zeros((MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS), dtype=np.int16)
+        for i in range(MAX_NUMBER_OF_POKEMON):
             learnable = np.where(test_data["lm"][i])[0]
-            if len(learnable) >= 4:
-                y[i] = learnable[:4]
+            if len(learnable) >= NUMBER_OF_MOVES_SLOTS:
+                y[i] = learnable[:NUMBER_OF_MOVES_SLOTS]
 
         # Run mutation multiple times
         for _ in range(10):
@@ -152,11 +153,11 @@ class TestPokemonMutation:
         x = np.array([0, 1, 2], dtype=np.int16)
 
         # Create moves array where pokemon have current moves
-        y = np.zeros((3, 4), dtype=np.int16)
+        y = np.zeros((3, NUMBER_OF_MOVES_SLOTS), dtype=np.int16)
         for i in range(3):
             learnable = np.where(test_data["lm"][x[i]])[0]
-            if len(learnable) >= 4:
-                y[i] = learnable[:4]
+            if len(learnable) >= NUMBER_OF_MOVES_SLOTS:
+                y[i] = learnable[:NUMBER_OF_MOVES_SLOTS]
 
         modified_lm = mutation.modify_lm(x, y, test_data["lm"])
 
@@ -169,7 +170,7 @@ class TestPokemonMutation:
     def test_full_mutation_maintains_validity(self, mutation: PokemonMutation, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test that full mutation maintains valid solutions."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         X = np.zeros((3, var_size), dtype=np.int16)
         for i in range(3):
@@ -177,15 +178,15 @@ class TestPokemonMutation:
             # Initialize with learnable moves
             for j in range(pokemon_in_team):
                 learnable = np.where(test_data["lm"][j])[0]
-                if len(learnable) >= 4:
-                    X[i, pokemon_in_team + j * 4 : pokemon_in_team + j * 4 + 4] = learnable[:4]
+                if len(learnable) >= NUMBER_OF_MOVES_SLOTS:
+                    X[i, pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS : pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS + 4] = learnable[:NUMBER_OF_MOVES_SLOTS]
 
         mutated = mutation._do(problem, X.copy())
 
         # Check validity
         for ind in mutated:
             x = ind[:pokemon_in_team]
-            y = ind[pokemon_in_team:].reshape(pokemon_in_team, 4)
+            y = ind[pokemon_in_team:].reshape(pokemon_in_team, NUMBER_OF_MOVES_SLOTS)
 
             # Check pokemon uniqueness
             assert len(set(x)) == len(x)
@@ -199,7 +200,7 @@ class TestPokemonMutation:
     def test_mutation_reproducibility(self, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test that mutation with same seed produces same results."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         X = np.zeros((2, var_size), dtype=np.int16)
         for i in range(2):
@@ -234,7 +235,7 @@ class TestPokemonMutation:
         )
 
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         X = np.zeros((2, var_size), dtype=np.int16)
         for i in range(2):
@@ -242,8 +243,8 @@ class TestPokemonMutation:
             # Initialize with learnable moves
             for j in range(pokemon_in_team):
                 learnable = np.where(test_data["lm"][j])[0]
-                if len(learnable) >= 4:
-                    X[i, pokemon_in_team + j * 4 : pokemon_in_team + j * 4 + 4] = learnable[:4]
+                if len(learnable) >= NUMBER_OF_MOVES_SLOTS:
+                    X[i, pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS : pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS + 4] = learnable[:NUMBER_OF_MOVES_SLOTS]
 
         X_original = X.copy()
         mutated = no_mutation._do(problem, X)
@@ -258,8 +259,8 @@ class TestPokemonMutation:
 
         # Find which moves pokemon 0 can learn
         learnable = np.where(test_data["lm"][0])[0]
-        if len(learnable) >= 4:
-            y = np.array([learnable[:4]], dtype=np.int16)
+        if len(learnable) >= NUMBER_OF_MOVES_SLOTS:
+            y = np.array([learnable[:NUMBER_OF_MOVES_SLOTS]], dtype=np.int16)
 
             modified_lm = mutation.modify_lm(x, y, test_data["lm"])
 

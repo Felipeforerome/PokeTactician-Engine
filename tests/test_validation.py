@@ -5,6 +5,7 @@ from typing import Any, Dict
 import numpy as np
 import pytest
 
+from poketactician.config import MAX_NUMBER_OF_POKEMON, SEED
 from poketactician.engine.problem import PokemonProblem
 from poketactician.engine.selector import ObjectiveSelector
 from poketactician.poketactician import PokeTactician
@@ -27,7 +28,7 @@ class TestDataValidation:
             pokemon_types=test_data["pt"],
             move_types=test_data["mt"],
             pokemon_stats=test_data["ps"],
-            n_pokemon=6,
+            n_pokemon=MAX_NUMBER_OF_POKEMON,
         )
 
         # Should create successfully
@@ -39,7 +40,7 @@ class TestDataValidation:
         # Try to create a team of 20 but only have 13 pokemon
         poke_tactician = PokeTactician(
             objectives=["test_objective"],
-            seed=42,
+            seed=SEED,
             learnable_moves=test_data["lm"],
             moves_category=test_data["me"],
             pokemon_types=test_data["pt"],
@@ -57,7 +58,7 @@ class TestDataValidation:
         try:
             poke_tactician = PokeTactician(
                 objectives=["test_objective"],
-                seed=42,
+                seed=SEED,
                 learnable_moves=test_data["lm"],
                 moves_category=test_data["me"],
                 pokemon_types=test_data["pt"],
@@ -79,7 +80,7 @@ class TestDataValidation:
         with pytest.raises(ValueError, match="At least one objective must be provided"):
             PokeTactician(
                 objectives=[],
-                seed=42,
+                seed=SEED,
                 learnable_moves=test_data["lm"],
                 moves_category=test_data["me"],
                 pokemon_types=test_data["pt"],
@@ -92,7 +93,7 @@ class TestDataValidation:
         with pytest.raises(ValueError, match="Unknown objective"):
             PokeTactician(
                 objectives=["nonexistent_objective"],
-                seed=42,
+                seed=SEED,
                 learnable_moves=test_data["lm"],
                 moves_category=test_data["me"],
                 pokemon_types=test_data["pt"],
@@ -108,7 +109,7 @@ class TestDataValidation:
 
         poke_tactician = PokeTactician(
             objectives=["test_objective"],
-            seed=42,
+            seed=SEED,
             learnable_moves=test_data["lm"],
             moves_category=test_data["me"],
             pokemon_types=test_data["pt"],
@@ -126,7 +127,7 @@ class TestDataValidation:
         """Test optimization with zero generations."""
         poke_tactician = PokeTactician(
             objectives=["test_objective"],
-            seed=42,
+            seed=SEED,
             learnable_moves=test_data["lm"],
             moves_category=test_data["me"],
             pokemon_types=test_data["pt"],
@@ -142,7 +143,7 @@ class TestDataValidation:
         """Test optimization with zero population size."""
         poke_tactician = PokeTactician(
             objectives=["test_objective"],
-            seed=42,
+            seed=SEED,
             learnable_moves=test_data["lm"],
             moves_category=test_data["me"],
             pokemon_types=test_data["pt"],
@@ -158,7 +159,7 @@ class TestDataValidation:
         """Test accessing results before running optimization."""
         poke_tactician = PokeTactician(
             objectives=["test_objective"],
-            seed=42,
+            seed=SEED,
             learnable_moves=test_data["lm"],
             moves_category=test_data["me"],
             pokemon_types=test_data["pt"],
@@ -174,7 +175,7 @@ class TestDataValidation:
         """Test plotting methods before running optimization."""
         poke_tactician = PokeTactician(
             objectives=["test_objective"],
-            seed=42,
+            seed=SEED,
             learnable_moves=test_data["lm"],
             moves_category=test_data["me"],
             pokemon_types=test_data["pt"],
@@ -193,7 +194,7 @@ class TestDataValidation:
 
         poke_tactician = PokeTactician(
             objectives=["test_objective"],
-            seed=42,
+            seed=SEED,
             learnable_moves=empty_lm,
             moves_category=test_data["me"],
             pokemon_types=test_data["pt"],
@@ -232,7 +233,7 @@ class TestDataValidation:
         """Test that PokeTactician handles None natures correctly."""
         poke_tactician = PokeTactician(
             objectives=["test_objective"],
-            seed=42,
+            seed=SEED,
             learnable_moves=test_data["lm"],
             moves_category=test_data["me"],
             pokemon_types=test_data["pt"],

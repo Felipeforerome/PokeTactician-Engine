@@ -8,6 +8,7 @@ from pymoo.optimize import minimize
 from pymoo.termination import get_termination
 
 import poketactician.objectives  # noqa: F401 — triggers objective registration
+from poketactician.config import DEFAULT_CROSSOVER_PROB, MAX_NUMBER_OF_POKEMON, NUMBER_OF_NATURES, NUMBER_OF_STATS
 from poketactician.engine.crossover import PokemonCrossover
 from poketactician.engine.mutation import PokemonMutation
 from poketactician.engine.problem import PokemonProblem
@@ -29,7 +30,7 @@ class PokeTactician:
         pokemon_stats: NDArray[np.int16],
         natures: NDArray[np.int16] | None = None,
         pre_selected: dict | None = None,
-        n_pokemon: int = 6,
+        n_pokemon: int = MAX_NUMBER_OF_POKEMON,
         decision_function: DecisionFunction | None = None,
         decision_function_kwargs: dict | None = None,
     ) -> None:
@@ -40,7 +41,7 @@ class PokeTactician:
         self.move_types = move_types
         self.pokemon_stats = pokemon_stats
         self.n_pokemon = n_pokemon
-        self.natures = natures if natures is not None else np.ones((25, 6), dtype=np.int16)
+        self.natures = natures if natures is not None else np.ones((NUMBER_OF_NATURES, NUMBER_OF_STATS), dtype=np.int16)
         self.n_moves = learnable_moves.shape[1]
         self.n_types = pokemon_types.shape[1]
         self._decision_function = decision_function if decision_function is not None else None
@@ -63,14 +64,14 @@ class PokeTactician:
             lm=self.learnable_moves,
             n_pokemon=self.n_pokemon,
             n_moves=self.n_moves,
-            pokemon_in_team=min(self.n_pokemon, 6),
+            pokemon_in_team=min(self.n_pokemon, MAX_NUMBER_OF_POKEMON),
         )
 
     def optimize(self, pop_size: int, n_gen: int, verbose: bool, history: bool = False) -> StrictResults:
         algorithm = NSGA2(
             pop_size=pop_size,
             sampling=PokemonTeamSampling(random_state=self.random_state, pre_selected=self.pre_selected),  # type: ignore
-            crossover=PokemonCrossover(prob_pokemon=0.5, random_state=self.random_state),  # type: ignore
+            crossover=PokemonCrossover(prob_pokemon=DEFAULT_CROSSOVER_PROB, random_state=self.random_state),  # type: ignore
             mutation=PokemonMutation(
                 prob_pokemon=0.5,
                 prob_move=0.5,

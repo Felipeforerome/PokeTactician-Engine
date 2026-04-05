@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 from matplotlib import pyplot as plt
 
+from poketactician.config import MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS
 from poketactician.poketactician import PokeTactician
 from tests.utils import assert_preselected_in_solution
 
@@ -37,8 +38,8 @@ class TestIntegration:
 
         # Check solution validity
         for solution in result.X:
-            x = solution[:6]  # Pokemon IDs
-            y = solution[6:].reshape(6, 4)  # Moves
+            x = solution[:MAX_NUMBER_OF_POKEMON]  # Pokemon IDs
+            y = solution[MAX_NUMBER_OF_POKEMON:].reshape(MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS)  # Moves
 
             # Unique pokemon
             assert len(set(x)) == len(x)
@@ -139,7 +140,7 @@ class TestIntegration:
             result = poke_tactician.optimize(pop_size=10, n_gen=2, verbose=False)
 
             # Check solution shape
-            expected_var_size = team_size + team_size * 4
+            expected_var_size = team_size + team_size * NUMBER_OF_MOVES_SLOTS
             assert result.X[0].shape[0] == expected_var_size
 
     def test_reproducibility_across_runs(self, test_data: Dict[str, Any]) -> None:
@@ -249,8 +250,8 @@ class TestIntegration:
 
         poke_tactician.optimize(pop_size=20, n_gen=10, verbose=False)
 
-        x = poke_tactician.best_solution[:6]
-        y = poke_tactician.best_solution[6:].reshape(6, 4)
+        x = poke_tactician.best_solution[:MAX_NUMBER_OF_POKEMON]
+        y = poke_tactician.best_solution[MAX_NUMBER_OF_POKEMON:].reshape(MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS)
 
         # Constraint 1: Unique pokemon
         assert len(set(x)) == len(x), "Pokemon should be unique"
@@ -262,7 +263,7 @@ class TestIntegration:
                     assert test_data["lm"][pokemon_id, move_id], f"Pokemon {pokemon_id} should be able to learn move {move_id}"
 
         # Constraint 3: Unique moves per pokemon
-        for i in range(6):
+        for i in range(MAX_NUMBER_OF_POKEMON):
             valid_moves = y[i][y[i] >= 0]
             assert len(set(valid_moves)) == len(valid_moves), "Moves should be unique per pokemon"
 

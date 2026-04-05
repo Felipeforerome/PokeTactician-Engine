@@ -7,6 +7,7 @@ import pytest
 
 # Import objectives to ensure they're registered
 import poketactician.objectives  # noqa: F401
+from poketactician.config import MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS, NUMBER_OF_NATURES, NUMBER_OF_STATS, NUMBER_OF_TYPES, SEED
 from poketactician.engine.problem import PokemonProblem
 from poketactician.engine.selector import ObjectiveSelector
 from poketactician.registry import register_objective_data
@@ -17,12 +18,12 @@ def test_data() -> Dict[str, Any]:
     """Create test data for the PokeTactician test cases."""
     n_pokemon = 13
     n_moves = 20
-    n_types = 18
-    n_stats = 6
-    n_natures = 25
+    n_types = NUMBER_OF_TYPES
+    n_stats = NUMBER_OF_STATS
+    n_natures = NUMBER_OF_NATURES
 
     # Set a fixed seed for reproducibility
-    seed = 42
+    seed = SEED
     rng = np.random.default_rng(seed)
 
     # Move Effectiveness matrix
@@ -35,10 +36,10 @@ def test_data() -> Dict[str, Any]:
 
     # Make sure each Pokemon has at least 4 learnable moves
     for i in range(n_pokemon):
-        if np.sum(lm[i]) < 4:
+        if np.sum(lm[i]) < NUMBER_OF_MOVES_SLOTS:
             # Add random learnable moves until we have at least 4
             indices = np.where(~lm[i])[0]
-            to_set = rng.choice(indices, size=4 - np.sum(lm[i]), replace=False)
+            to_set = rng.choice(indices, size=NUMBER_OF_MOVES_SLOTS - np.sum(lm[i]), replace=False)
             lm[i, to_set] = True
 
     # Pokemon Types matrix (each Pokemon has 1-2 types)
@@ -90,7 +91,7 @@ def problem(test_data: Dict[str, Any]) -> PokemonProblem:
         lm=test_data["lm"],
         n_pokemon=test_data["n_pokemon"],
         n_moves=test_data["n_moves"],
-        pokemon_in_team=6,
+        pokemon_in_team=MAX_NUMBER_OF_POKEMON,
     )
 
 

@@ -5,11 +5,13 @@ from typing import Dict
 import numpy as np
 from numpy.typing import NDArray
 
+from poketactician.config import MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS
+
 
 def assert_preselected_in_solution(
     solution: NDArray[np.int16],
     pre_selected: Dict[int, list],
-    pokemon_in_team: int = 6,
+    pokemon_in_team: int = MAX_NUMBER_OF_POKEMON,
 ) -> None:
     """Assert that preselected pokemon and moves are correctly present in a solution.
 
@@ -32,7 +34,7 @@ def assert_preselected_in_solution(
     """
     # Parse solution into pokemon IDs and moves
     pokemon_ids = solution[:pokemon_in_team]
-    moves = solution[pokemon_in_team:].reshape(pokemon_in_team, 4)
+    moves = solution[pokemon_in_team:].reshape(pokemon_in_team, NUMBER_OF_MOVES_SLOTS)
 
     # Get preselected pokemon IDs in order
     preselected_pokemon_ids = list(pre_selected.keys())

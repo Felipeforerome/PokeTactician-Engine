@@ -8,6 +8,7 @@ import numpy as np
 from numpy.typing import NDArray
 from pymoo.core.mutation import Mutation
 
+from poketactician.config import DEFAULT_MUTATION_PROB_MOVE, DEFAULT_MUTATION_PROB_POKEMON, EMPTY_MOVE_SENTINEL, NUMBER_OF_MOVES_SLOTS
 from poketactician.engine.problem import PokemonProblem
 from poketactician.utils import get_random_moves
 
@@ -23,7 +24,13 @@ class PokemonMutation(Mutation):
     remain fixed during optimization.
     """
 
-    def __init__(self, random_state: np.random.Generator, prob_pokemon: float = 0.01, prob_move: float = 0.001, pre_selected: dict | None = None) -> None:
+    def __init__(
+        self,
+        random_state: np.random.Generator,
+        prob_pokemon: float = DEFAULT_MUTATION_PROB_POKEMON,
+        prob_move: float = DEFAULT_MUTATION_PROB_MOVE,
+        pre_selected: dict | None = None,
+    ) -> None:
         """Initialize the Pokemon mutation operator.
 
         Args:
@@ -44,7 +51,7 @@ class PokemonMutation(Mutation):
 
         Args:
             x: Array of Pokemon indices representing the current team
-            y: 2D array of move indices for each Pokemon (shape: [team_size, 4])
+            y: 2D array of move indices for each Pokemon (shape: [team_size, NUMBER_OF_MOVES_SLOTS])
             lm: Legal moves matrix indicating valid moves for each Pokemon
 
         Returns:
@@ -81,7 +88,7 @@ class PokemonMutation(Mutation):
 
         Args:
             x: Array of Pokemon indices representing the current team
-            y: 2D array of move indices for each Pokemon (shape: [team_size, 4])
+            y: 2D array of move indices for each Pokemon (shape: [team_size, NUMBER_OF_MOVES_SLOTS])
             lm: Legal moves matrix indicating valid moves for each Pokemon
 
         Returns:
@@ -101,14 +108,14 @@ class PokemonMutation(Mutation):
         pokemon_with_mutations = x[rows_with_mutations]
 
         # Generate new random moves for Pokemon that need mutations
-        possible_new_moves = np.zeros((pokemon_in_team, 4), dtype=np.int16)
+        possible_new_moves = np.zeros((pokemon_in_team, NUMBER_OF_MOVES_SLOTS), dtype=np.int16)
         modified_LM = self.modify_lm(x, y, lm)
         for i in pokemon_with_mutations:
             possible_new_moves[np.where(x == i)[0][0]] = get_random_moves(modified_LM, i, self.random_state)
 
-        # Apply mutations only where valid moves are available (>= 0)
+        # Apply mutations only where valid moves are available (not empty sentinel)
         mutated_moves = np.where(
-            np.logical_and(mutated_moves_mask, possible_new_moves >= 0),
+            np.logical_and(mutated_moves_mask, possible_new_moves != EMPTY_MOVE_SENTINEL),
             possible_new_moves,
             y,
         )
@@ -122,7 +129,7 @@ class PokemonMutation(Mutation):
 
         Args:
             x: Array of Pokemon indices representing the current team
-            y: 2D array of move indices for each Pokemon (shape: [team_size, 4])
+            y: 2D array of move indices for each Pokemon (shape: [team_size, NUMBER_OF_MOVES_SLOTS])
             lm: Legal moves matrix indicating valid moves for each Pokemon
 
         Returns:
@@ -136,7 +143,7 @@ class PokemonMutation(Mutation):
             curren_available_moves = num_moves_available[x_i]
             # Mark already-equipped moves as unavailable if Pokemon has more than 4 moves
             for y_i in y[x_i]:
-                if curren_available_moves > 4:
+                if curren_available_moves > NUMBER_OF_MOVES_SLOTS:
                     modified_LM[x_val, y_i] = 0  # Mark move as unavailable
                     curren_available_moves -= 1
                 else:
@@ -161,7 +168,7 @@ class PokemonMutation(Mutation):
         for ind in X:
             # Split individual into Pokemon team and move sets
             x = ind[: problem.pokemon_in_team]  # Pokemon indices
-            y = ind[problem.pokemon_in_team :].reshape(problem.pokemon_in_team, 4)  # Move indices
+            y = ind[problem.pokemon_in_team :].reshape(problem.pokemon_in_team, NUMBER_OF_MOVES_SLOTS)  # Move indices
 
             mutated_team = x.copy()
             mutated_moves = y.copy()
