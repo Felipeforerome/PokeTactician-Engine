@@ -60,7 +60,10 @@ class PokemonProblem(ElementwiseProblem):
         constraints = []
 
         # Moves in the positions of x_i and y_i are learnable: 1 - LM_xi,yi ≤ 0
-        constraints += list((1 - self.LM[pokemon_rows, move_columns]).flatten())
+        # Empty move slots (sentinel) are automatically satisfied (0)
+        learnability = np.zeros(self.pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
+        learnability[valid_mask] = 1 - self.LM[pokemon_rows, move_columns]
+        constraints += list(learnability)
 
         # Not repeated moves: len(yi) - len(set(yi)) ≤ 0
         constraints += list((np.apply_along_axis(lambda row: len(row[row != EMPTY_MOVE_SENTINEL]) - len(set(row[row != EMPTY_MOVE_SENTINEL])), 1, y)))

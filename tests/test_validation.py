@@ -187,24 +187,6 @@ class TestDataValidation:
         with pytest.raises(ValueError, match=r"No results available. Run optimize\(\) first\."):
             poke_tactician.convergence_plot()
 
-    def test_poketactician_with_all_false_learnable_moves(self, test_data: Dict[str, Any]) -> None:
-        """Test PokeTactician when no pokemon can learn any moves."""
-        # Create LM where no pokemon can learn moves
-        empty_lm = np.zeros_like(test_data["lm"], dtype=bool)
-
-        poke_tactician = PokeTactician(
-            objectives=["test_objective"],
-            seed=SEED,
-            learnable_moves=empty_lm,
-            moves_category=test_data["me"],
-            pokemon_types=test_data["pt"],
-            move_types=test_data["mt"],
-            pokemon_stats=test_data["ps"],
-        )
-
-        with pytest.raises(Exception, match="Problem Error: G can not be set, expected shape .+"):
-            poke_tactician.optimize(pop_size=10, n_gen=2, verbose=False)
-
     def test_objective_selector_with_partial_match(self) -> None:
         """Test ObjectiveSelector with objective that doesn't exist."""
         with pytest.raises(AssertionError, match=r"Some objectives are not registered: .+"):

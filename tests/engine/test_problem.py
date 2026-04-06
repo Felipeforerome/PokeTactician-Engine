@@ -169,9 +169,10 @@ class TestPokemonProblem:
         out = {}
         problem._evaluate(x, out)
 
-        # Should not crash and should have outputs
+        # Should not crash and should have correct shape
         assert "F" in out
         assert "G" in out
+        assert out["G"].shape == (1, problem.n_ieq_constr)
 
     def test_evaluate_objectives_shape(self, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test that objectives have correct shape."""
