@@ -143,6 +143,8 @@ class PokemonMutation(Mutation):
             curren_available_moves = num_moves_available[x_i]
             # Mark already-equipped moves as unavailable if Pokemon has more than 4 moves
             for y_i in y[x_i]:
+                if y_i == EMPTY_MOVE_SENTINEL:
+                    continue  # Skip empty move slots
                 if curren_available_moves > NUMBER_OF_MOVES_SLOTS:
                     modified_LM[x_val, y_i] = 0  # Mark move as unavailable
                     curren_available_moves -= 1
