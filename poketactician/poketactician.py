@@ -32,6 +32,8 @@ class PokeTactician:
         n_pokemon: int = 6,
         decision_function: DecisionFunction | None = None,
         decision_function_kwargs: dict | None = None,
+        pokemon_multation_prob: float | None = None,
+        move_mutation_prob: float | None = None,
     ) -> None:
         self.learnable_moves = learnable_moves
         self.seed = seed
@@ -46,6 +48,8 @@ class PokeTactician:
         self._decision_function = decision_function if decision_function is not None else None
         self._decision_function_kwargs = decision_function_kwargs if decision_function_kwargs is not None else {}
         self.pre_selected = pre_selected if pre_selected else None
+        self.pokemon_multation_prob = pokemon_multation_prob
+        self.move_mutation_prob = move_mutation_prob
         self._results: Result | StrictResults | None = None
         data_context = {
             "learnable_moves": self.learnable_moves,
@@ -72,8 +76,8 @@ class PokeTactician:
             sampling=PokemonTeamSampling(random_state=self.random_state, pre_selected=self.pre_selected),  # type: ignore
             crossover=PokemonCrossover(prob_pokemon=0.5, random_state=self.random_state),  # type: ignore
             mutation=PokemonMutation(
-                prob_pokemon=0.5,
-                prob_move=0.5,
+                prob_pokemon=self.pokemon_multation_prob if self.pokemon_multation_prob is not None else 0.5,
+                prob_move=self.move_mutation_prob if self.move_mutation_prob is not None else 0.5,
                 random_state=self.random_state,
                 pre_selected=self.pre_selected if self.pre_selected is not None else None,
             ),  # type: ignore
