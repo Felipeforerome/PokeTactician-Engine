@@ -5,6 +5,7 @@ from typing import Any, Dict
 import numpy as np
 import pytest
 
+from poketactician.config import NUMBER_OF_MOVES_SLOTS
 from poketactician.engine.crossover import PokemonCrossover
 from poketactician.engine.problem import PokemonProblem
 
@@ -23,7 +24,7 @@ class TestPokemonCrossover:
         # Create two parent solutions
         n_matings = 3
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         # Create parent array with shape (2, n_matings, var_size)
         parent1 = np.zeros((n_matings, var_size), dtype=np.int16)
@@ -34,8 +35,8 @@ class TestPokemonCrossover:
             parent1[i, :pokemon_in_team] = np.arange(pokemon_in_team)
             parent2[i, :pokemon_in_team] = np.arange(pokemon_in_team, pokemon_in_team * 2)
             # Add some valid moves
-            parent1[i, pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * 4)
-            parent2[i, pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * 4)
+            parent1[i, pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
+            parent2[i, pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
 
         X = np.array([parent1, parent2])
         # Perform crossover
@@ -48,7 +49,7 @@ class TestPokemonCrossover:
     def test_crossover_identical_parents(self, crossover: PokemonCrossover, problem: PokemonProblem) -> None:
         """Test that identical parents produce identical offspring."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         # Create identical parents
         parent = np.zeros(var_size, dtype=np.int16)
@@ -67,7 +68,7 @@ class TestPokemonCrossover:
     def test_crossover_preserves_pokemon_uniqueness(self, crossover: PokemonCrossover, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test that crossover maintains unique pokemon in each team."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         # Create diverse parents
         parent1 = np.zeros(var_size, dtype=np.int16)
@@ -77,8 +78,8 @@ class TestPokemonCrossover:
         parent2[:pokemon_in_team] = [6, 7, 8, 9, 10, 11]
 
         # Fill moves
-        parent1[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * 4)
-        parent2[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * 4)
+        parent1[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
+        parent2[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
 
         X = np.array([[parent1], [parent2]])
 
@@ -93,7 +94,7 @@ class TestPokemonCrossover:
     def test_crossover_offspring_from_parents(self, crossover: PokemonCrossover, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test that offspring pokemon come from parent sets."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         # Create parents with distinct pokemon
         parent1 = np.zeros(var_size, dtype=np.int16)
@@ -119,7 +120,7 @@ class TestPokemonCrossover:
     def test_crossover_reproducibility(self, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test that crossover with same seed produces same results."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         # Create parents
         parent1 = np.zeros(var_size, dtype=np.int16)
@@ -147,7 +148,7 @@ class TestPokemonCrossover:
     def test_crossover_different_seeds(self, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test that crossover with different seeds produces different results."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         # Create parents
         parent1 = np.zeros(var_size, dtype=np.int16)
@@ -174,7 +175,7 @@ class TestPokemonCrossover:
     def test_crossover_with_overlapping_pokemon(self, crossover: PokemonCrossover, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test crossover when parents share some pokemon."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         # Create parents with some overlap
         parent1 = np.zeros(var_size, dtype=np.int16)
@@ -183,8 +184,8 @@ class TestPokemonCrossover:
         parent1[:pokemon_in_team] = [0, 1, 2, 3, 4, 5]
         parent2[:pokemon_in_team] = [0, 1, 2, 6, 7, 8]  # First 3 are shared
 
-        parent1[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * 4)
-        parent2[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * 4)
+        parent1[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
+        parent2[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
 
         X = np.array([[parent1], [parent2]])
 
@@ -199,7 +200,7 @@ class TestPokemonCrossover:
     def test_crossover_with_overlapping_pokemon_make_different_offspring(self, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test crossover when parents share some pokemon."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         # Create parents with some overlap
         parent1 = np.zeros(var_size, dtype=np.int16)
@@ -208,8 +209,8 @@ class TestPokemonCrossover:
         parent1[:pokemon_in_team] = [0, 1, 2, 3, 4, 5]
         parent2[:pokemon_in_team] = [0, 1, 2, 6, 7, 8]  # First 3 are shared
 
-        parent1[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * 4)
-        parent2[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * 4)
+        parent1[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
+        parent2[pokemon_in_team:] = np.random.randint(0, test_data["n_moves"], pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
 
         X = np.array([[parent1], [parent2]])
         rolling_truth = False
@@ -229,7 +230,7 @@ class TestPokemonCrossover:
     def test_crossover_multiple_matings(self, crossover: PokemonCrossover, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test that crossover handles multiple mating pairs correctly."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
         n_matings = 5
 
         # Create multiple parent pairs
@@ -261,7 +262,7 @@ class TestPokemonCrossover:
     def test_crossover_probability_effect(self, problem: PokemonProblem, test_data: Dict[str, Any]) -> None:
         """Test that changing crossover probability affects results."""
         pokemon_in_team = problem.pokemon_in_team
-        var_size = pokemon_in_team + pokemon_in_team * 4
+        var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         # Create parents
         parent1 = np.zeros(var_size, dtype=np.int16)

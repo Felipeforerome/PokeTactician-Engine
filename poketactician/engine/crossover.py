@@ -2,11 +2,12 @@ import numpy as np
 from numpy.typing import NDArray
 from pymoo.core.crossover import Crossover
 
+from poketactician.config import DEFAULT_CROSSOVER_PROB, NUMBER_OF_MOVES_SLOTS
 from poketactician.engine.problem import PokemonProblem
 
 
 class PokemonCrossover(Crossover):
-    def __init__(self, random_state: np.random.Generator, prob_pokemon: float = 0.5) -> None:
+    def __init__(self, random_state: np.random.Generator, prob_pokemon: float = DEFAULT_CROSSOVER_PROB) -> None:
         super().__init__(2, 2)  # 2 parents → 2 offspring
         self.prob_pokemon = prob_pokemon
         self.random_state = random_state
@@ -30,11 +31,11 @@ class PokemonCrossover(Crossover):
             # Split into X and Y
             x1, y1 = (
                 parent1[:pokemon_in_team],
-                parent1[pokemon_in_team:].reshape(pokemon_in_team, 4),
+                parent1[pokemon_in_team:].reshape(pokemon_in_team, NUMBER_OF_MOVES_SLOTS),
             )
             x2, y2 = (
                 parent2[:pokemon_in_team],
-                parent2[pokemon_in_team:].reshape(pokemon_in_team, 4),
+                parent2[pokemon_in_team:].reshape(pokemon_in_team, NUMBER_OF_MOVES_SLOTS),
             )
 
             parent1_src1 = self.random_state.random() < self.prob_pokemon  # True if child1 is based on parent 1, False if based on parent 2
@@ -44,11 +45,11 @@ class PokemonCrossover(Crossover):
 
             child1_x, child1_y = (
                 child1[:pokemon_in_team],
-                child1[pokemon_in_team:].reshape(pokemon_in_team, 4),
+                child1[pokemon_in_team:].reshape(pokemon_in_team, NUMBER_OF_MOVES_SLOTS),
             )
             child2_x, child2_y = (
                 child2[:pokemon_in_team],
-                child2[pokemon_in_team:].reshape(pokemon_in_team, 4),
+                child2[pokemon_in_team:].reshape(pokemon_in_team, NUMBER_OF_MOVES_SLOTS),
             )
 
             # --- Perform crossover on x (pokémon IDs) ---

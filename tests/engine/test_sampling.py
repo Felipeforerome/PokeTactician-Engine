@@ -5,6 +5,7 @@ from typing import Any, Dict
 import numpy as np
 import pytest
 
+from poketactician.config import MAX_NUMBER_OF_POKEMON, NUMBER_OF_MOVES_SLOTS
 from poketactician.engine.problem import PokemonProblem
 from poketactician.engine.sampling import PokemonTeamSampling
 from poketactician.engine.selector import ObjectiveSelector
@@ -23,7 +24,7 @@ class TestPokemonTeamSampling:
         """Test that sampling produces correct output shape."""
         n_samples = 10
         pokemon_in_team = problem.pokemon_in_team
-        expected_var_size = pokemon_in_team + pokemon_in_team * 4
+        expected_var_size = pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS
 
         samples = sampling._do(problem, n_samples)
 
@@ -65,7 +66,7 @@ class TestPokemonTeamSampling:
 
         for sample in samples:
             pokemon_ids = sample[:pokemon_in_team]
-            moves = sample[pokemon_in_team:].reshape(pokemon_in_team, 4)
+            moves = sample[pokemon_in_team:].reshape(pokemon_in_team, NUMBER_OF_MOVES_SLOTS)
 
             for i, pokemon_id in enumerate(pokemon_ids):
                 for move_id in moves[i]:
@@ -86,7 +87,7 @@ class TestPokemonTeamSampling:
         for sample in samples:
             pokemon_ids = sample[:pokemon_in_team]
             # First three pokemon should be the pre-selected ones
-            moves = sample[pokemon_in_team:].reshape(pokemon_in_team, 4)
+            moves = sample[pokemon_in_team:].reshape(pokemon_in_team, NUMBER_OF_MOVES_SLOTS)
             # First N pokemon should be the pre-selected ones at their expected positions
             for i, expected_pokemon_id in enumerate(pre_selected.keys()):
                 assert pokemon_ids[i] == expected_pokemon_id, f"Pre-selected Pokemon {expected_pokemon_id} should be at position {i}"
@@ -148,7 +149,7 @@ class TestPokemonTeamSampling:
 
         samples = sampling._do(problem, n_samples)
 
-        assert samples.shape == (1, pokemon_in_team + pokemon_in_team * 4)
+        assert samples.shape == (1, pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
 
         # Verify validity
         pokemon_ids = samples[0, :pokemon_in_team]
@@ -161,7 +162,7 @@ class TestPokemonTeamSampling:
 
         samples = sampling._do(problem, n_samples)
 
-        assert samples.shape == (n_samples, pokemon_in_team + pokemon_in_team * 4)
+        assert samples.shape == (n_samples, pokemon_in_team + pokemon_in_team * NUMBER_OF_MOVES_SLOTS)
 
         # All should have unique pokemon
         for sample in samples:
@@ -176,9 +177,9 @@ class TestPokemonTeamSampling:
         samples = sampling._do(problem, n_samples)
 
         for sample in samples:
-            moves = sample[pokemon_in_team:].reshape(pokemon_in_team, 4)
+            moves = sample[pokemon_in_team:].reshape(pokemon_in_team, NUMBER_OF_MOVES_SLOTS)
             # Each pokemon should have 4 move slots (may include -1 for empty slots)
-            assert moves.shape == (pokemon_in_team, 4)
+            assert moves.shape == (pokemon_in_team, NUMBER_OF_MOVES_SLOTS)
 
     def test_sampling_handles_pokemon_with_few_moves(self, test_data: Dict[str, Any]) -> None:
         """Test sampling when some pokemon have fewer than 4 learnable moves."""
@@ -195,7 +196,7 @@ class TestPokemonTeamSampling:
             lm=modified_lm,
             n_pokemon=test_data["n_pokemon"],
             n_moves=test_data["n_moves"],
-            pokemon_in_team=6,
+            pokemon_in_team=MAX_NUMBER_OF_POKEMON,
         )
 
         rng = np.random.default_rng(42)
@@ -204,7 +205,7 @@ class TestPokemonTeamSampling:
         samples = sampling._do(problem, 5)
 
         # Should still work, with -1 for missing moves
-        assert samples.shape == (5, 6 + 6 * 4)
+        assert samples.shape == (5, MAX_NUMBER_OF_POKEMON + MAX_NUMBER_OF_POKEMON * NUMBER_OF_MOVES_SLOTS)
 
     def test_sampling_with_small_team(self, test_data: Dict[str, Any]) -> None:
         """Test sampling with smaller team size."""
@@ -223,7 +224,7 @@ class TestPokemonTeamSampling:
         n_samples = 10
         samples = sampling._do(problem, n_samples)
 
-        assert samples.shape == (n_samples, 3 + 3 * 4)
+        assert samples.shape == (n_samples, 3 + 3 * NUMBER_OF_MOVES_SLOTS)
 
         # Verify uniqueness
         for sample in samples:

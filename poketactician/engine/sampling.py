@@ -8,6 +8,7 @@ import numpy as np
 from numpy.typing import NDArray
 from pymoo.core.sampling import Sampling
 
+from poketactician.config import NUMBER_OF_MOVES_SLOTS
 from poketactician.engine.problem import PokemonProblem
 
 
@@ -69,17 +70,17 @@ class PokemonTeamSampling(Sampling):
             team: List of Pokemon indices representing the team
 
         Returns:
-            2D array of move indices (shape: [team_size, 4])
+            2D array of move indices (shape: [team_size, NUMBER_OF_MOVES_SLOTS])
         """
-        moves = np.zeros((problem.pokemon_in_team, 4), dtype=np.int16)
+        moves = np.zeros((problem.pokemon_in_team, NUMBER_OF_MOVES_SLOTS), dtype=np.int16)
 
         for j, pokemon_id in enumerate(team):
             legal_moves = np.where(problem.LM[pokemon_id])[0]
-            chosen = -1 * np.ones(4, dtype=np.int16)
+            chosen = -1 * np.ones(NUMBER_OF_MOVES_SLOTS, dtype=np.int16)
 
             # Get pre-selected moves for this position if available
             selected = self.pre_selected_moves[j] if self.pre_selected_moves is not None and j < len(self.pre_selected_moves) else []
-            num_random_moves = 4 - len(selected)
+            num_random_moves = NUMBER_OF_MOVES_SLOTS - len(selected)
 
             # Exclude already selected moves from legal moves pool
             available_moves = np.array([move for move in legal_moves if move not in selected])

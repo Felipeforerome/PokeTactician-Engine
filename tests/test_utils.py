@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from poketactician.config import NUMBER_OF_MOVES_SLOTS
 from poketactician.utils import get_random_moves
 
 
@@ -23,7 +24,7 @@ class TestGetRandomMoves:
         moves = get_random_moves(lm, 0, self.rng(42))
 
         valid_moves = moves[moves >= 0]
-        assert len(valid_moves) == 4
+        assert len(valid_moves) == NUMBER_OF_MOVES_SLOTS
         assert all(lm[0, move] for move in valid_moves)
         assert len(set(valid_moves)) == len(valid_moves)
 
@@ -35,7 +36,7 @@ class TestGetRandomMoves:
         moves = get_random_moves(lm, 1, self.rng(123))
 
         valid_moves = moves[moves >= 0]
-        assert len(valid_moves) == 4
+        assert len(valid_moves) == NUMBER_OF_MOVES_SLOTS
         assert all(lm[1, move] for move in valid_moves)
         assert len(set(valid_moves)) == len(valid_moves)
 
@@ -71,7 +72,7 @@ class TestGetRandomMoves:
         moves = get_random_moves(lm, 4, self.rng(2024))
 
         valid_moves = moves[moves >= 0]
-        assert len(valid_moves) == 4
+        assert len(valid_moves) == NUMBER_OF_MOVES_SLOTS
         assert all(move in learnable for move in valid_moves)
         assert len(set(valid_moves)) == len(valid_moves)
 

@@ -5,6 +5,7 @@ from typing import Any, Dict
 import numpy as np
 import pytest
 
+from poketactician.config import NUMBER_OF_MOVES_SLOTS
 from tests.utils import assert_preselected_in_solution
 
 
@@ -499,16 +500,16 @@ class TestAssertPreselectedInSolution:
                 moves = pre_selected[pokemon_id]
                 # Pad with other learnable moves if needed
                 learnable = np.where(test_data["lm"][pokemon_id])[0]
-                while len(moves) < 4:
+                while len(moves) < NUMBER_OF_MOVES_SLOTS:
                     for move in learnable:
                         if move not in moves:
                             moves.append(int(move))
                             break
-                solution_parts.append(np.array(moves[:4], dtype=np.int16))
+                solution_parts.append(np.array(moves[:NUMBER_OF_MOVES_SLOTS], dtype=np.int16))
             else:
                 # Random learnable moves
                 learnable = np.where(test_data["lm"][pokemon_id])[0]
-                solution_parts.append(np.array(learnable[:4], dtype=np.int16))
+                solution_parts.append(np.array(learnable[:NUMBER_OF_MOVES_SLOTS], dtype=np.int16))
 
         solution = np.concatenate(solution_parts)
 
