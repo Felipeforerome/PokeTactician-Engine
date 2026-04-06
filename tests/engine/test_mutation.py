@@ -179,7 +179,9 @@ class TestPokemonMutation:
             for j in range(pokemon_in_team):
                 learnable = np.where(test_data["lm"][j])[0]
                 if len(learnable) >= NUMBER_OF_MOVES_SLOTS:
-                    X[i, pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS : pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS + 4] = learnable[:NUMBER_OF_MOVES_SLOTS]
+                    X[i, pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS : pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS + NUMBER_OF_MOVES_SLOTS] = learnable[
+                        :NUMBER_OF_MOVES_SLOTS
+                    ]
 
         mutated = mutation._do(problem, X.copy())
 
@@ -244,7 +246,9 @@ class TestPokemonMutation:
             for j in range(pokemon_in_team):
                 learnable = np.where(test_data["lm"][j])[0]
                 if len(learnable) >= NUMBER_OF_MOVES_SLOTS:
-                    X[i, pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS : pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS + 4] = learnable[:NUMBER_OF_MOVES_SLOTS]
+                    X[i, pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS : pokemon_in_team + j * NUMBER_OF_MOVES_SLOTS + NUMBER_OF_MOVES_SLOTS] = learnable[
+                        :NUMBER_OF_MOVES_SLOTS
+                    ]
 
         X_original = X.copy()
         mutated = no_mutation._do(problem, X)
