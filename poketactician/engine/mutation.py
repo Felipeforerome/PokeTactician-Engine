@@ -27,8 +27,8 @@ class PokemonMutation(Mutation):
     def __init__(
         self,
         random_state: np.random.Generator,
-        prob_pokemon: float = DEFAULT_MUTATION_PROB_POKEMON,
-        prob_move: float = DEFAULT_MUTATION_PROB_MOVE,
+        prob_pokemon: float | None = None,
+        prob_move: float | None = None,
         pre_selected: dict | None = None,
     ) -> None:
         """Initialize the Pokemon mutation operator.
@@ -42,8 +42,8 @@ class PokemonMutation(Mutation):
         """
         super().__init__()
         self.random_state = random_state
-        self.prob_pokemon = prob_pokemon
-        self.prob_move = prob_move
+        self.prob_pokemon = prob_pokemon if prob_pokemon is not None else DEFAULT_MUTATION_PROB_POKEMON
+        self.prob_move = prob_move if prob_move is not None else DEFAULT_MUTATION_PROB_MOVE
         self.pre_selected = pre_selected if pre_selected is not None else {}
 
     def pokemon_mutation(self, x: NDArray[np.int16], y: NDArray[np.int16], lm: NDArray[np.bool_]) -> tuple[NDArray[np.int16], NDArray[np.int16]]:

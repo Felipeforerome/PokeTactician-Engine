@@ -7,9 +7,9 @@ from poketactician.engine.problem import PokemonProblem
 
 
 class PokemonCrossover(Crossover):
-    def __init__(self, random_state: np.random.Generator, prob_pokemon: float = DEFAULT_CROSSOVER_PROB) -> None:
+    def __init__(self, random_state: np.random.Generator, prob_pokemon: float | None = None) -> None:
         super().__init__(2, 2)  # 2 parents → 2 offspring
-        self.prob_pokemon = prob_pokemon
+        self.prob_pokemon = prob_pokemon if prob_pokemon is not None else DEFAULT_CROSSOVER_PROB
         self.random_state = random_state
 
     def _do(self, problem: PokemonProblem, X: NDArray[np.int16], **kwargs) -> NDArray[np.int16]:  # noqa: N803
